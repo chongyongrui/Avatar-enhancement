@@ -7,7 +7,7 @@ public class ThirdPersonCam : MonoBehaviour
     public float rotationSpeed;
     public Transform player;//Transform components for object ie.position of player in word space;
     public Transform playerObj;
-    public Rigidbody rigid;
+                                         
     public Transform orientation;
 
     // Start is called before the first frame update
