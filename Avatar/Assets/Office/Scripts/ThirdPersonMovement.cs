@@ -4,50 +4,51 @@ using UnityEngine;
 
 public class ThirdPersonMovement : MonoBehaviour
 {
-    CharacterController controller;
-    Vector2 movement;
+    public CharacterController controller;
     public float movementspeed;
     Vector3 sphere;
     float grounddist;
-    [SerializeField]LayerMask groundMask;
+    [SerializeField] LayerMask groundMask;
     Vector3 velocity;
     float grav = -1f;
     public Vector3 direction;
     MovementBase currentstate;
     public Idle basestate = new Idle();
-
+    public Walking walkstate = new Walking();
     public Animator anim;
-
+    float horizontalinput,verticalinput;
     // Start is called before the first frame update
     void Start()
-    {   anim = GetComponent<Animator>();
+    {
+        anim = GetComponentInChildren<Animator>();
         controller = GetComponent<CharacterController>();
         SwitchState(basestate);
 
     }
 
     // Update is called once per frame
-    public void SwitchState(MovementBase state){
-        currentstate = state;
-        currentstate.EnterState(this);
-    
-    }
+
     void Update()
     {
-        var horizontalinput = Input.GetAxis("Horizontal");
-        var verticalinput = Input.GetAxis("Vertical");
-        movement = new Vector2(horizontalinput, verticalinput);
-         direction = new Vector3(movement.x, 0, movement.y).normalized;
-        
-
-        if (direction.magnitude >= 0.1f)
-        {
-            controller.Move(direction * movementspeed * Time.fixedDeltaTime);
-        }
-        Gravity();
+        directionFunction();
         anim.SetFloat("hzinput",horizontalinput);
         anim.SetFloat("vinput",verticalinput);
+        Gravity();
+
         currentstate.UpdateState(this);
+    }
+    public void directionFunction()
+    {
+         horizontalinput = Input.GetAxis("Horizontal");
+         verticalinput = Input.GetAxis("Vertical");
+        direction = transform.forward * verticalinput + transform.right * horizontalinput;
+        controller.Move(direction.normalized * movementspeed * Time.fixedDeltaTime);
+    }
+    public void SwitchState(MovementBase state)
+    {
+        currentstate = state;
+        currentstate.EnterState(this);
+
     }
     bool IsGrounded()
     {

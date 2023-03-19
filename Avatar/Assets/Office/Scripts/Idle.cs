@@ -2,17 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Idle : MovementBase
-{
-    // Start is called before the first frame update
-    public override void EnterState(ThirdPersonMovement movement)
-    {
-        throw new System.NotImplementedException();
+public class Idle : MovementBase {
+    public override void EnterState(ThirdPersonMovement player) {
+        // Set animation state to idle
         
     }
-    public override void UpdateState(ThirdPersonMovement movement)
-    {
-       
-    
+
+    public override void UpdateState(ThirdPersonMovement player) {
+        // Check if player is moving
+        if (player.direction.magnitude >= 0.1f) {
+            // If so, switch to the Walking state
+            player.SwitchState(player.walkstate);
+        }
     }
 }
+
