@@ -5579,7 +5579,7 @@ Transform:
   m_GameObject: {fileID: 975200928}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 3}
-  m_LocalScale: {x: 100, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -6603,7 +6603,7 @@ Animator:
   m_GameObject: {fileID: 1238666685}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 033cb0e3b727af448a3d066581113320, type: 2}
+  m_Controller: {fileID: 9100000, guid: 4232f3474a8a86048b71f659920d5727, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -8802,7 +8802,7 @@ MonoBehaviour:
     m_DecelTime: 0.1
     m_InputAxisName: Mouse Y
     m_InputAxisValue: 0
-    m_InvertInput: 1
+    m_InvertInput: 0
     m_MinValue: 0
     m_MaxValue: 1
     m_Wrap: 0
@@ -11756,12 +11756,24 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 3590285772286522908, guid: 12a74d8f283f6c14d8f4c4a75555272e, type: 3}
+      propertyPath: anim
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3590285772286522908, guid: 12a74d8f283f6c14d8f4c4a75555272e, type: 3}
       propertyPath: controller
       value: 
       objectReference: {fileID: 1431522447}
     - target: {fileID: 3590285772286522908, guid: 12a74d8f283f6c14d8f4c4a75555272e, type: 3}
+      propertyPath: movementspeed
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3590285772286522908, guid: 12a74d8f283f6c14d8f4c4a75555272e, type: 3}
       propertyPath: groundMask.m_Bits
-      value: 0
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4400623984521723778, guid: 12a74d8f283f6c14d8f4c4a75555272e, type: 3}
+      propertyPath: m_Name
+      value: Boon Hua
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3590285772286522905, guid: 12a74d8f283f6c14d8f4c4a75555272e, type: 3}
