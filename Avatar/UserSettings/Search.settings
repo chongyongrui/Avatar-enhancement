@@ -10,6 +10,9 @@ scopes = {
 	"last_search.DA949528" = "gizm"
 	"OpenInspectorPreview.DA949528" = "0"
 	"currentGroup.DA949528" = "all"
+	"last_search.8C24D059" = ""
+	"OpenInspectorPreview.8C24D059" = "0"
+	"currentGroup.8C24D059" = "all"
 }
 providers = {
 	adb = {

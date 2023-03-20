@@ -10,7 +10,7 @@ public class ThirdPersonMovement : MonoBehaviour
     float grounddist;
     [SerializeField] LayerMask groundMask;
     Vector3 velocity;
-    float grav = -1f;
+    float grav = -4f;
     public Vector3 direction;
     MovementBase currentstate;
     public Idle basestate = new Idle();
@@ -41,8 +41,8 @@ public class ThirdPersonMovement : MonoBehaviour
     {
          horizontalinput = Input.GetAxis("Horizontal");
          verticalinput = Input.GetAxis("Vertical");
-        direction = transform.forward * verticalinput + transform.right * horizontalinput;
-        controller.Move(direction.normalized * movementspeed * Time.fixedDeltaTime);
+        direction = transform.forward.normalized * verticalinput + transform.right.normalized * horizontalinput;
+        controller.Move(direction.normalized * movementspeed * Time.deltaTime);
     }
     public void SwitchState(MovementBase state)
     {
