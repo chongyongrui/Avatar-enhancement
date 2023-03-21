@@ -13,7 +13,7 @@ public class NetworkManagerUI : MonoBehaviour
     private void Awake(){
     ServerButton.onClick.AddListener(()=>{
         NetworkManager.Singleton.StartServer();
-        Debug.Log("serverbtn");
+        print("Hello world");
     });
     ClientButton.onClick.AddListener(()=>{
         NetworkManager.Singleton.StartClient();

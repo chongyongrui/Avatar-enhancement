@@ -1,17 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class ThirdPersonMovement : MonoBehaviour
+using Unity.Netcode;
+public class ThirdPersonMovement : NetworkBehaviour
 {
     public CharacterController controller;
-    public float movementspeed;
+    public float movementspeed = 0.5f;
     Vector3 sphere;
     float grounddist;
     [SerializeField] LayerMask groundMask;
     Vector3 velocity;
-    float grav = -4f;
-    public Vector3 direction;
+    float grav = -1f;
+    public Vector3 direction;   
     MovementBase currentstate;
     public Idle basestate = new Idle();
     public Walking walkstate = new Walking();
@@ -30,18 +30,17 @@ public class ThirdPersonMovement : MonoBehaviour
 
     void Update()
     {
+        Gravity();
         directionFunction();
         anim.SetFloat("hzinput",horizontalinput);
-        anim.SetFloat("vinput",verticalinput);
-        Gravity();
-
+        anim.SetFloat("vinput",verticalinput);        
         currentstate.UpdateState(this);
     }
     public void directionFunction()
-    {
+    {   if(!IsOwner)return;
          horizontalinput = Input.GetAxis("Horizontal");
          verticalinput = Input.GetAxis("Vertical");
-        direction = transform.forward.normalized * verticalinput + transform.right.normalized * horizontalinput;
+        direction = transform.forward * verticalinput + transform.right * horizontalinput;
         controller.Move(direction.normalized * movementspeed * Time.deltaTime);
     }
     public void SwitchState(MovementBase state)
