@@ -28,7 +28,7 @@ public class ThirdPersonMovement : NetworkBehaviour
 
     // Update is called once per frame
 
-    void Update()
+    void FixedUpdate()
     {
         Gravity();
         directionFunction();
@@ -37,9 +37,9 @@ public class ThirdPersonMovement : NetworkBehaviour
         currentstate.UpdateState(this);
     }
     public void directionFunction()
-    {   if(!IsOwner)return;
-         horizontalinput = Input.GetAxis("Horizontal");
-         verticalinput = Input.GetAxis("Vertical");
+    {   if(!IsLocalPlayer)return;
+          horizontalinput = Input.GetAxisRaw("Horizontal");
+        verticalinput = Input.GetAxisRaw("Vertical");
         direction = transform.forward * verticalinput + transform.right * horizontalinput;
         controller.Move(direction.normalized * movementspeed * Time.deltaTime);
     }
@@ -59,13 +59,13 @@ public class ThirdPersonMovement : NetworkBehaviour
     {
         if (!IsGrounded())
         {
-            velocity.y += grav * Time.fixedDeltaTime;
+            velocity.y += grav * Time.deltaTime;
         }
         else if (velocity.y < 0)
         {
             velocity.y = -2;
         }
 
-        controller.Move(velocity * Time.fixedDeltaTime);
+        controller.Move(velocity * Time.deltaTime);
     }
 }

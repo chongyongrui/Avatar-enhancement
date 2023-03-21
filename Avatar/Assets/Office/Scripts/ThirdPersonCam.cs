@@ -19,23 +19,27 @@ public class ThirdPersonCam : MonoBehaviour
     }
 
     void LateUpdate()
+{
+    input.x = Input.GetAxis("Horizontal");
+    input.y = Input.GetAxis("Vertical");
+
+    Vector3 offset = new Vector3(transform.position.x, player.position.y, transform.position.z);
+    Vector3 view = player.position - offset;
+    orientation.forward = view.normalized;
+
+    UpdateTargetDirection();
+
+    if (targetDirection != Vector3.zero)
     {
-        input.x = Input.GetAxis("Horizontal");
-        input.y = Input.GetAxis("Vertical");
+        Vector3 lookDirection = targetDirection.normalized;
+        freeRotation = Quaternion.LookRotation(lookDirection, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, freeRotation, rotationSpeed * Time.deltaTime);
 
-        Vector3 offset = new Vector3(transform.position.x, player.position.y, transform.position.z);
-        Vector3 view = player.position - offset;
-        orientation.forward = view.normalized;
-
-        UpdateTargetDirection();
-
-        if (targetDirection != Vector3.zero)
-        {
-            Vector3 lookDirection = targetDirection.normalized;
-            freeRotation = Quaternion.LookRotation(lookDirection, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, freeRotation, rotationSpeed * Time.deltaTime);
-        }
+        // Set player rotation to match ThirdPersonCam rotation
+        player.rotation = transform.rotation;
     }
+}
+
 
     public void UpdateTargetDirection()
     {
