@@ -9,7 +9,7 @@ public class Walking : MovementBase {
 
     public override void UpdateState(ThirdPersonMovement player) {
         // Move the player in the direction they are facing
-        player.controller.Move(player.direction * player.movementspeed * Time.fixedDeltaTime);
+        player.controller.Move(player.direction * player.movementSpeed * Time.fixedDeltaTime);
 
         // Check if player is moving
         if (player.direction.magnitude > 0) {
