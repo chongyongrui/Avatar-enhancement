@@ -2,7 +2,7 @@
 
 This project focuses on the networking side of unity.
 
-## Table of Contents
+## Table of Contents :ok_man:
 
 - [Installation](#installation)
 - [Features](#features)
@@ -15,7 +15,7 @@ This project focuses on the networking side of unity.
 3. .NET SDK
 4.  Visual Studio Code
 
-## Features
+## Features :dog2:
 
 > What this project contains
 * Movement of user using WASD
@@ -23,7 +23,7 @@ This project focuses on the networking side of unity.
 * Multiplayer 
 * UI for easy spawning of Host/Client
 
-> Upcoming features
+> Upcoming features :hourglass_flowing_sand:
 - [ ] Interaction with inanimate objects
 - [ ] Game tag
 - [ ] Voice communication
@@ -31,5 +31,14 @@ This project focuses on the networking side of unity.
 
 
 ## Walkthrough :cat2:
+> For the time being, i shall key in major updates that is pushed. Each update will be tagged as Update1,Update2 etc;
 
-To be filled. 
+27/3/2023
+- Improved UI :scream_cat:
+    * Added in player count
+    * Added in game debug console
+    * Holder for Network Buttons
+- Working Multiplayer :100:
+    * Stress tested to 5 players
+    * Animations sync
+    * Player count sync

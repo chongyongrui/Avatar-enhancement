@@ -4,11 +4,15 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NetworkManagerUI : MonoBehaviour
+using TMPro;
+public class NetworkManagerUI : NetworkBehaviour
 {
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
+    [SerializeField] private TextMeshProUGUI playerCount;
+
+    private NetworkVariable<int> playerNum = new NetworkVariable<int>(0,NetworkVariableReadPermission.Everyone);
     // Start is called before the first frame update
     private void Awake(){
     ServerButton.onClick.AddListener(()=>{
@@ -21,5 +25,11 @@ public class NetworkManagerUI : MonoBehaviour
     HostButton.onClick.AddListener(()=>{
         NetworkManager.Singleton.StartHost();
     });
+    }
+    private void Update(){
+        playerCount.text = "Players: "+playerNum.Value.ToString();
+        if(!IsOwner)return;
+        playerNum.Value = NetworkManager.Singleton.ConnectedClients.Count;
+        
     }
 }
