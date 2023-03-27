@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
+using Unity.Netcode;
+using Cinemachine;
+using StarterAssets;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
+
 #endif
 
 namespace StarterAssets
@@ -9,7 +13,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class ThirdPersonController : MonoBehaviour
+    public class ThirdPersonController : NetworkBehaviour
     {
         [Header("Player")]
         [SerializeField] private float moveSpeed = 2.0f;
@@ -93,6 +97,7 @@ namespace StarterAssets
         private CharacterController controller;
         private StarterAssetsInputs input;
         private Transform mainCamera;
+        private CinemachineVirtualCamera cinemachineVirtual;
 
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
@@ -115,7 +120,10 @@ namespace StarterAssets
         {
             //Reference main cam;
             mainCamera = Camera.main.transform;
-
+            
+            if(cinemachineVirtual == null){
+                cinemachineVirtual=FindObjectOfType<CinemachineVirtualCamera>();
+            }
         }
 
         private void Start()
@@ -125,7 +133,7 @@ namespace StarterAssets
             hasAnim = TryGetComponent(out anim);
             controller = GetComponent<CharacterController>();
             input = GetComponent<StarterAssetsInputs>();
-            playerInput = GetComponent<PlayerInput>();
+            
 
 
             AssignAnimationIDs();
@@ -133,20 +141,33 @@ namespace StarterAssets
             // reset our timeouts on start
             jumpWait = JumpTimeout;
             _fallTimeoutDelta = FallTimeout;
+            if(IsClient &&IsOwner){
+                GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
+            }
         }
 
         private void Update()
-        {
+        {   if(IsOwner) {
+             hasAnim = TryGetComponent(out anim);
             GroundedCheck();
             JumpAndGravity();
             Move();
+        }
         }
 
         private void LateUpdate()
         {
             CameraRotation();
         }
-
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            if(IsClient && IsOwner){
+                playerInput = GetComponent<PlayerInput>();
+                playerInput.enabled=true;
+     
+            }
+        }
         private void AssignAnimationIDs()
         {   //Take parameters in animators and sets to int in script;
             animSpeed = Animator.StringToHash("Speed");
