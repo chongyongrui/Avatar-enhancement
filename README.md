@@ -23,6 +23,13 @@ This project focuses on the networking side of unity.
 * Multiplayer 
 * UI for easy spawning of Host/Client
 
-## Walkthrough
+> Upcoming features
+- [ ] Interaction with inanimate objects
+- [ ] Game tag
+- [ ] Voice communication
+- [ ] Stress test
 
-To be filled. :cat2:
+
+## Walkthrough :cat2:
+
+To be filled. 
