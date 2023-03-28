@@ -1,44 +1,47 @@
-# Avatar enhancement
+# Avatar Enhancement
 
-This project focuses on the networking side of unity.
+This project focuses on the networking side of Unity.
 
-## Table of Contents :ok_man:
+## Table of Contents
 
 - [Installation](#installation)
 - [Features](#features)
-- [Walkthrough](#walktrhough)
+- [Walkthrough](#walkthrough)
 
 ## Installation
 
-1.  Unity
+1. Unity
 2. .NET Framework
 3. .NET SDK
-4.  Visual Studio Code
+4. Visual Studio Code
 
-## Features :dog2:
+## Features
 
-> What this project contains
-* Movement of user using WASD
-* Free look with camera rotation
-* Multiplayer 
-* UI for easy spawning of Host/Client
+### What this project contains
 
-> Upcoming features :hourglass_flowing_sand:
-- [ ] Interaction with inanimate objects
-- [ ] Game tag
-- [ ] Voice communication
-- [ ] Stress test
+- Movement of user using WASD
+- Free look with camera rotation
+- Multiplayer 
+- UI for easy spawning of Host/Client
 
+### Upcoming features
 
-## Walkthrough :cat2:
-> For the time being, i shall key in major updates that is pushed. Each update will be tagged as Update1,Update2 etc;
+- Interaction with inanimate objects
+- Game tag
+- Voice communication
+- Stress test
 
-27/3/2023
+## Walkthrough
+
+For the time being, I shall key in major updates that are pushed. Each update will be tagged as Update1, Update2, etc.
+
+### 27/3/2023
+
 - Improved UI :scream_cat:
-    * Added in player count
-    * Added in game debug console
-    * Holder for Network Buttons
+    - Added player count
+    - Added game debug console
+    - Holder for Network Buttons
 - Working Multiplayer :100:
-    * Stress tested to 5 players
-    * Animations sync
-    * Player count sync
+    - Stress tested to 5 players
+    - Animations sync
+    - Player count sync
