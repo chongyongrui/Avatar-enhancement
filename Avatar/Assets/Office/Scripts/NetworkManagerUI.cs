@@ -11,7 +11,20 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
     [SerializeField] private TextMeshProUGUI playerCount;
-
+    private bool isServerStarted =false;
+    // ServerButton.onClick.AddListener(() =>
+    //     {
+    //         if (!isServerStarted)
+    //         {
+    //             NetworkManager.Singleton.StartServer();
+    //             isServerStarted = true;
+    //         }
+    //         else
+    //         {
+    //             NetworkManager.Singleton.StopAllCoroutines();
+    //             isServerStarted = false;
+    //         }
+    //     });
     private NetworkVariable<int> playerNum = new NetworkVariable<int>(0,NetworkVariableReadPermission.Everyone);
     // Start is called before the first frame update
     private void Awake(){
