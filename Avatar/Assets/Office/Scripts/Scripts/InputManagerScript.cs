@@ -9,22 +9,31 @@ using TMPro;
 public class InputManagerScript : MonoBehaviour
 {
     [SerializeField] private TMP_InputField nameInputField;
-    [SerializeField] private  Button enterButton;
-    [SerializeField] private  Button clearButton;
-
+    [SerializeField] private Button enterButton;
+    [SerializeField] private Button clearButton;
+    [SerializeField] private TMP_Text testName;
+    private string playerName;
+    private string nextSceneName;
     private void Start()
     {
         enterButton.onClick.AddListener(SaveName);
         clearButton.onClick.AddListener(ClearName);
-        LoadName();
+        //LoadName();
     }
 
     private void SaveName()
     {
-        string playerName = nameInputField.text;
+        playerName = nameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
-        ClearName();
-        LoadNextScene();
+
+        //ClearName();
+        if (playerName == "")//Check if the inputField is empty;
+        {
+            nameInputField.Select();
+            nameInputField.ActivateInputField();
+        }
+        else
+            LoadNextScene();
     }
 
     private void ClearName()
@@ -37,14 +46,14 @@ public class InputManagerScript : MonoBehaviour
     {
         if (PlayerPrefs.HasKey("PlayerName"))
         {
-            string playerName = PlayerPrefs.GetString("PlayerName");
+            playerName = PlayerPrefs.GetString("PlayerName");
             nameInputField.text = playerName;
         }
     }
 
     private void LoadNextScene()
     {
-        string nextSceneName = "Main";
+        nextSceneName = "Main";
         SceneManager.LoadScene(nextSceneName);
     }
 

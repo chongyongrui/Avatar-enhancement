@@ -5,8 +5,8 @@ using Unity.Netcode;
 
 public class PlayerName : NetworkBehaviour
 {
-    [SerializeField] private TMP_Text playerNameText;
-
+    [SerializeField] private TextMeshProUGUI playerNameText;
+    
     private NetworkVariable<string> playerName = new NetworkVariable<string>(string.Empty,NetworkVariableReadPermission.Everyone);
 
     public override void OnNetworkSpawn()
@@ -15,11 +15,11 @@ public class PlayerName : NetworkBehaviour
         if (IsClient&&IsOwner)
         {
             // Set the player name to the one entered by the player
-            string name = PlayerPrefs.GetString("PlayerName");
-            playerName.Value = name;
+            string playerName = PlayerPrefs.GetString("PlayerName");
+            playerNameText.text = playerName;
         }
         
         // Update the player name text
-        playerNameText.text = playerName.Value;
+        
     }
 }

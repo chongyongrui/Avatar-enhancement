@@ -2,6 +2,8 @@
 using Unity.Netcode;
 using Cinemachine;
 using StarterAssets;
+using TMPro;
+
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 
@@ -42,6 +44,7 @@ namespace StarterAssets
 
 
         public float FallTimeout = 0.15f;
+        private string playerName;
 
         [Header("Player Grounded")]
 
@@ -102,6 +105,8 @@ namespace StarterAssets
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
         private bool hasAnim;
+        [Header("Testing")]
+        [SerializeField] private TMP_Text playerNameText;
 
         private bool IsCurrentDeviceMouse
         {
@@ -117,7 +122,7 @@ namespace StarterAssets
 
 
         private void Awake()
-        {
+        {  playerName = PlayerPrefs.GetString("PlayerName");
             //Reference main cam;
             mainCamera = Camera.main.transform;
             
@@ -133,7 +138,7 @@ namespace StarterAssets
             hasAnim = TryGetComponent(out anim);
             controller = GetComponent<CharacterController>();
             input = GetComponent<StarterAssetsInputs>();
-            
+            playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
 
 
             AssignAnimationIDs();
@@ -144,6 +149,7 @@ namespace StarterAssets
             if(IsClient &&IsOwner){
                 GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
             }
+            
         }
 
         private void Update()
@@ -162,12 +168,13 @@ namespace StarterAssets
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
+            NetString player = new NetString();
             //isClient checks if current instance is client,IsOwner checks if client owns the object,
             //ensure playerinput is only enabled for client instance;
             if(IsClient && IsOwner){
-                playerInput = GetComponent<PlayerInput>();
+                playerInput = GetComponent<PlayerInput>();  
                 playerInput.enabled=true;
-     
+                
             }
         }
         private void AssignAnimationIDs()

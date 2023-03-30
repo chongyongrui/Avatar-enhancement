@@ -198,7 +198,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 32
   m_VerticalAlignment: 1024
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -314,7 +314,6 @@ GameObject:
   - component: {fileID: -43142210471022429}
   - component: {fileID: -4696861780802418463}
   - component: {fileID: 919378928254412238}
-  - component: {fileID: 4287082942244110739}
   m_Layer: 6
   m_Name: MainPlayer
   m_TagString: Player
@@ -423,6 +422,7 @@ MonoBehaviour:
   BottomClamp: -30
   CameraAngleOverride: 0
   LockCameraPosition: 0
+  playerNameText: {fileID: 0}
 --- !u!114 &7717111563149580022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -613,19 +613,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TransitionStateInfoList: []
   m_Animator: {fileID: 6508584596783856838}
---- !u!114 &4287082942244110739
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 574454473996172294}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07f80ed75d548cf4b98135a6c6ac17d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerNameText: {fileID: 4306620334232152960}
 --- !u!1 &697881292594787653
 GameObject:
   m_ObjectHideFlags: 0
@@ -1437,7 +1424,7 @@ GameObject:
   - component: {fileID: 7371498194102905185}
   m_Layer: 6
   m_Name: Canvas
-  m_TagString: Untagged
+  m_TagString: nop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

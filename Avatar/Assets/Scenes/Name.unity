@@ -373,7 +373,7 @@ GameObject:
   - component: {fileID: 496496856}
   - component: {fileID: 496496855}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: EnterName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -800,7 +800,7 @@ GameObject:
   - component: {fileID: 672296205}
   - component: {fileID: 672296207}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Holder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -883,6 +883,7 @@ MonoBehaviour:
   nameInputField: {fileID: 868057241}
   enterButton: {fileID: 1557167338}
   clearButton: {fileID: 737307606}
+  testName: {fileID: 496496855}
 --- !u!1 &737307604
 GameObject:
   m_ObjectHideFlags: 0
