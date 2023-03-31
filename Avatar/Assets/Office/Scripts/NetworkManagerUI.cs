@@ -12,7 +12,7 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private Button ClientButton;
     [SerializeField] private TextMeshProUGUI playerCount;
     [SerializeField] private TMP_Text playerNameText;
-    private NetString playerName;
+   
     private bool isServerStarted =false;
 
     
@@ -51,7 +51,7 @@ public class NetworkManagerUI : NetworkBehaviour
     });
     }
     private void setName(){
-        playerNameText.text = playerName.username.Value.ToString();
+       // playerNameText.text = NetString.player.username.Value.ToString();
 
     
     }

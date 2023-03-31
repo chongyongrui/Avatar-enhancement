@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Netcode;
 using Cinemachine;
 using StarterAssets;
@@ -168,7 +168,7 @@ namespace StarterAssets
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
-            NetString player = new NetString();
+            
             //isClient checks if current instance is client,IsOwner checks if client owns the object,
             //ensure playerinput is only enabled for client instance;
             if(IsClient && IsOwner){
