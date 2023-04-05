@@ -105,8 +105,8 @@ namespace StarterAssets
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
         private bool hasAnim;
-        [Header("Testing")]
-        [SerializeField] private TMP_Text playerNameText;
+        //[Header("Testing")]
+        //[SerializeField] private TMP_Text playerNameText;
 
         private bool IsCurrentDeviceMouse
         {
@@ -138,7 +138,7 @@ namespace StarterAssets
             hasAnim = TryGetComponent(out anim);
             controller = GetComponent<CharacterController>();
             input = GetComponent<StarterAssetsInputs>();
-            playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
+            //playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
 
 
             AssignAnimationIDs();
@@ -148,6 +148,8 @@ namespace StarterAssets
             fallTimeoutDelta = FallTimeout;
             if(IsClient &&IsOwner){
                 GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
+                playerInput = GetComponent<PlayerInput>();  
+                playerInput.enabled=true;
             }
             
         }
@@ -165,18 +167,18 @@ namespace StarterAssets
         {
             CameraRotation();
         }
-        public override void OnNetworkSpawn()
-        {
-            base.OnNetworkSpawn();
+        // public override void OnNetworkSpawn()
+        // {
+        //     base.OnNetworkSpawn();
             
-            //isClient checks if current instance is client,IsOwner checks if client owns the object,
-            //ensure playerinput is only enabled for client instance;
-            if(IsClient && IsOwner){
-                playerInput = GetComponent<PlayerInput>();  
-                playerInput.enabled=true;
+        //     //isClient checks if current instance is client,IsOwner checks if client owns the object,
+        //     //ensure playerinput is only enabled for client instance;
+        //     if(IsClient && IsOwner){
+        //         playerInput = GetComponent<PlayerInput>();  
+        //         playerInput.enabled=true;
                 
-            }
-        }
+        //     }
+        // }
         private void AssignAnimationIDs()
         {   //Take parameters in animators and sets to int in script;
             animSpeed = Animator.StringToHash("Speed");
