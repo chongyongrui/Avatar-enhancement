@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Collections;
+using Unity.Netcode;
 
 public struct NetString :  INetworkSerializeByMemcpy
 {
@@ -16,6 +18,6 @@ public struct NetString :  INetworkSerializeByMemcpy
         return _info.Value.ToString();
     }
  
-    public static implicit operator string(NetworkString s) => s.ToString();
-    public static implicit operator NetworkString(string s) => new NetworkString() { _info = new FixedString32Bytes(s) };
+    public static implicit operator string(NetString s) => s.ToString();
+    public static implicit operator NetString(string s) => new NetString() { _info = new FixedString32Bytes(s) };
 }

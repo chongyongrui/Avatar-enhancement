@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 using TMPro;
 public class NetworkManagerUI : NetworkBehaviour
@@ -37,7 +38,8 @@ public class NetworkManagerUI : NetworkBehaviour
         
         
     ServerButton.onClick.AddListener(()=>{
-        NetworkManager.Singleton.StartServer();
+        NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             
     });
     ClientButton.onClick.AddListener(()=>{

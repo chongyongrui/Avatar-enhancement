@@ -51,10 +51,21 @@ public class InputManagerScript : MonoBehaviour
         }
     }
 
-    private void LoadNextScene()
+   private void LoadNextScene()
+{
+    nextSceneName = "Main";
+    SceneManager.LoadScene(nextSceneName, LoadSceneMode.Single);
+    DestroyPreviousSceneObjects();
+}
+
+private void DestroyPreviousSceneObjects()
+{
+    Scene previousScene = SceneManager.GetActiveScene();
+    for (int i = 0; i < previousScene.rootCount; i++)
     {
-        nextSceneName = "Main";
-        SceneManager.LoadScene(nextSceneName);
+        GameObject go = previousScene.GetRootGameObjects()[i];
+        Destroy(go);
     }
+}
 
 }
