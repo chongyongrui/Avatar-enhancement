@@ -11,6 +11,7 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
+    [SerializeField] private Button LeaveButton;
     [SerializeField] private TextMeshProUGUI playerCount;
     [SerializeField] private TMP_Text playerNameText;
    
@@ -36,10 +37,17 @@ public class NetworkManagerUI : NetworkBehaviour
     private void Awake(){
         Debug.Log(PlayerPrefs.GetString("PlayerName"));
         
-        
-    ServerButton.onClick.AddListener(()=>{
+    LeaveButton.onClick.AddListener(()=>{
         NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+   
+            
+    });
+    ServerButton.onClick.AddListener(()=>{
+        NetworkManager.Singleton.StartServer();
+       HostButton.gameObject.SetActive(false);
+       ClientButton.gameObject.SetActive(false);
+       LeaveButton.gameObject.SetActive(false);
             
     });
     ClientButton.onClick.AddListener(()=>{
