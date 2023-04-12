@@ -146,7 +146,7 @@ namespace StarterAssets
             // reset our timeouts on start
             jumpWait = JumpTimeout;
             fallTimeoutDelta = FallTimeout;
-            if(IsClient &&IsOwner){
+            if(IsOwner){
                 GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
                 playerInput = GetComponent<PlayerInput>();  
                 playerInput.enabled=true;

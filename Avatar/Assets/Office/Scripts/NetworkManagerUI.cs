@@ -4,17 +4,20 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-
+using System.Text;
 using TMPro;
 public class NetworkManagerUI : NetworkBehaviour
-{
-    [SerializeField] private Button ServerButton;
+{   
+    [SerializeField]private TMP_InputField passwordInputField;
+   [SerializeField] private TMP_InputField nameInputField;
+    
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
     [SerializeField] private Button LeaveButton;
+
+    [SerializeField] GameObject Holder;
     [SerializeField] private TextMeshProUGUI playerCount;
-    [SerializeField] private TMP_Text playerNameText;
-   
+    private static Dictionary<ulong,PlayerData> clientData;//Dictionary to store 
     private bool isServerStarted =false;
 
     
@@ -34,31 +37,54 @@ public class NetworkManagerUI : NetworkBehaviour
     private NetworkVariable<int> playerNum = new NetworkVariable<int>(0,NetworkVariableReadPermission.Everyone);
    
     // Start is called before the first frame update
+    private void Start(){
+        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+    }
+    private void Destroy(){
+        if (NetworkManager.Singleton == null) { return; }
+          NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
+    }
     private void Awake(){
         Debug.Log(PlayerPrefs.GetString("PlayerName"));
         
     LeaveButton.onClick.AddListener(()=>{
-        NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if(IsClient) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
+        else NetworkManager.Singleton.Shutdown();
+        Holder.SetActive(false);
    
             
     });
-    ServerButton.onClick.AddListener(()=>{
-        NetworkManager.Singleton.StartServer();
-       HostButton.gameObject.SetActive(false);
-       ClientButton.gameObject.SetActive(false);
-       LeaveButton.gameObject.SetActive(false);
-            
-    });
+
     ClientButton.onClick.AddListener(()=>{
-        NetworkManager.Singleton.StartClient();
+        
+       var payload = JsonUtility.ToJson(new ConnectionPayload()
+            {
+                
+                NetworkPlayerName = PlayerPrefs.GetString("PlayerName").ToString()
+            });
+
+            byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
+            NetworkManager.Singleton.StartClient();
        HostButton.gameObject.SetActive(false);
     });
+
     HostButton.onClick.AddListener(()=>{
+        clientData = new Dictionary<ulong, PlayerData>();
+        clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(PlayerPrefs.GetString("PlayerName"));
+        
         NetworkManager.Singleton.StartHost();
         ClientButton.gameObject.SetActive(false);
         
     });
+    }
+
+    public static PlayerData? GetPlayerData(ulong clientId){
+        if (clientData.TryGetValue(clientId, out PlayerData playerData))
+            {
+                return playerData;
+            }
+
+            return null;
     }
     private void setName(){
        // playerNameText.text = NetString.player.username.Value.ToString();
@@ -71,4 +97,14 @@ public class NetworkManagerUI : NetworkBehaviour
         playerNum.Value = NetworkManager.Singleton.ConnectedClients.Count;
         
     }
+  private void HandleClientDisconnect(ulong clientId)
+        {
+            if (NetworkManager.Singleton.IsServer)
+            {
+                clientData.Remove(clientId);
+            }
+
+            // Are we the client that is disconnecting?
+            
+        }
 }
