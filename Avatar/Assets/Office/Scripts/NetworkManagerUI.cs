@@ -6,6 +6,9 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Text;
 using TMPro;
+
+
+
 public class NetworkManagerUI : NetworkBehaviour
 {   
     [SerializeField]private TMP_InputField passwordInputField;
@@ -45,11 +48,15 @@ public class NetworkManagerUI : NetworkBehaviour
           NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
     }
     private void Awake(){
-        Debug.Log(PlayerPrefs.GetString("PlayerName"));
+       // Debug.Log(PlayerPrefs.GetString("PlayerName"));
         
     LeaveButton.onClick.AddListener(()=>{
         if(IsClient) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
         else NetworkManager.Singleton.Shutdown();
+        if (NetworkManager.Singleton.IsServer)
+            {
+                NetworkManager.Singleton.ConnectionApprovalCallback -= ApprovalCheck;
+            }
         Holder.SetActive(false);
    
             
@@ -60,10 +67,12 @@ public class NetworkManagerUI : NetworkBehaviour
        var payload = JsonUtility.ToJson(new ConnectionPayload()
             {
                 
-                NetworkPlayerName = PlayerPrefs.GetString("PlayerName").ToString()
+                NetworkPlayerName = passwordInputField.text,
+                password = passwordInputField.text
             });
 
             byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
+            NetworkManager.Singleton.NetworkConfig.ConnectionData=  payloadBytes;
             NetworkManager.Singleton.StartClient();
        HostButton.gameObject.SetActive(false);
     });
@@ -71,9 +80,9 @@ public class NetworkManagerUI : NetworkBehaviour
     HostButton.onClick.AddListener(()=>{
         clientData = new Dictionary<ulong, PlayerData>();
         clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(PlayerPrefs.GetString("PlayerName"));
-        
+         NetworkManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
         NetworkManager.Singleton.StartHost();
-        ClientButton.gameObject.SetActive(false);
+
         
     });
     }
@@ -85,11 +94,6 @@ public class NetworkManagerUI : NetworkBehaviour
             }
 
             return null;
-    }
-    private void setName(){
-       // playerNameText.text = NetString.player.username.Value.ToString();
-
-    
     }
     private void Update(){
         playerCount.text = "Players: "+ playerNum.Value.ToString();
@@ -107,4 +111,23 @@ public class NetworkManagerUI : NetworkBehaviour
             // Are we the client that is disconnecting?
             
         }
+    private void ApprovalCheck(byte[] connectionData, ulong clientId, NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse responsde)
+        {
+            string payload = Encoding.ASCII.GetString(connectionData);
+            var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(payload);
+
+            bool approveConnection = connectionPayload
+            
+            .password == passwordInputField.text;
+
+
+            if (approveConnection)
+            {
+               
+                clientData[clientId] = new PlayerData(connectionPayload.NetworkPlayerName);
+            }
+
+            callback.
+        }
+
 }
