@@ -3,6 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ConnectionPayload 
-{
+{   public string password;
     public string NetworkPlayerName;
 }

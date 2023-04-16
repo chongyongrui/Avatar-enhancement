@@ -63,7 +63,8 @@ public class NetworkManagerUI : NetworkBehaviour
     });
 
     ClientButton.onClick.AddListener(()=>{
-        
+        //Send data to server when client connects;Serialize data into string(Easy transmission across network);
+        //Transmission in binary data thus conversion to byte array.
        var payload = JsonUtility.ToJson(new ConnectionPayload()
             {
                 
@@ -111,23 +112,34 @@ public class NetworkManagerUI : NetworkBehaviour
             // Are we the client that is disconnecting?
             
         }
-    private void ApprovalCheck(byte[] connectionData, ulong clientId, NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse responsde)
-        {
-            string payload = Encoding.ASCII.GetString(connectionData);
-            var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(payload);
+private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
+{
+    // Get the password sent by the client
+     
+    byte[] payloadBytes = request.Payload;
+    var payloadString = Encoding.ASCII.GetString(payloadBytes);
+    var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(payloadString);
+    var clientPassword = connectionPayload.password;
 
-            bool approveConnection = connectionPayload
-            
-            .password == passwordInputField.text;
+    // Check if the password is correct
+    bool approved = clientPassword == passwordInputField.text;
 
-
-            if (approveConnection)
-            {
-               
-                clientData[clientId] = new PlayerData(connectionPayload.NetworkPlayerName);
-            }
-
-            callback.
-        }
+    if (approved)
+    {   
+        // If the client is approved, create their player object
+        response.CreatePlayerObject = true;
+       
+        // Store their player data in the clientData dictionary
+        ulong clientId = request.ClientNetworkId;
+        PlayerData playerData = new PlayerData(connectionPayload.NetworkPlayerName);
+        clientData[clientId] = playerData;
+    }
+    else
+    {
+        // If the client is not approved, reject the connection and provide a reason
+        response.Approved = false;
+        response.Reason = "Incorrect password.";
+    }
+}
 
 }
