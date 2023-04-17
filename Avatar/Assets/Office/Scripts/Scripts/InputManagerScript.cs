@@ -25,7 +25,7 @@ public class InputManagerScript : MonoBehaviour
     {
         playerName = nameInputField.text;
         PlayerPrefs.SetString("PlayerName", playerName);
-
+ 
         //ClearName();
         if (playerName == "")//Check if the inputField is empty;
         {

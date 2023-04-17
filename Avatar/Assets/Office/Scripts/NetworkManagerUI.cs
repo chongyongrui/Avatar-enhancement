@@ -18,7 +18,7 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private Button ClientButton;
     [SerializeField] private Button LeaveButton;
 
-    [SerializeField] GameObject Holder;
+    [SerializeField] private GameObject Holder;
     [SerializeField] private TextMeshProUGUI playerCount;
     private static Dictionary<ulong,PlayerData> clientData;//Dictionary to store 
     private bool isServerStarted =false;
@@ -42,6 +42,7 @@ public class NetworkManagerUI : NetworkBehaviour
     // Start is called before the first frame update
     private void Start(){
         NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+        NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
     }
     private void Destroy(){
         if (NetworkManager.Singleton == null) { return; }
@@ -57,8 +58,7 @@ public class NetworkManagerUI : NetworkBehaviour
             {
                 NetworkManager.Singleton.ConnectionApprovalCallback -= ApprovalCheck;
             }
-        Holder.SetActive(false);
-   
+
             
     });
 
@@ -110,8 +110,23 @@ public class NetworkManagerUI : NetworkBehaviour
             }
 
             // Are we the client that is disconnecting?
-            
+            if (clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                Holder.SetActive(true);
+                LeaveButton.gameObject.SetActive(false);
+                playerCount.gameObject.SetActive(false);
+                
+            }
         }
+    private void HandleClientConnect(ulong clientId){
+        if (clientId == NetworkManager.Singleton.LocalClientId)
+            {
+                Holder.SetActive(false);
+                LeaveButton.gameObject.SetActive(true);
+                playerCount.gameObject.SetActive(true);
+            }
+    }
+        
 private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
 {
     // Get the password sent by the client
