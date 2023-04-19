@@ -12,8 +12,7 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private TMP_InputField nameInputField;
 
-    [SerializeField] private Button HostButton;
-    [SerializeField] private Button ClientButton;
+
     [SerializeField] private Button LeaveButton;
 
     [SerializeField] private GameObject Holder;
@@ -41,8 +40,8 @@ public class NetworkManagerUI : NetworkBehaviour
     {
         NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
         NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
-        
-        LeaveButton.gameObject.SetActive(false);
+
+
     }
     private void Destroy()
     {
@@ -54,38 +53,43 @@ public class NetworkManagerUI : NetworkBehaviour
     {
         if (IsClient) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
         else NetworkManager.Singleton.Shutdown();
+
         if (NetworkManager.Singleton.IsServer)
-        {   
+        {
             NetworkManager.Singleton.ConnectionApprovalCallback -= ApprovalCheck;
         }
+        Holder.SetActive(false);
+
     }
     public void Client()
-    {
+    {   //Convert to byte array;
         var payload = JsonUtility.ToJson(new ConnectionPayload()
         {
 
             NetworkPlayerName = nameInputField.text,
             password = passwordInputField.text
-        });
+        }); 
 
         byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
         NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
         NetworkManager.Singleton.StartClient();
-        HostButton.gameObject.SetActive(false);
+
     }
     public void Host()
-    {
+    {   //Instantiate dictornary 'clientData' for Id->PlayerData;
         clientData = new Dictionary<ulong, PlayerData>();
         clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
-
-        NetworkManager.Singleton.ConnectionApprovalCallback += ApprovalCheck;
+      
+       // NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
         NetworkManager.Singleton.StartHost();
-        
-    }
-   
+          Debug.Log("Name of current player is "+clientData[OwnerClientId].PlayerName);
 
+    }
+
+    // '?' allows null return for un-nullable;
     public static PlayerData? GetPlayerData(ulong clientId)
-    {
+    {   //For name display;
+        //Get the client data for the specific id;
         if (clientData.TryGetValue(clientId, out PlayerData playerData))
         {
             return playerData;
@@ -120,32 +124,34 @@ public class NetworkManagerUI : NetworkBehaviour
         }
     }
 
-
     private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
         // Get the password sent by the client
+        string payload = Encoding.ASCII.GetString(request.Payload);
 
-        byte[] payloadBytes = request.Payload;
-        var payloadString = Encoding.ASCII.GetString(payloadBytes);
-        var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(payloadString);
-
+        var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(payload);
 
 
-        var clientPassword = connectionPayload.password;
+
+        // var clientPassword = connectionPayload.password;
 
         // Check if the password is correct
-        bool approved = clientPassword == passwordInputField.text;
+        bool approved = connectionPayload.password == passwordInputField.text;
 
         if (approved)
         {
-            // If the client is approved, create their player object
-
-
             // Store their player data in the clientData dictionary
             ulong clientId = request.ClientNetworkId;
-            PlayerData playerData = new PlayerData(connectionPayload.NetworkPlayerName);
-            clientData[clientId] = playerData;
+
+            clientData[clientId] = new PlayerData(connectionPayload.NetworkPlayerName);
             response.Approved = true;
+            response.CreatePlayerObject = true;
+            // Position to spawn the player object (if null it uses default of Vector3.zero)
+            response.Position = Vector3.zero;
+
+            // Rotation to spawn the player object (if null it uses the default of Quaternion.identity)
+            response.Rotation = Quaternion.identity;
+
         }
         else
         {
@@ -153,6 +159,8 @@ public class NetworkManagerUI : NetworkBehaviour
             response.Approved = false;
             response.Reason = "Incorrect password.";
         }
+        response.PlayerPrefabHash = null;
     }
+
 
 }

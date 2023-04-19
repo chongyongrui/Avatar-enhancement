@@ -122,7 +122,7 @@ namespace StarterAssets
 
 
         private void Awake()
-        {  playerName = PlayerPrefs.GetString("PlayerName");
+        { 
             //Reference main cam;
             mainCamera = Camera.main.transform;
             

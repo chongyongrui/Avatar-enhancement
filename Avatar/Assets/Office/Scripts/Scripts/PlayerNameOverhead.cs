@@ -17,9 +17,9 @@ public class PlayerNameOverhead : NetworkBehaviour
 
             PlayerData? playerData = NetworkManagerUI.GetPlayerData(OwnerClientId);
 
-            if (!(playerData== null))
+            if (playerData.HasValue)
             {  
-                displayName.Value = playerData.ToString();
+                displayName.Value = playerData.Value.PlayerName;
             }
         }
 
