@@ -13,7 +13,7 @@ public class PlayerNameOverhead : NetworkBehaviour
 
         public override void OnNetworkSpawn()
         {
-            if (!IsOwner) { return; }
+            
 
             PlayerData? playerData = NetworkManagerUI.GetPlayerData(OwnerClientId);
 

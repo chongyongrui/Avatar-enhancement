@@ -8,7 +8,7 @@ public class PlayerName : NetworkBehaviour
 {
     [SerializeField] private TextMeshProUGUI playerNameText;
     
-    [SerializeField] private NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(string.Empty,
+     private NetworkVariable<FixedString32Bytes> playerName = new NetworkVariable<FixedString32Bytes>(string.Empty,
     NetworkVariableReadPermission.Everyone,
     NetworkVariableWritePermission.Owner);
 

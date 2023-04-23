@@ -43,7 +43,7 @@ public class NetworkManagerUI : NetworkBehaviour
 
 
     }
-    private void Destroy()
+    private void OnDestroy()
     {
         if (NetworkManager.Singleton == null) { return; }
         NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
@@ -77,13 +77,14 @@ public class NetworkManagerUI : NetworkBehaviour
     }
     public void Host()
     {   //Instantiate dictornary 'clientData' for Id->PlayerData;
+        
         clientData = new Dictionary<ulong, PlayerData>();
         clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
       
-       // NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+       //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
         NetworkManager.Singleton.StartHost();
-          Debug.Log("Name of current player is "+clientData[OwnerClientId].PlayerName);
-
+        setPassword(passwordInputField.text);
+         
     }
 
     // '?' allows null return for un-nullable;
@@ -123,21 +124,26 @@ public class NetworkManagerUI : NetworkBehaviour
 
         }
     }
+    public void setPassword(string password){
+        byte[] hashed = Encoding.ASCII.GetBytes(password);
+        NetworkManager.Singleton.NetworkConfig.ConnectionData = hashed;
+    }
 
     private void ApprovalCheck(NetworkManager.ConnectionApprovalRequest request, NetworkManager.ConnectionApprovalResponse response)
     {
         // Get the password sent by the client
+        byte[] clienthash = request.Payload;
         string payload = Encoding.ASCII.GetString(request.Payload);
 
         var connectionPayload = JsonUtility.FromJson<ConnectionPayload>(payload);
 
+        byte[] hostHash = NetworkManager.Singleton.NetworkConfig.ConnectionData;
 
+    // Check if the hashes match
+    
+        bool approved = clienthash.Equals(hostHash);
 
-        // var clientPassword = connectionPayload.password;
-
-        // Check if the password is correct
-        bool approved = connectionPayload.password == passwordInputField.text;
-
+   
         if (approved)
         {
             // Store their player data in the clientData dictionary
@@ -146,12 +152,8 @@ public class NetworkManagerUI : NetworkBehaviour
             clientData[clientId] = new PlayerData(connectionPayload.NetworkPlayerName);
             response.Approved = true;
             response.CreatePlayerObject = true;
-            // Position to spawn the player object (if null it uses default of Vector3.zero)
-            response.Position = Vector3.zero;
-
-            // Rotation to spawn the player object (if null it uses the default of Quaternion.identity)
-            response.Rotation = Quaternion.identity;
-
+            // Position to spawn the player object   (if null it uses default of Vector3.zero)
+    
         }
         else
         {
