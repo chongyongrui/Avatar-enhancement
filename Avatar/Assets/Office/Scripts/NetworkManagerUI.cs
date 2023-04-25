@@ -43,7 +43,7 @@ public class NetworkManagerUI : NetworkBehaviour
 
 
     }
-    private void OnDestroy()
+    private void Destroy()
     {
         if (NetworkManager.Singleton == null) { return; }
         NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
@@ -58,53 +58,53 @@ public class NetworkManagerUI : NetworkBehaviour
         {
             NetworkManager.Singleton.ConnectionApprovalCallback -= ApprovalCheck;
         }
-        Holder.SetActive(false);
+        Holder.SetActive(true);
 
     }
     public void Client()
     {   //Convert to byte array;
-        var payload = JsonUtility.ToJson(new ConnectionPayload()
-        {
+        // var payload = JsonUtility.ToJson(new ConnectionPayload()
+        // {
 
-            NetworkPlayerName = nameInputField.text,
-            password = passwordInputField.text
-        }); 
+        //     NetworkPlayerName = nameInputField.text,
+        //     password = passwordInputField.text
+        // }); 
 
-        byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
-        NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
+        // byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
+        // NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
         NetworkManager.Singleton.StartClient();
 
     }
     public void Host()
     {   //Instantiate dictornary 'clientData' for Id->PlayerData;
         
-        clientData = new Dictionary<ulong, PlayerData>();
-        clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
+    //     clientData = new Dictionary<ulong, PlayerData>();
+    //     clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
       
-       //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+    //    //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
         NetworkManager.Singleton.StartHost();
-        setPassword(passwordInputField.text);
+        //setPassword(passwordInputField.text);
          
     }
 
     // '?' allows null return for un-nullable;
-    public static PlayerData? GetPlayerData(ulong clientId)
-    {   //For name display;
-        //Get the client data for the specific id;
-        if (clientData.TryGetValue(clientId, out PlayerData playerData))
-        {
-            return playerData;
-        }
+    // public static PlayerData? GetPlayerData(ulong clientId)
+    // {   ////For name display;
+    //     ////Get the client data for the specific id;
+    //     if (clientData.TryGetValue(clientId, out PlayerData playerData))
+    //     {
+    //         return playerData;
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
 
     private void HandleClientDisconnect(ulong clientId)
     {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            clientData.Remove(clientId);
-        }
+        // if (NetworkManager.Singleton.IsServer)
+        // {
+        //     clientData.Remove(clientId);
+        // }
 
         // Are we the client that is disconnecting?
         if (clientId == NetworkManager.Singleton.LocalClientId)

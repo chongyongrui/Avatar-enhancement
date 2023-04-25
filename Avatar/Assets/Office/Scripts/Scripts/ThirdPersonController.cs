@@ -58,7 +58,11 @@ namespace StarterAssets
         public LayerMask GroundLayers;
 
         [Header("Cinemachine")]
-
+        CinemachineComponentBase componentBase;
+        float camDist;
+        float sensitivity  = 8.0f;
+        [SerializeField] float maxCameraDistance;
+        Input scroll;
         public GameObject CinemachineCameraTarget;
 
         public float TopClamp = 70.0f;
@@ -128,6 +132,7 @@ namespace StarterAssets
             
             if(cinemachineVirtual == null){
                 cinemachineVirtual=FindObjectOfType<CinemachineVirtualCamera>();
+                componentBase  = cinemachineVirtual.GetCinemachineComponent(CinemachineCore.Stage.Body);
             }
         }
 
@@ -157,10 +162,11 @@ namespace StarterAssets
         private void Update()
         {   if(IsOwner) {
              hasAnim = TryGetComponent(out anim);
-            GroundedCheck();
+            GroundedCheck();   
             JumpAndGravity();
             Move();
-        }
+            Scroll();
+        }       
         }
 
         private void LateUpdate()
@@ -220,7 +226,32 @@ namespace StarterAssets
             CinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + CameraAngleOverride,
                 cinemachineTargetYaw, 0.0f);
         }
-
+      private void Scroll(){
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if(scroll !=0){
+            camDist = scroll * sensitivity ;
+            if(componentBase is Cinemachine3rdPersonFollow ){
+                
+                if (camDist < 0)
+                {
+                    (componentBase as Cinemachine3rdPersonFollow).CameraDistance -= camDist;
+                    if ((componentBase as Cinemachine3rdPersonFollow).CameraDistance > maxCameraDistance)
+                    {
+                        (componentBase as Cinemachine3rdPersonFollow).CameraDistance = maxCameraDistance;
+                    }
+                }
+                else
+                {
+                    (componentBase as Cinemachine3rdPersonFollow).CameraDistance -= camDist;
+                    if ((componentBase as Cinemachine3rdPersonFollow).CameraDistance <= 1)
+                    {
+                        (componentBase as Cinemachine3rdPersonFollow).CameraDistance = 1;
+                    }
+                }
+            }
+            }
+        
+      }
         private void Move()
         {
             // set target speed based on move speed, sprint speed and if sprint is pressed
@@ -399,4 +430,4 @@ namespace StarterAssets
             }
         }
     }
-}
+}                                                                                                                                                                                   

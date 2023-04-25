@@ -11,17 +11,17 @@ public class PlayerNameOverhead : NetworkBehaviour
 
         private NetworkVariable<FixedString32Bytes> displayName = new NetworkVariable<FixedString32Bytes>();
 
-        public override void OnNetworkSpawn()
-        {
+        // public override void OnNetworkSpawn()
+        // {
             
 
-            PlayerData? playerData = NetworkManagerUI.GetPlayerData(OwnerClientId);
+        //     PlayerData? playerData = NetworkManagerUI.GetPlayerData(OwnerClientId);
 
-            if (playerData.HasValue)
-            {  
-                displayName.Value = playerData.Value.PlayerName;
-            }
-        }
+        //     if (playerData.HasValue)
+        //     {  
+        //         displayName.Value = playerData.Value.PlayerName;
+        //     }
+        // }
 
         private void OnEnable()
         {
