@@ -1209,6 +1209,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2070925441746177913, guid: 307b1cd7fbc2bdb4b99f2ca0ba47e074, type: 3}
+      propertyPath: m_Priority
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2070925442191277752, guid: 307b1cd7fbc2bdb4b99f2ca0ba47e074, type: 3}
       propertyPath: ShoulderOffset.x
       value: 0
