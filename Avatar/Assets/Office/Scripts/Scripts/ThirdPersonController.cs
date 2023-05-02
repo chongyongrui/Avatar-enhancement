@@ -21,7 +21,7 @@ namespace StarterAssets
         [SerializeField] private float moveSpeed = 2.0f;
 
         [SerializeField] private float runSpeed = 5.0f;
-
+        [SerializeField] private float RotationSpeed = 1.0f;
 
         [Range(0.0f, 0.3f)]
         [SerializeField] private float RotationSmoothTime = 0.12f;
@@ -58,9 +58,10 @@ namespace StarterAssets
         public LayerMask GroundLayers;
 
         [Header("Cinemachine")]
+
         CinemachineComponentBase componentBase;
         float camDist;
-        float sensitivity  = 8.0f;
+        float sensitivity = 8.0f;
         [SerializeField] float maxCameraDistance;
         Input scroll;
         public GameObject CinemachineCameraTarget;
@@ -104,14 +105,13 @@ namespace StarterAssets
         private CharacterController controller;
         private StarterAssetsInputs input;
         private Transform mainCamera;
-        private CinemachineVirtualCamera cinemachineVirtual;
+        private CinemachineVirtualCamera ThirdPersonCam;
+        [SerializeField] private CinemachineVirtualCameraBase FirstPersonCam;
 
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
         private bool hasAnim;
-        //[Header("Testing")]
-        //[SerializeField] private TMP_Text playerNameText;
-
+        private bool firstpersonstatus = false;
         private bool IsCurrentDeviceMouse
         {
             get
@@ -126,14 +126,23 @@ namespace StarterAssets
 
 
         private void Awake()
-        { 
+        {
             //Reference main cam;
             mainCamera = Camera.main.transform;
-            
-            if(cinemachineVirtual == null){
-                cinemachineVirtual=FindObjectOfType<CinemachineVirtualCamera>();
-                componentBase  = cinemachineVirtual.GetCinemachineComponent(CinemachineCore.Stage.Body);
+
+            if (ThirdPersonCam == null)
+            {
+                ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
+                componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
             }
+            if (FirstPersonCam == null)
+            {
+                FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                GameObject.FindWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
+                FirstPersonCam.gameObject.SetActive(false);
+            }
+
+
         }
 
         private void Start()
@@ -145,46 +154,67 @@ namespace StarterAssets
             input = GetComponent<StarterAssetsInputs>();
             //playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
 
-
+            //            FirstPersonCam.gameObject.SetActive(false);
             AssignAnimationIDs();
 
             // reset our timeouts on start
             jumpWait = JumpTimeout;
             fallTimeoutDelta = FallTimeout;
-            if(IsOwner){
-                GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
-                playerInput = GetComponent<PlayerInput>();  
-                playerInput.enabled=true;
-            }
-            
+
+
         }
 
         private void Update()
-        {   if(IsOwner) {
-             hasAnim = TryGetComponent(out anim);
-            GroundedCheck();   
-            JumpAndGravity();
-            Move();
-            Scroll();
-        }       
+        {
+            if (IsOwner)
+            {
+                hasAnim = TryGetComponent(out anim);
+                GroundedCheck();
+                JumpAndGravity();
+                Move();
+                if (firstpersonstatus == false)
+                {
+                    Scroll();
+                }
+                if (Input.GetButtonDown("CamToggle"))
+                {
+                    if (ThirdPersonCam.isActiveAndEnabled)
+                    {
+
+                        FirstPersonCam.gameObject.SetActive(true);
+                        ThirdPersonCam.gameObject.SetActive(false);
+                        firstpersonstatus = true;
+                    }
+                    else
+                    {
+                        FirstPersonCam.gameObject.SetActive(false);
+                        ThirdPersonCam.gameObject.SetActive(true);
+                        firstpersonstatus = false;
+                    }
+
+
+                }
+            }
         }
 
         private void LateUpdate()
         {
             CameraRotation();
         }
-        // public override void OnNetworkSpawn()
-        // {
-        //     base.OnNetworkSpawn();
-            
-        //     //isClient checks if current instance is client,IsOwner checks if client owns the object,
-        //     //ensure playerinput is only enabled for client instance;
-        //     if(IsClient && IsOwner){
-        //         playerInput = GetComponent<PlayerInput>();  
-        //         playerInput.enabled=true;
-                
-        //     }
-        // }
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            //isClient checks if current instance is client,IsOwner checks if client owns the object,
+            //ensure playerinput is only enabled for client instance;
+            if (IsOwner)
+            {
+                GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
+                playerInput = GetComponent<PlayerInput>();
+                playerInput.enabled = true;
+
+            }
+        }
         private void AssignAnimationIDs()
         {   //Take parameters in animators and sets to int in script;
             animSpeed = Animator.StringToHash("Speed");
@@ -208,50 +238,77 @@ namespace StarterAssets
 
         private void CameraRotation()
         {
-            // if there is an input and camera position is not fixed
-            if (input.look.sqrMagnitude >= thresehold && !LockCameraPosition)
+            if (!firstpersonstatus)
             {
-                //Don't multiply mouse input by Time.deltaTime;
-                float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
+                if (input.look.sqrMagnitude >= thresehold)
+                {
+                    //Don't multiply mouse input by Time.deltaTime
+                    float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 
-                cinemachineTargetYaw += input.look.x * deltaTimeMultiplier;
-                cinemachineTargetPitch += input.look.y * deltaTimeMultiplier;
+                    cinemachineTargetPitch += input.look.y * RotationSpeed * deltaTimeMultiplier;
+                    rotationVelocity = input.look.x * RotationSpeed * deltaTimeMultiplier;
+
+                    // clamp our pitch rotation
+                    cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, BottomClamp, TopClamp);
+
+                    // Update Cinemachine camera target pitch
+                    CinemachineCameraTarget.transform.localRotation = Quaternion.Euler(cinemachineTargetPitch, 0.0f, 0.0f);
+
+                    // rotate the player left and right
+                    transform.Rotate(Vector3.up * rotationVelocity);
+                }
             }
+            else
+            {
+                // if there is an input and camera position is not fixed
+                if (input.look.sqrMagnitude >= thresehold && !LockCameraPosition)
+                {
+                    //Don't multiply mouse input by Time.deltaTime;
+                    float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 
-            // clamp our rotations so our values are limited 360 degrees
-            cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
-            cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, BottomClamp, TopClamp);
+                    cinemachineTargetYaw += input.look.x * deltaTimeMultiplier;
+                    cinemachineTargetPitch += input.look.y * deltaTimeMultiplier;
+                }
 
-            // Cinemachine will follow this target
-            CinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + CameraAngleOverride,
-                cinemachineTargetYaw, 0.0f);
+                // clamp our rotations so our values are limited 360 degrees
+                cinemachineTargetYaw = ClampAngle(cinemachineTargetYaw, float.MinValue, float.MaxValue);
+                cinemachineTargetPitch = ClampAngle(cinemachineTargetPitch, BottomClamp, TopClamp);
+
+                // Cinemachine will follow this target
+                CinemachineCameraTarget.transform.rotation = Quaternion.Euler(cinemachineTargetPitch + CameraAngleOverride,
+                    cinemachineTargetYaw, 0.0f);
+            }
         }
-      private void Scroll(){
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if(scroll !=0){
-            camDist = scroll * sensitivity ;
-            if(componentBase is Cinemachine3rdPersonFollow ){
-                
-                if (camDist < 0)
+
+        private void Scroll()
+        {
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll != 0)
+            {
+                camDist = scroll * sensitivity;
+                if (componentBase is Cinemachine3rdPersonFollow)
                 {
-                    (componentBase as Cinemachine3rdPersonFollow).CameraDistance -= camDist;
-                    if ((componentBase as Cinemachine3rdPersonFollow).CameraDistance > maxCameraDistance)
+
+                    if (camDist < 0)
                     {
-                        (componentBase as Cinemachine3rdPersonFollow).CameraDistance = maxCameraDistance;
+                        (componentBase as Cinemachine3rdPersonFollow).CameraDistance -= camDist;
+                        if ((componentBase as Cinemachine3rdPersonFollow).CameraDistance > maxCameraDistance)
+                        {
+                            (componentBase as Cinemachine3rdPersonFollow).CameraDistance = maxCameraDistance;
+                        }
                     }
-                }
-                else
-                {
-                    (componentBase as Cinemachine3rdPersonFollow).CameraDistance -= camDist;
-                    if ((componentBase as Cinemachine3rdPersonFollow).CameraDistance <= 1)
+                    else
                     {
-                        (componentBase as Cinemachine3rdPersonFollow).CameraDistance = 1;
+                        (componentBase as Cinemachine3rdPersonFollow).CameraDistance -= camDist;
+                        if ((componentBase as Cinemachine3rdPersonFollow).CameraDistance <= 1)
+                        {
+                            (componentBase as Cinemachine3rdPersonFollow).CameraDistance = 1;
+                        }
                     }
                 }
             }
-            }
-        
-      }
+
+        }
         private void Move()
         {
             // set target speed based on move speed, sprint speed and if sprint is pressed
@@ -266,7 +323,7 @@ namespace StarterAssets
             //Gets length of vector and sets as speed;
             float currentHorizontalSpeed = new Vector3(controller.velocity.x, 0.0f, controller.velocity.z).magnitude;
 
-          //Analog or digital tenerary;
+            //Analog or digital tenerary;
             float inputMagnitude = input.analogMovement ? input.move.magnitude : 1f;
 
             // accelerate or decelerate to target speed
@@ -430,4 +487,4 @@ namespace StarterAssets
             }
         }
     }
-}                                                                                                                                                                                   
+}
