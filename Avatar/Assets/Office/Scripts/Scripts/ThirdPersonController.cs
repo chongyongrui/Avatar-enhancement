@@ -21,10 +21,10 @@ namespace StarterAssets
         [SerializeField] private float moveSpeed = 2.0f;
 
         [SerializeField] private float runSpeed = 5.0f;
-        [SerializeField] private float RotationSpeed = 1.0f;
+        [SerializeField] private float RotationSpeed = 0.5f;
 
         [Range(0.0f, 0.3f)]
-        [SerializeField] private float RotationSmoothTime = 0.12f;
+        [SerializeField] private float RotationSmoothTime = 0.1f;
         [SerializeField] private float SpeedChangeRate = 10.0f;
 
         public AudioClip LandingAudioClip;
@@ -106,7 +106,7 @@ namespace StarterAssets
         private StarterAssetsInputs input;
         private Transform mainCamera;
         private CinemachineVirtualCamera ThirdPersonCam;
-        [SerializeField] private CinemachineVirtualCameraBase FirstPersonCam;
+         private CinemachineVirtualCameraBase FirstPersonCam;
 
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
@@ -138,8 +138,6 @@ namespace StarterAssets
             if (FirstPersonCam == null)
             {
                 FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
-                GameObject.FindWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
-                FirstPersonCam.gameObject.SetActive(false);
             }
 
 
@@ -184,6 +182,7 @@ namespace StarterAssets
                         FirstPersonCam.gameObject.SetActive(true);
                         ThirdPersonCam.gameObject.SetActive(false);
                         firstpersonstatus = true;
+                        Cursor.lockState = CursorLockMode.Locked;
                     }
                     else
                     {
@@ -196,7 +195,7 @@ namespace StarterAssets
                 }
             }
         }
-
+    
         private void LateUpdate()
         {
             CameraRotation();
@@ -209,9 +208,11 @@ namespace StarterAssets
             //ensure playerinput is only enabled for client instance;
             if (IsOwner)
             {
-                GameObject.FindWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>().Follow = transform.GetChild(0).transform;
+                ThirdPersonCam.Follow = transform.GetChild(0).transform;
+                FirstPersonCam.Follow = transform.GetChild(0).transform;
                 playerInput = GetComponent<PlayerInput>();
                 playerInput.enabled = true;
+                FirstPersonCam.gameObject.SetActive(false);
 
             }
         }
@@ -238,7 +239,7 @@ namespace StarterAssets
 
         private void CameraRotation()
         {
-            if (!firstpersonstatus)
+            if (firstpersonstatus)
             {
                 if (input.look.sqrMagnitude >= thresehold)
                 {
@@ -259,7 +260,7 @@ namespace StarterAssets
                 }
             }
             else
-            {
+            {   
                 // if there is an input and camera position is not fixed
                 if (input.look.sqrMagnitude >= thresehold && !LockCameraPosition)
                 {
@@ -313,9 +314,6 @@ namespace StarterAssets
         {
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = input.sprint ? runSpeed : moveSpeed;
-
-            // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
-
             // note: Vector2's == operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // If there is no input, set the target speed to 0
             if (input.move == Vector2.zero) targetSpeed = 0.0f;
@@ -351,6 +349,12 @@ namespace StarterAssets
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
+
+            if(firstpersonstatus){
+                inputDirection = transform.right * input.move.x + transform.forward * input.move.y;
+                controller.Move(inputDirection.normalized * (speed * Time.deltaTime) + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+
+            }else{
             if (input.move != Vector2.zero)
             {
                 targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
@@ -364,11 +368,11 @@ namespace StarterAssets
 
 
             Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-
+            
             // move the player
             controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
                              new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
-
+            }
             // update animator if using character
             if (hasAnim)
             {

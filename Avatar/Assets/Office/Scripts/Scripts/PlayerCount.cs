@@ -9,9 +9,11 @@ public class PlayerCount : NetworkBehaviour
     [SerializeField] private TextMeshProUGUI playerCount;
       private NetworkVariable<int> playerNum = new NetworkVariable<int>(0,NetworkVariableReadPermission.Everyone);
       private void Start(){
-        if(!IsClient){
-          playerCount.gameObject.SetActive(false);
-        }
+        playerCount.gameObject.SetActive(false);
+      }
+      public override void OnNetworkSpawn(){
+       if(!IsOwner){return;}
+       playerCount.gameObject.SetActive(true);
       }
       private void Update(){
         playerCount.text = "Players: "+ playerNum.Value.ToString();

@@ -38,16 +38,18 @@ public class NetworkManagerUI : NetworkBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
-        NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
+    NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+     NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
+
+    
 
 
     }
     private void Destroy()
     {
         if (NetworkManager.Singleton == null) { return; }
-        NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
-        NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
+       // NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
+       // NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
     }
     public void Leave()
     {
