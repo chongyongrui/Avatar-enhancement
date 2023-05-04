@@ -21,21 +21,7 @@ public class NetworkManagerUI : NetworkBehaviour
     private bool isServerStarted = false;
 
 
-    // ServerButton.onClick.AddListener(() =>
-    //     {
-    //         if (!isServerStarted)
-    //         {
-    //             NetworkManager.Singleton.StartServer();
-    //             isServerStarted = true;
-    //         }
-    //         else
-    //         {
-    //             NetworkManager.Singleton.StopAllCoroutines();
-    //             isServerStarted = false;
-    //         }
-    //     });
-
-    // Start is called before the first frame update
+   // Start is called before the first frame update
     private void Start()
     {
     NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
@@ -52,18 +38,20 @@ public class NetworkManagerUI : NetworkBehaviour
        // NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
     }
     public void Leave()
-    {
+    {   NetworkManager.Singleton.Shutdown();
         if (IsClient) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
-        else NetworkManager.Singleton.Shutdown();
+        
 
         if (NetworkManager.Singleton.IsServer)
         {
             NetworkManager.Singleton.ConnectionApprovalCallback -= ApprovalCheck;
-        }
+        } 
+        
         Holder.SetActive(true);
 
     }
     public void Client()
+    
     {   //Convert to byte array;
         // var payload = JsonUtility.ToJson(new ConnectionPayload()
         // {
@@ -118,11 +106,12 @@ public class NetworkManagerUI : NetworkBehaviour
         }
     }
     private void HandleClientConnect(ulong clientId)
-    {
+    {Debug.Log($"ClientId {clientId} connected, LocalClientId is {NetworkManager.Singleton.LocalClientId}");
         if (clientId == NetworkManager.Singleton.LocalClientId)
         {
             Holder.SetActive(false);
             LeaveButton.gameObject.SetActive(true);
+            
 
         }
     }

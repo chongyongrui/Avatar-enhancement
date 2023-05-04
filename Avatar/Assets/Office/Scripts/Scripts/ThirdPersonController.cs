@@ -106,7 +106,7 @@ namespace StarterAssets
         private StarterAssetsInputs input;
         private Transform mainCamera;
         private CinemachineVirtualCamera ThirdPersonCam;
-         private CinemachineVirtualCameraBase FirstPersonCam;
+        private CinemachineVirtualCameraBase FirstPersonCam;
 
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
@@ -129,22 +129,10 @@ namespace StarterAssets
         {
             //Reference main cam;
             mainCamera = Camera.main.transform;
-
-            if (ThirdPersonCam == null)
-            {
-                ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
-                componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
-            }
-            if (FirstPersonCam == null)
-            {
-                FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
-            }
-
-
         }
 
         private void Start()
-        {
+        {   Debug.Log(NetworkManager.Singleton.LocalClientId);
             cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
             hasAnim = TryGetComponent(out anim);
@@ -189,13 +177,14 @@ namespace StarterAssets
                         FirstPersonCam.gameObject.SetActive(false);
                         ThirdPersonCam.gameObject.SetActive(true);
                         firstpersonstatus = false;
+                        Cursor.lockState = CursorLockMode.None;
                     }
 
 
                 }
             }
         }
-    
+
         private void LateUpdate()
         {
             CameraRotation();
@@ -206,8 +195,28 @@ namespace StarterAssets
 
             //isClient checks if current instance is client,IsOwner checks if client owns the object,
             //ensure playerinput is only enabled for client instance;
+
+
+
             if (IsOwner)
             {
+              
+                if (ThirdPersonCam == null)
+                {
+                    ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
+                    componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
+                }
+
+                // you turned off first person camera, hence find game object with tag will always return null.
+                // either u try to set the reference here first before CameraSwitcher.cs kicks in
+                // or you save the reference in cameraswitcher and store a reference here.
+                // if u want, can set cameraswitcher to be a singleton
+                if (FirstPersonCam == null)
+                {
+                    Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
+                    FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                }
+
                 ThirdPersonCam.Follow = transform.GetChild(0).transform;
                 FirstPersonCam.Follow = transform.GetChild(0).transform;
                 playerInput = GetComponent<PlayerInput>();
@@ -260,7 +269,7 @@ namespace StarterAssets
                 }
             }
             else
-            {   
+            {
                 // if there is an input and camera position is not fixed
                 if (input.look.sqrMagnitude >= thresehold && !LockCameraPosition)
                 {
@@ -350,28 +359,31 @@ namespace StarterAssets
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
 
-            if(firstpersonstatus){
+            if (firstpersonstatus)
+            {
                 inputDirection = transform.right * input.move.x + transform.forward * input.move.y;
                 controller.Move(inputDirection.normalized * (speed * Time.deltaTime) + new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
 
-            }else{
-            if (input.move != Vector2.zero)
-            {
-                targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
-                                  mainCamera.eulerAngles.y;
-                float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
-                    RotationSmoothTime);
-
-                // rotate to face input direction relative to camera position
-                transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
             }
+            else
+            {
+                if (input.move != Vector2.zero)
+                {
+                    targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
+                                      mainCamera.eulerAngles.y;
+                    float rotation = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRotation, ref rotationVelocity,
+                        RotationSmoothTime);
+
+                    // rotate to face input direction relative to camera position
+                    transform.rotation = Quaternion.Euler(0.0f, rotation, 0.0f);
+                }
 
 
-            Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
-            
-            // move the player
-            controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
-                             new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
+                Vector3 targetDirection = Quaternion.Euler(0.0f, targetRotation, 0.0f) * Vector3.forward;
+
+                // move the player
+                controller.Move(targetDirection.normalized * (speed * Time.deltaTime) +
+                                 new Vector3(0.0f, verticalVelocity, 0.0f) * Time.deltaTime);
             }
             // update animator if using character
             if (hasAnim)

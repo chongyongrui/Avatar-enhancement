@@ -1313,7 +1313,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 569523236}
         m_TargetAssemblyTypeName: NetworkManagerUI, Assembly-CSharp
         m_MethodName: Leave
         m_Mode: 1
