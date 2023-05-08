@@ -19,7 +19,8 @@ This project focuses on the networking side of Unity.
 > 1. Create folder 'Avatar'
 > 2. Clone into folder
 > 3. Open project, under File > Build Settings > Build and Run
-> Remember to delete these files under Avatar_Data before staging.
+
+> 4. Remember to delete these files under Avatar_Data before staging.
 
 ``` 
 sharedassets0.resource
