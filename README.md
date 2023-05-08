@@ -15,7 +15,10 @@ This project focuses on the networking side of Unity.
 3. .NET SDK
 4. Visual Studio Code
 
-## How to use
+
+## Features
+
+### How to use
 > 1. Create folder 'Avatar'
 > 2. Clone into folder
 > 3. Open project, under File > Build Settings > Build and Run
@@ -28,8 +31,6 @@ sharedassets0.assets
 sharedassets0.assets.resS
 
 ```
-## Features
-
 ### What this project contains
 
 - Movement of user using WASD
@@ -66,4 +67,6 @@ For the time being, I shall key in major updates that are pushed. Each update wi
 - New Player Features
     - Scroll to zoom feature
     - First person camera
+    - Name update for clients
+    - Password Authentication
 
