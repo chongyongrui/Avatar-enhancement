@@ -15,7 +15,10 @@ This project focuses on the networking side of Unity.
 3. .NET SDK
 4. Visual Studio Code
 
-## Git push Warning
+## How to use
+> 1. Create folder 'Avatar'
+> 2. Clone into folder
+> 3. Open project, under File > Build Settings > Build and Run
 > Remember to delete these files under Avatar_Data before staging.
 
 ``` 
