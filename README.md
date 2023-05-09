@@ -22,7 +22,6 @@ This project focuses on the networking side of Unity.
 > 1. Create folder 'Avatar'
 > 2. Clone into folder
 > 3. Open project, under File > Build Settings > Build and Run
-
 > 4. Remember to delete these files under Avatar_Data before staging.
 
 ``` 
@@ -69,4 +68,5 @@ For the time being, I shall key in major updates that are pushed. Each update wi
     - First person camera
     - Name update for clients
     - Password Authentication
+- Footstep audio for walking and running
 
