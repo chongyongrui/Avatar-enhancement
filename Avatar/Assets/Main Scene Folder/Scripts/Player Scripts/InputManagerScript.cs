@@ -15,7 +15,7 @@ public class InputManagerScript : MonoBehaviour
     private string playerName;
     private string nextSceneName;
     private void Start()
-    {
+    {   
         enterButton.onClick.AddListener(SaveName);
         clearButton.onClick.AddListener(ClearName);
         //LoadName();

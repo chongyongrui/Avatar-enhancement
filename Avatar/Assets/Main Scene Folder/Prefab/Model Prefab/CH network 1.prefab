@@ -440,7 +440,7 @@ MonoBehaviour:
   pushLayers:
     serializedVersion: 2
     m_Bits: 0
-  canPush: 1
+  canPush: 0
   strength: 1.1
 --- !u!114 &4275746046652063866
 MonoBehaviour:

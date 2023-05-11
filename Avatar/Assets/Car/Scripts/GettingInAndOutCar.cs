@@ -10,7 +10,10 @@ public class GettingInAndOutCar : MonoBehaviour
     private GameObject interactingPlayer;
     private ThirdPersonController interactingPlayerController;
     private bool isInsideCar = false;
-
+    private void Start(){
+        carController.enabled = false;
+       
+    }
     private void Update()
     {
         if (!isInsideCar)

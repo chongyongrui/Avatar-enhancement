@@ -1,30 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class ModelSpawner : MonoBehaviour
+using Unity.Netcode;
+public class ModelSpawner : NetworkBehaviour
 {public GameObject modelPrefab;
     private GameObject spawnedModel;
-
+    private List<GameObject> spawnedPrefabs = new List<GameObject>();
     private void OnMouseDown()
-    {
+    { if(!IsOwner){return;}
         if (spawnedModel == null)
         {
-            SpawnModel();
+            SpawnModelServerRpc();
         }
         else
         {
-            DestroyModel();
+            DestroyModelServerRpc(); 
         }
     }
-
-    private void SpawnModel()
+    [ServerRpc]
+    private void SpawnModelServerRpc()
     {
-        spawnedModel = Instantiate(modelPrefab, new Vector3(2.6f, -0.51f, -2f),  Quaternion.Euler(0f, -63f, 0f));
+        spawnedModel = Instantiate(modelPrefab, new Vector3(0.18f, -0.74f,4.41f),  Quaternion.Euler(0f, -63f, 0f));
+        spawnedPrefabs.Add(spawnedModel);
+        spawnedModel.GetComponent<PrometeoCarController>().parent = this;
+        spawnedModel.GetComponent<NetworkObject>().Spawn();
     }
-
-    private void DestroyModel()
-    {
+    
+    [ServerRpc(RequireOwnership = false)]
+    private void DestroyModelServerRpc()
+    {   GameObject destroy = spawnedPrefabs[0];
+        destroy.GetComponent<NetworkObject>().Despawn();
+        spawnedPrefabs.Remove(destroy);
         Destroy(spawnedModel);
         spawnedModel = null;
     }

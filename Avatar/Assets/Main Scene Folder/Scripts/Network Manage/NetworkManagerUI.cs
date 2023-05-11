@@ -106,7 +106,7 @@ public class NetworkManagerUI : NetworkBehaviour
         }
     }
     private void HandleClientConnect(ulong clientId)
-    {Debug.Log($"ClientId {clientId} connected, LocalClientId is {NetworkManager.Singleton.LocalClientId}");
+    {//Debug.Log($"ClientId {clientId} connected, LocalClientId is {NetworkManager.Singleton.LocalClientId}");
         if (clientId == NetworkManager.Singleton.LocalClientId)
         {
             Holder.SetActive(false);
