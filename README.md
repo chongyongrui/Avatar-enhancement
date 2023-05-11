@@ -15,8 +15,22 @@ This project focuses on the networking side of Unity.
 3. .NET SDK
 4. Visual Studio Code
 
+
 ## Features
 
+### How to use
+> 1. Create folder 'Avatar'
+> 2. Clone into folder
+> 3. Open project, under File > Build Settings > Build and Run
+
+> 4. Remember to delete these files under Avatar_Data before staging.
+
+``` 
+sharedassets0.resource
+sharedassets0.assets
+sharedassets0.assets.resS
+
+```
 ### What this project contains
 
 - Movement of user using WASD
@@ -35,7 +49,7 @@ This project focuses on the networking side of Unity.
 
 For the time being, I shall key in major updates that are pushed. Each update will be tagged as Update1, Update2, etc.
 
-### 27/3/2023
+### 10/4/2023
 
 - Improved UI :scream_cat:
     - Added player count
@@ -45,3 +59,14 @@ For the time being, I shall key in major updates that are pushed. Each update wi
     - Stress tested to 5 players
     - Animations sync
     - Player count sync
+
+### 1/5/2023
+
+- Change of environment :scream_cat:
+    - Larger world asset
+- New Player Features
+    - Scroll to zoom feature
+    - First person camera
+    - Name update for clients
+    - Password Authentication
+
