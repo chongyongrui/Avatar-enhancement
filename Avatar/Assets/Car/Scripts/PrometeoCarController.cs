@@ -5,10 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
-public class PrometeoCarController : MonoBehaviour
+using Unity.Netcode;
+public class PrometeoCarController : NetworkBehaviour
 {
-
+    public ModelSpawner parent;
     //CAR SETUP
 
       [Space(20)]

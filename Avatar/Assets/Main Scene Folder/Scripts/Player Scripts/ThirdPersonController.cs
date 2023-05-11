@@ -132,7 +132,7 @@ namespace StarterAssets
         }
 
         private void Start()
-        {   Debug.Log(NetworkManager.Singleton.LocalClientId);
+        {  // Debug.Log(NetworkManager.Singleton.LocalClientId);
             cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
             hasAnim = TryGetComponent(out anim);
@@ -153,7 +153,7 @@ namespace StarterAssets
         private void Update()
         {
             if (IsOwner)
-            {
+            {   
                 hasAnim = TryGetComponent(out anim);
                 GroundedCheck();
                 JumpAndGravity();
@@ -182,6 +182,9 @@ namespace StarterAssets
 
 
                 }
+                if(Input.GetKeyDown(KeyCode.T)){
+                    TestServerRpc();
+                }
             }
         }
 
@@ -190,7 +193,7 @@ namespace StarterAssets
             CameraRotation();
         }
         public override void OnNetworkSpawn()
-        {
+        {   transform.position =  new Vector3(0,0,0);
             base.OnNetworkSpawn();
 
             //isClient checks if current instance is client,IsOwner checks if client owns the object,
@@ -199,7 +202,7 @@ namespace StarterAssets
 
 
             if (IsOwner)
-            {
+            {   
               
                 if (ThirdPersonCam == null)
                 {
@@ -224,6 +227,10 @@ namespace StarterAssets
                 FirstPersonCam.gameObject.SetActive(false);
 
             }
+        }
+        [ServerRpc]
+        private void TestServerRpc(){
+            Debug.Log("TEst server rpc"+ OwnerClientId);
         }
         private void AssignAnimationIDs()
         {   //Take parameters in animators and sets to int in script;
