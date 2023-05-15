@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using StarterAssets;
 public class GettingInAndOutCar : MonoBehaviour
-{ public float interactionDistance = 3f;
+{ public ModelSpawner modelSpawner;
+    public float interactionDistance = 3f;
     public KeyCode interactKey = KeyCode.E;
     public  PrometeoCarController carController;
-
+    private ModelSpawner modelspawner;
     private GameObject interactingPlayer;
-    private ThirdPersonController interactingPlayerController;
+    [SerializeField] ThirdPersonController interactingPlayerController;
     private bool isInsideCar = false;
     private void Start(){
+        modelSpawner = GetComponent<ModelSpawner>();
+        interactingPlayerController = modelSpawner.GetPlayerController();
         carController.enabled = false;
        
     }
@@ -40,6 +43,8 @@ public class GettingInAndOutCar : MonoBehaviour
         isInsideCar = true;
         interactingPlayerController.enabled = false;
         carController.enabled = true;
+        carController = modelSpawner.spawnedModel.GetComponent<PrometeoCarController>();
+
         interactingPlayer.transform.SetParent(transform);
         interactingPlayer.transform.localPosition = Vector3.zero;
         interactingPlayer.transform.localRotation = Quaternion.identity;

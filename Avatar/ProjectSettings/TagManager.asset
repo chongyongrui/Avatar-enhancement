@@ -6,6 +6,15 @@ TagManager:
   tags:
   - PlayerFollowCamera
   - CinemachineTarget
+  - nop
+  - door
+  - button f6
+  - button f1
+  - button f5
+  - button f2
+  - button f4
+  - button f3
+  - FirstPersonCamera
   layers:
   - Default
   - TransparentFX
@@ -14,7 +23,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
+  - Model
   - 
   - 
   - 

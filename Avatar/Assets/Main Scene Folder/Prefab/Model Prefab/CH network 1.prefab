@@ -315,6 +315,7 @@ GameObject:
   - component: {fileID: -4696861780802418463}
   - component: {fileID: 919378928254412238}
   - component: {fileID: 2677256835983870477}
+  - component: {fileID: 4279322753336384268}
   m_Layer: 6
   m_Name: CH network 1
   m_TagString: Player
@@ -627,6 +628,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31f515a785ec6d24eb468845353c44b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4279322753336384268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 574454473996172294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 149ce0d385099ad41b371c6bd136a1d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelPrefab: {fileID: 642287924342879162, guid: 579156ad604429f418f029b5605c1225, type: 3}
+  layer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &697881292594787653
 GameObject:
   m_ObjectHideFlags: 0
