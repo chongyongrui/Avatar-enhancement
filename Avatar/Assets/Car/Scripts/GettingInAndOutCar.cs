@@ -2,20 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using StarterAssets;
-public class GettingInAndOutCar : MonoBehaviour
-{ public ModelSpawner modelSpawner;
+using Unity.Netcode;
+public class GettingInAndOutCar : NetworkBehaviour
+{
+    public ModelSpawner modelSpawner;
     public float interactionDistance = 3f;
     public KeyCode interactKey = KeyCode.E;
-    public  PrometeoCarController carController;
+    public PrometeoCarController carController;
     private ModelSpawner modelspawner;
     private GameObject interactingPlayer;
     [SerializeField] ThirdPersonController interactingPlayerController;
     private bool isInsideCar = false;
-    private void Start(){
-        modelSpawner = GetComponent<ModelSpawner>();
-        interactingPlayerController = modelSpawner.GetPlayerController();
+    private void Start()
+    {   if(IsOwner){
+        interactingPlayer = GameObject.FindGameObjectWithTag("Player");
+        if(interactingPlayer != null){
+            interactingPlayerController  = interactingPlayer.GetComponent<ThirdPersonController>();
+            
+        }
         carController.enabled = false;
-       
+    }
+
     }
     private void Update()
     {
