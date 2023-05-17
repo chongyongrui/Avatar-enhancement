@@ -32,7 +32,7 @@ public class GettingInAndOutCar : NetworkBehaviour
             {
                 if (Input.GetKeyDown(interactKey))
                 {
-                    GetInCar();
+                    GetInCarServerRPC();
                 }
             }
         }
@@ -40,12 +40,12 @@ public class GettingInAndOutCar : NetworkBehaviour
         {
             if (Input.GetKeyDown(interactKey))
             {
-                GetOutOfCar();
+                GetOutOfCarServerRPC();
             }
         }
     }
-
-    private void GetInCar()
+[ServerRpc(RequireOwnership = false)]
+    private void GetInCarServerRPC()
     {
         isInsideCar = true;
         interactingPlayerController.enabled = false;
@@ -54,12 +54,13 @@ public class GettingInAndOutCar : NetworkBehaviour
 //        carController = modelSpawner.spawnedModel.GetComponent<PrometeoCarController>();
 
         interactingPlayer.transform.SetParent(transform);
+        interactingPlayer.transform.position=  new Vector3(0,0,0);  
         interactingPlayer.transform.localPosition = Vector3.zero;
         interactingPlayer.transform.localRotation = Quaternion.identity;
         interactingPlayer.SetActive(false);
     }
-
-    private void GetOutOfCar()
+[ServerRpc(RequireOwnership = false)]
+    private void GetOutOfCarServerRPC()
     {
         isInsideCar = false;
         interactingPlayerController.enabled = true;
@@ -69,6 +70,7 @@ public class GettingInAndOutCar : NetworkBehaviour
         interactingPlayer.transform.SetParent(null);
         interactingPlayer.transform.position = transform.position + transform.forward * 2f;
         interactingPlayer.SetActive(true);
+        TestServerRpc();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -88,4 +90,8 @@ public class GettingInAndOutCar : NetworkBehaviour
             interactingPlayerController = null;
         }
     }
+     [ServerRpc]
+        private void TestServerRpc(){
+            Debug.Log("The owner id is "+ OwnerClientId);
+        }
 }

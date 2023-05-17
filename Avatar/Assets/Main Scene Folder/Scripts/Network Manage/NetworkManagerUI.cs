@@ -124,21 +124,41 @@ public class NetworkManagerUI : NetworkBehaviour
         {
             Holder.SetActive(false);
             LeaveButton.gameObject.SetActive(true);
-            //UpdatePlayernameServerRPC(NetworkManager.LocalClient.ClientId,nameInputField.text);
+            UpdatePlayernameServerRPC(nameInputField.text);
             
 
         }
     }
+    [ServerRpc(RequireOwnership = false)]
+public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
+{
+    var clientId = serverRpcParams.Receive.SenderClientId;
+    if (NetworkManager.ConnectedClients.ContainsKey(clientId))
+    {
+        var client = NetworkManager.ConnectedClients[clientId];
+        // Do things for this client
+    }
+}
+
     [ServerRpc(RequireOwnership =false)]
-    private void UpdatePlayernameServerRPC(ulong clientid, string clientname){
+    private void UpdatePlayernameServerRPC(string clientname){
         // ClientRpcParams clientRpcParams  = new ClientRpcParams{
         //     Send = new ClientRpcSendParams
         //     {
         //         TargetClientIds = new[]{clientid}
         //     }
         // };
-        PlayerNameOverhead playerobj = NetworkManagerUI.Singleton.GetPlayerObj(clientid);
-        playerobj.UpdateplayernameServerRPC(clientname);
+        ServerRpcParams serverRpcParams  = default;
+         var clientId = serverRpcParams.Receive.SenderClientId;
+    if (NetworkManager.ConnectedClients.ContainsKey(clientId))
+    {
+        var client = NetworkManager.ConnectedClients[clientId];
+        // Do things for this clien
+        PlayerNameOverhead playerobj = NetworkManagerUI.Singleton.GetPlayerObj(clientId);
+         playerobj.UpdateplayernameServerRPC(clientname);
+    }
+        
+       
 
     }
     public void setPassword(string password){
