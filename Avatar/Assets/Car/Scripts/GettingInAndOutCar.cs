@@ -11,7 +11,7 @@ public class GettingInAndOutCar : NetworkBehaviour
     public PrometeoCarController carController;
     private ModelSpawner modelspawner;
     private GameObject interactingPlayer;
-    [SerializeField] ThirdPersonController interactingPlayerController;
+     private ThirdPersonController interactingPlayerController;
     private bool isInsideCar = false;
     private void Start()
     {   if(IsOwner){
@@ -50,11 +50,13 @@ public class GettingInAndOutCar : NetworkBehaviour
         isInsideCar = true;
         interactingPlayerController.enabled = false;
         carController.enabled = true;
-        carController = modelSpawner.spawnedModel.GetComponent<PrometeoCarController>();
+
+//        carController = modelSpawner.spawnedModel.GetComponent<PrometeoCarController>();
 
         interactingPlayer.transform.SetParent(transform);
         interactingPlayer.transform.localPosition = Vector3.zero;
         interactingPlayer.transform.localRotation = Quaternion.identity;
+        interactingPlayer.SetActive(false);
     }
 
     private void GetOutOfCar()
@@ -62,8 +64,11 @@ public class GettingInAndOutCar : NetworkBehaviour
         isInsideCar = false;
         interactingPlayerController.enabled = true;
         carController.enabled = false;
+        carController.carSpeed= 0f;
+        
         interactingPlayer.transform.SetParent(null);
         interactingPlayer.transform.position = transform.position + transform.forward * 2f;
+        interactingPlayer.SetActive(true);
     }
 
     private void OnTriggerEnter(Collider other)

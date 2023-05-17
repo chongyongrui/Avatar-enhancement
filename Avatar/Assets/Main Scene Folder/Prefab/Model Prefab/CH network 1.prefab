@@ -641,9 +641,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modelPrefab: {fileID: 642287924342879162, guid: 579156ad604429f418f029b5605c1225, type: 3}
+  spawnedModel: {fileID: 0}
+  spawnPosition: {x: 0.18, y: -0.74, z: 4.41}
   layer:
     serializedVersion: 2
     m_Bits: 128
+  playerController: {fileID: 0}
 --- !u!1 &697881292594787653
 GameObject:
   m_ObjectHideFlags: 0
@@ -1454,7 +1457,6 @@ GameObject:
   - component: {fileID: 6426536544655994459}
   - component: {fileID: 7371498194102905185}
   - component: {fileID: 8316660074239732510}
-  - component: {fileID: 8295760114429507566}
   m_Layer: 6
   m_Name: Canvas
   m_TagString: nop
@@ -1541,19 +1543,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7144015b6bf8d70458a13cfe6768d218, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8295760114429507566
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4337230780718978648}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9365bd2c80e98584d9e39f7d8b9f29a9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  displayNameText: {fileID: 4306620334232152960}
 --- !u!1 &4382910154165696283
 GameObject:
   m_ObjectHideFlags: 0

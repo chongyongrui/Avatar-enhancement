@@ -10,32 +10,38 @@ public class PlayerNameOverhead : NetworkBehaviour
         [SerializeField] private TextMeshProUGUI displayNameText;
 
         private NetworkVariable<FixedString32Bytes> displayName = new NetworkVariable<FixedString32Bytes>();
+        public string Playername => displayName.Value.ToString();
 
-        // public override void OnNetworkSpawn()
+        [ServerRpc(RequireOwnership =false)]
+        public void UpdateplayernameServerRPC(string newPLayername){
+            displayName.Value = new FixedString32Bytes(newPLayername);
+            onUpdatePLayerNameClientRpc(displayName.Value.ToString());
+
+        }
+        [ClientRpc]
+        public void onUpdatePLayerNameClientRpc(string newPLayername){
+            Debug.Log(newPLayername);
+        }
+        private void Awake(){
+            displayName.OnValueChanged += OnPlayerNameChanged;
+        }
+        private void OnPlayerNameChanged(FixedString32Bytes oldName,FixedString32Bytes newName){
+
+        }
+
+        // private void OnEnable()
         // {
-            
-
-        //     PlayerData? playerData = NetworkManagerUI.GetPlayerData(OwnerClientId);
-
-        //     if (playerData.HasValue)
-        //     {  
-        //         displayName.Value = playerData.Value.PlayerName;
-        //     }
+        //     displayName.OnValueChanged += HandleDisplayNameChanged;
         // }
 
-        private void OnEnable()
-        {
-            displayName.OnValueChanged += HandleDisplayNameChanged;
-        }
+        // private void OnDisable()
+        // {
+        //     displayName.OnValueChanged -= HandleDisplayNameChanged;
+        // }
 
-        private void OnDisable()
-        {
-            displayName.OnValueChanged -= HandleDisplayNameChanged;
-        }
-
-        private void HandleDisplayNameChanged(FixedString32Bytes oldDisplayName, FixedString32Bytes newDisplayName)
-        {
-            displayNameText.text = newDisplayName.ToString();
-        }
+        // private void HandleDisplayNameChanged(FixedString32Bytes oldDisplayName, FixedString32Bytes newDisplayName)
+        // {
+        //     displayNameText.text = newDisplayName.ToString();
+        // }
 }
 

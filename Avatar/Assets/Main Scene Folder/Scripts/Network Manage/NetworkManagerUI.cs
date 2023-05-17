@@ -16,14 +16,16 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private Button LeaveButton;
 
     [SerializeField] private GameObject Holder;
-
+    public static NetworkManagerUI Singleton;
     private static Dictionary<ulong, PlayerData> clientData;//Dictionary to store 
     private bool isServerStarted = false;
 
-
+    public PlayerNameOverhead GetPlayerObj(ulong id)=> NetworkManager.Singleton.ConnectedClients[id].PlayerObject.GetComponent<PlayerNameOverhead>();
+    public NetworkManager network;
+    public ulong LocalId => network.LocalClient.ClientId;
    // Start is called before the first frame update
     private void Start()
-    {
+    { //network = NetworkManager.Singleton;
     NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
      NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
 
@@ -62,7 +64,12 @@ public class NetworkManagerUI : NetworkBehaviour
 
         // byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
         // NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
-        NetworkManager.Singleton.StartClient();
+         if(nameInputField.text.Length<4){
+        nameInputField.Select();
+        nameInputField.ActivateInputField();
+    }
+    else{
+        NetworkManager.Singleton.StartClient();}
 
     }
     public void Host()
@@ -72,12 +79,18 @@ public class NetworkManagerUI : NetworkBehaviour
     //     clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
       
     //    //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
-        NetworkManager.Singleton.StartHost();
+    if(nameInputField.text.Length<4){
+        nameInputField.Select();
+        nameInputField.ActivateInputField();
+    }
+    else{
+        NetworkManager.Singleton.StartHost();}
         //setPassword(passwordInputField.text);
          
     }
+    
 
-    // '?' allows null return for un-nullable;
+    
     // public static PlayerData? GetPlayerData(ulong clientId)
     // {   ////For name display;
     //     ////Get the client data for the specific id;
@@ -111,9 +124,22 @@ public class NetworkManagerUI : NetworkBehaviour
         {
             Holder.SetActive(false);
             LeaveButton.gameObject.SetActive(true);
+            //UpdatePlayernameServerRPC(NetworkManager.LocalClient.ClientId,nameInputField.text);
             
 
         }
+    }
+    [ServerRpc(RequireOwnership =false)]
+    private void UpdatePlayernameServerRPC(ulong clientid, string clientname){
+        // ClientRpcParams clientRpcParams  = new ClientRpcParams{
+        //     Send = new ClientRpcSendParams
+        //     {
+        //         TargetClientIds = new[]{clientid}
+        //     }
+        // };
+        PlayerNameOverhead playerobj = NetworkManagerUI.Singleton.GetPlayerObj(clientid);
+        playerobj.UpdateplayernameServerRPC(clientname);
+
     }
     public void setPassword(string password){
         byte[] hashed = Encoding.ASCII.GetBytes(password);
