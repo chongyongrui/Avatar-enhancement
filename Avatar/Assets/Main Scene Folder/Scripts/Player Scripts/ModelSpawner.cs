@@ -14,10 +14,7 @@ public class ModelSpawner : NetworkBehaviour
     public ThirdPersonController playerController;
     private PrometeoCarController carController;
 
-    private void Start()
-    {
-        playerController = GetComponent<ThirdPersonController>();
-    }
+    private  NetworkVariable<bool> spawnedstatus = new NetworkVariable<bool>();
 
     private void Update()
     {
@@ -65,14 +62,11 @@ public class ModelSpawner : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     private void DestroyModelServerRpc()
     {
-        GameObject destroy = spawnedPrefabs[0];
+        GameObject destroy = spawnedModel;
         destroy.GetComponent<NetworkObject>().Despawn();
-        spawnedPrefabs.Remove(destroy);
+        spawnedPrefabs.Remove(spawnedPrefabs[0]);
         Destroy(spawnedModel);
         spawnedModel = null;
     }
-    public ThirdPersonController GetPlayerController()
-    {
-        return playerController;
-    }
+  
 }

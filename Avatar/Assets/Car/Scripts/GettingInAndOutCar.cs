@@ -18,18 +18,25 @@ public class GettingInAndOutCar : NetworkBehaviour
     private Transform previousParent; // Store the previous parent of the player for camera adjustment
     private CinemachineVirtualCamera playerCamera; // Reference to the player's Cinemachine virtual camera
 
-    private void Start()
+    public void Start()
     {
         if (IsOwner)
         {
             interactingPlayer = GameObject.FindGameObjectWithTag("Player");
             interactingPlayerController = interactingPlayer?.GetComponent<ThirdPersonController>();
             carController.enabled = false;
+            if (playerCamera == null)
+            {
+                // Get the Cinemachine virtual camera component from the player
+                playerCamera = GameObject.FindGameObjectWithTag("CarCamera").GetComponent<CinemachineVirtualCamera>();
+                playerCamera.Follow = transform.GetChild(0).transform;
+                playerCamera.LookAt = transform;
+                playerCamera.gameObject.SetActive(false);
 
-            // Get the Cinemachine virtual camera component from the player
-            playerCamera = interactingPlayer.GetComponentInChildren<CinemachineVirtualCamera>();
+            }
         }
     }
+
     private void Update()
     {
         if (!isInsideCar)
@@ -38,6 +45,7 @@ public class GettingInAndOutCar : NetworkBehaviour
             {
                 if (Input.GetKeyDown(interactKey))
                 {
+                    playerCamera.gameObject.SetActive(true);
                     GetInCarServerRPC();
                 }
             }
@@ -45,14 +53,19 @@ public class GettingInAndOutCar : NetworkBehaviour
         else
         {
             if (Input.GetKeyDown(interactKey))
-            {
+            { // Stop the car from moving
+                Rigidbody carRigidbody = carController.GetComponent<Rigidbody>();
+                carRigidbody.velocity = Vector3.zero;
                 GetOutOfCarServerRPC();
             }
         }
     }
-[ServerRpc(RequireOwnership = false)]
+    [ServerRpc(RequireOwnership = false)]
     private void GetInCarServerRPC()
-    {isInsideCar = true;
+    {
+        interactingPlayerController.ThirdPersonCam.gameObject.SetActive(false);
+        interactingPlayerController.FirstPersonCam.gameObject.SetActive(false);
+        isInsideCar = true;
         interactingPlayerController.enabled = false;
         carController.enabled = true;
 
@@ -66,31 +79,32 @@ public class GettingInAndOutCar : NetworkBehaviour
         interactingPlayer.SetActive(false);
 
         // Adjust the player's camera follow settings to face the front of the car
-        playerCamera.LookAt = transform;
-        playerCamera.Follow = carCameraPosition;
+
+
     }
-[ServerRpc(RequireOwnership = false)]
-private void GetOutOfCarServerRPC()
-{
-    isInsideCar = false;
-    interactingPlayerController.enabled = true;
-    carController.enabled = false;
-    carController.carSpeed = 0f;
+    [ServerRpc(RequireOwnership = false)]
+    private void GetOutOfCarServerRPC()
+    {
+        isInsideCar = false;
+        interactingPlayerController.enabled = true;
+        interactingPlayerController.ThirdPersonCam.gameObject.SetActive(true);
+        // interactingPlayerController.FirstPersonCam.gameObject.SetActive(true);
+        carController.carSpeed = 0f;
+        carController.enabled = false;
+        // Reset the player's parent to the previous parent
+        interactingPlayer.transform.SetParent(previousParent);
 
-    // Reset the player's parent to the previous parent
-    interactingPlayer.transform.SetParent(previousParent);
+        // Reset the player's camera follow settings to default
+        //    playerCamera.LookAt = interactingPlayer.transform;
+        //  playerCamera.Follow = interactingPlayer.transform;
+        playerCamera.gameObject.SetActive(false);
+        // interactingPlayer.transform.position = transform.position + transform.forward * 2f;
+        interactingPlayer.SetActive(true);
 
-    // Reset the player's camera follow settings to default
-    playerCamera.LookAt = interactingPlayer.transform;
-    playerCamera.Follow = interactingPlayer.transform;
-
-    interactingPlayer.transform.position = transform.position + transform.forward * 2f;
-    interactingPlayer.SetActive(true);
-
-    // Stop the car from moving
-    Rigidbody carRigidbody = carController.GetComponent<Rigidbody>();
-    carRigidbody.velocity = Vector3.zero;
-}
+        // Stop the car from moving
+        Rigidbody carRigidbody = carController.GetComponent<Rigidbody>();
+        carRigidbody.velocity = Vector3.zero;
+    }
 
 
     private void OnTriggerEnter(Collider other)
@@ -110,8 +124,9 @@ private void GetOutOfCarServerRPC()
             interactingPlayerController = null;
         }
     }
-     [ServerRpc]
-        private void TestServerRpc(){
-            Debug.Log("The owner id is "+ OwnerClientId);
-        }
+    [ServerRpc]
+    private void TestServerRpc()
+    {
+        Debug.Log("The owner id is " + OwnerClientId);
+    }
 }

@@ -105,8 +105,8 @@ namespace StarterAssets
         private CharacterController controller;
         private StarterAssetsInputs input;
         private Transform mainCamera;
-        private CinemachineVirtualCamera ThirdPersonCam;
-        private CinemachineVirtualCameraBase FirstPersonCam;
+        public CinemachineVirtualCamera ThirdPersonCam;
+        public CinemachineVirtualCameraBase FirstPersonCam;
 
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
