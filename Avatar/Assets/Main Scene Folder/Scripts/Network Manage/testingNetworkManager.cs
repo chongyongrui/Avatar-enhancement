@@ -34,15 +34,15 @@ public class testingNetworkManager : NetworkBehaviour
     private string registrationEndpoint = "/register";
 
    // Start is called before the first frame update
-    private void Start()
-    {
-    NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
-     NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
+    // private void Start()
+    // {
+    // NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+    //  NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
 
     
 
 
-    }
+    // }
     private void Destroy()
     {
         if (NetworkManager.Singleton == null) { return; }
@@ -77,27 +77,10 @@ public class testingNetworkManager : NetworkBehaviour
         NetworkManager.Singleton.StartClient();
 
     }
-    public void Host()
-    {   //Instantiate dictornary 'clientData' for Id->PlayerData;
-        
-    //     clientData = new Dictionary<ulong, PlayerData>();
-    //     clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
-      
-    //    //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
-        NetworkManager.Singleton.StartHost();
-        //setPassword(passwordInputField.text);
-         
-    }
 
     public void Register(){
 
-        // Debug.Log("Name is "+ nameInputField.text);
-        // Debug.Log("Pw is " + passwordInputField.text);
-        // Dictionary<string, string> registrationData = new Dictionary<string, string>()
-        // {
-        //     { "name", nameInputField.text },
-        //     { "password", passwordInputField.text }
-        // };
+        //TODO: Add check that name is not already on the blockchain        
 
         //Format Name into wallet seed which is 32 characters
         int numZero = 32 - nameInputField.text.Length - 1;
@@ -120,9 +103,7 @@ public class testingNetworkManager : NetworkBehaviour
         // };
 
         string jsonData = JsonConvert.SerializeObject(registrationData);
-        // string jsonData = JsonUtility.ToJson(registrationDataWrapper);
 
-        // Debug.Log(jsonData);
         // Construct the URL for the registration endpoint
         string url = agentUrl + registrationEndpoint;
         // Debug.Log(url);
@@ -153,7 +134,10 @@ public class testingNetworkManager : NetworkBehaviour
             // string wallet_seed = request.downloadHandler.text["seed"];
             // string verkey = request.downloadHandler.text["verkey"];
             Debug.Log("DID: " + response.did);
+            
+            // Where to send messages that arrive destined for a given verkey 
             Debug.Log("Verkey: " + response.verkey);
+            
             Debug.Log("Seed: " + response.seed);
         }
         else
