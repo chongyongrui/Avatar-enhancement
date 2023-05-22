@@ -182,9 +182,7 @@ namespace StarterAssets
 
 
                 }
-                if(Input.GetKeyDown(KeyCode.T)){
-                    TestServerRpc();
-                }
+              
             }
         }
 
@@ -204,27 +202,26 @@ namespace StarterAssets
             if (IsOwner)
             {   
               
-                if (ThirdPersonCam == null)
+                if (ThirdPersonCam == null ||FirstPersonCam == null)
                 {
                     ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
                     componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
+                     FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
                 }
 
-                // you turned off first person camera, hence find game object with tag will always return null.
-                // either u try to set the reference here first before CameraSwitcher.cs kicks in
-                // or you save the reference in cameraswitcher and store a reference here.
-                // if u want, can set cameraswitcher to be a singleton
+                
                 if (FirstPersonCam == null)
                 {
                     Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
-                    FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                   
                 }
 
                 ThirdPersonCam.Follow = transform.GetChild(0).transform;
+                FirstPersonCam.gameObject.SetActive(false);
                 FirstPersonCam.Follow = transform.GetChild(0).transform;
                 playerInput = GetComponent<PlayerInput>();
                 playerInput.enabled = true;
-                FirstPersonCam.gameObject.SetActive(false);
+                //FirstPersonCam.gameObject.SetActive(false);
 
             }
         }

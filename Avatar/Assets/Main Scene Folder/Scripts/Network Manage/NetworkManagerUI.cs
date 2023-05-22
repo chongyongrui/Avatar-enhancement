@@ -88,19 +88,6 @@ public class NetworkManagerUI : NetworkBehaviour
         //setPassword(passwordInputField.text);
          
     }
-    
-
-    
-    // public static PlayerData? GetPlayerData(ulong clientId)
-    // {   ////For name display;
-    //     ////Get the client data for the specific id;
-    //     if (clientData.TryGetValue(clientId, out PlayerData playerData))
-    //     {
-    //         return playerData;
-    //     }
-
-    //     return null;
-    // }
 
     private void HandleClientDisconnect(ulong clientId)
     {
@@ -124,7 +111,7 @@ public class NetworkManagerUI : NetworkBehaviour
         {
             Holder.SetActive(false);
             LeaveButton.gameObject.SetActive(true);
-            UpdatePlayernameServerRPC(nameInputField.text);
+            //UpdatePlayernameServerRPC(nameInputField.text);
             
 
         }
@@ -140,27 +127,18 @@ public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
     }
 }
 
-    [ServerRpc(RequireOwnership =false)]
-    private void UpdatePlayernameServerRPC(string clientname){
-        // ClientRpcParams clientRpcParams  = new ClientRpcParams{
-        //     Send = new ClientRpcSendParams
-        //     {
-        //         TargetClientIds = new[]{clientid}
-        //     }
-        // };
-        ServerRpcParams serverRpcParams  = default;
-         var clientId = serverRpcParams.Receive.SenderClientId;
+   [ServerRpc(RequireOwnership = false)]
+public void UpdatePlayernameServerRPC(string clientName, ServerRpcParams serverRpcParams)
+{
+    var clientId = serverRpcParams.Receive.SenderClientId;
     if (NetworkManager.ConnectedClients.ContainsKey(clientId))
     {
         var client = NetworkManager.ConnectedClients[clientId];
-        // Do things for this clien
-        PlayerNameOverhead playerobj = NetworkManagerUI.Singleton.GetPlayerObj(clientId);
-         playerobj.UpdateplayernameServerRPC(clientname);
+        PlayerNameOverhead playerObj = NetworkManagerUI.Singleton.GetPlayerObj(clientId);
+        playerObj.UpdateplayernameServerRPC(clientName);
     }
-        
-       
+}
 
-    }
     public void setPassword(string password){
         byte[] hashed = Encoding.ASCII.GetBytes(password);
         NetworkManager.Singleton.NetworkConfig.ConnectionData = hashed;
