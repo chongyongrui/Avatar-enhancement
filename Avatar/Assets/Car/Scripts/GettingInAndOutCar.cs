@@ -18,8 +18,7 @@ public class GettingInAndOutCar : NetworkBehaviour
     private bool isInsideCar = false;
     private Transform previousParent;
     private CinemachineVirtualCamera playerCamera;
-
-    private void Start()
+    public override void OnNetworkSpawn ()
     {
         if (IsOwner)
         {

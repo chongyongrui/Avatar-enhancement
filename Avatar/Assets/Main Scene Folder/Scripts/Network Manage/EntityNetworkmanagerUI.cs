@@ -6,15 +6,18 @@ using Unity.Netcode;
 
 using UnityEngine.UI;
 
-public class EntityNetworkmanagerUI : Singleton<EntityNetworkmanagerUI>
+public class EntityNetworkmanagerUI : NetworkBehaviour
 {
      [SerializeField] private Button executePhysicsButton;
+      [SerializeField] private TextMeshProUGUI EntityCount;
+      private EntitySpawner count;
+     private NetworkVariable<int> EntityNum = new NetworkVariable<int>(0,NetworkVariableReadPermission.Everyone);
+
 
     private bool hasServerStarted;
-
     void Start()
     {
-    
+        
         NetworkManager.Singleton.OnServerStarted += () =>
         {
             hasServerStarted = true;
@@ -30,4 +33,10 @@ public class EntityNetworkmanagerUI : Singleton<EntityNetworkmanagerUI>
             EntitySpawner.Instance.SpawnObjects();
         });
     }
+    private void Update(){
+        EntityCount.text = "Entities: " + EntityNum.Value.ToString();
+        if(!IsOwner)return;
+        EntityNum.Value = EntitySpawner.Instance.UpdateEntityCount();
+    }
+
 }
