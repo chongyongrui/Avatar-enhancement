@@ -21,7 +21,7 @@ public class GettingInAndOutCar : NetworkBehaviour
     public override void OnNetworkSpawn ()
     {
         if (IsOwner)
-        {
+        {//"?." checks if variable is null before referencing
             interactingPlayer = GameObject.FindGameObjectWithTag("Player");
             interactingPlayerController = interactingPlayer?.GetComponent<ThirdPersonController>();
             carController.enabled = false;

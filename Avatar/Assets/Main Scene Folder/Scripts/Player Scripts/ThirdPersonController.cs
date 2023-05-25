@@ -133,7 +133,8 @@ namespace StarterAssets
 
         private void Start()
         {  // Debug.Log(NetworkManager.Singleton.LocalClientId);
-            cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+        
+            //cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
             hasAnim = TryGetComponent(out anim);
             controller = GetComponent<CharacterController>();
@@ -146,6 +147,28 @@ namespace StarterAssets
             // reset our timeouts on start
             jumpWait = JumpTimeout;
             fallTimeoutDelta = FallTimeout;
+            transform.position =  new Vector3(0,0,0);
+             if (IsOwner &&IsClient)
+            {   
+              
+                if (ThirdPersonCam == null &&FirstPersonCam == null)
+                {
+                    ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
+                    componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
+                     FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                }
+
+                
+                if (FirstPersonCam == null)
+                {
+                    Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
+                   
+                }
+
+                ThirdPersonCam.Follow = transform.GetChild(0).transform;
+               // FirstPersonCam.gameObject.SetActive(false);
+                //FirstPersonCam.Follow = transform.GetChild(0).transform;
+            }
 
 
         }
@@ -164,12 +187,13 @@ namespace StarterAssets
                 }
                 if (Input.GetButtonDown("CamToggle"))
                 {
-                    if (ThirdPersonCam.isActiveAndEnabled)
+                    if (ThirdPersonCam.gameObject.activeSelf)
                     {
 
                         FirstPersonCam.gameObject.SetActive(true);
                         ThirdPersonCam.gameObject.SetActive(false);
                         firstpersonstatus = true;
+                          FirstPersonCam.Follow = transform.GetChild(0).transform;
                         Cursor.lockState = CursorLockMode.Locked;
                     }
                     else
@@ -191,7 +215,7 @@ namespace StarterAssets
             CameraRotation();
         }
         public override void OnNetworkSpawn()
-        {   transform.position =  new Vector3(0,0,0);
+        {   
             base.OnNetworkSpawn();
 
             //isClient checks if current instance is client,IsOwner checks if client owns the object,
@@ -202,23 +226,7 @@ namespace StarterAssets
             if (IsOwner)
             {   
               
-                if (ThirdPersonCam == null ||FirstPersonCam == null)
-                {
-                    ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
-                    componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
-                     FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
-                }
-
                 
-                if (FirstPersonCam == null)
-                {
-                    Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
-                   
-                }
-
-                ThirdPersonCam.Follow = transform.GetChild(0).transform;
-                FirstPersonCam.gameObject.SetActive(false);
-                FirstPersonCam.Follow = transform.GetChild(0).transform;
                 playerInput = GetComponent<PlayerInput>();
                 playerInput.enabled = true;
                 //FirstPersonCam.gameObject.SetActive(false);
