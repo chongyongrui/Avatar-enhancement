@@ -18,6 +18,7 @@ public class GettingInAndOutCar : NetworkBehaviour
     private bool isInsideCar = false;
     private Transform previousParent;
     private CinemachineVirtualCamera playerCamera;
+  
     public override void OnNetworkSpawn ()
     {
         if (IsOwner)
@@ -64,29 +65,32 @@ public class GettingInAndOutCar : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void GetInCarServerRPC()
+private void GetInCarServerRPC()
+{
+    if (carController == null)
     {
-        if (isInsideCar)
-            return;
-
-        if (interactingPlayerController == null)
-            return;
-
-        interactingPlayerController.ThirdPersonCam.gameObject.SetActive(false);
-        interactingPlayerController.FirstPersonCam.gameObject.SetActive(false);
-        isInsideCar = true;
-        interactingPlayerController.enabled = false;
-        carController.enabled = true;
-
-        previousParent = interactingPlayer.transform.parent;
-        interactingPlayer.transform.SetParent(transform);
-        interactingPlayer.transform.localPosition = Vector3.zero;
-        interactingPlayer.transform.localRotation = Quaternion.identity;
-        interactingPlayer.SetActive(false);
-
-        // Adjust the player's camera follow settings to face the front of the car
-        playerCamera.gameObject.SetActive(true);
+        return;
     }
+    if (interactingPlayer == null)
+    {
+        return;
+    }
+
+    interactingPlayerController.ThirdPersonCam.gameObject.SetActive(false);
+    interactingPlayerController.FirstPersonCam.gameObject.SetActive(false);
+    isInsideCar = true;
+    interactingPlayerController.enabled = false;
+    carController.enabled = true;
+
+    previousParent = interactingPlayer.transform.parent;
+    interactingPlayer.transform.SetParent(transform);
+    interactingPlayer.transform.localPosition = Vector3.zero;
+    interactingPlayer.transform.localRotation = Quaternion.identity;
+    interactingPlayer.SetActive(false);
+
+    // Adjust the player's camera follow settings to face the front of the car
+    playerCamera.gameObject.SetActive(true);
+}
 
     [ServerRpc(RequireOwnership = false)]
     private void GetOutOfCarServerRPC()
