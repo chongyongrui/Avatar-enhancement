@@ -10,7 +10,7 @@ public class ModelSpawner : NetworkBehaviour
     private List<GameObject> spawnedPrefabs = new List<GameObject>();
     [SerializeField] Vector3 spawnPosition = new Vector3(0.18f, -0.74f, 4.41f);
 
-    [SerializeField] private LayerMask layer;
+    [SerializeField] private LayerMask layer;   
     public ThirdPersonController playerController;
     private PrometeoCarController carController;
 
