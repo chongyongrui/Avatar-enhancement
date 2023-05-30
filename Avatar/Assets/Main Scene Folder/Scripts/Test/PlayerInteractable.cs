@@ -4,18 +4,35 @@ using UnityEngine;
 
 public class PlayerInteractable : MonoBehaviour
 {
-   
-    // Update is called once per frame
-    void Update()
+   public float interactionRadius = 2f; // The radius for detecting nearby objects
+    public KeyCode interactionKey = KeyCode.E; // The key to trigger the interaction
+    public Transform handIKTarget; // The IK target for the character's hand
+    public Animator animator; // Reference to the animator component
+    private void Start(){}
+    private void Update()
     {
-       if(Input.GetKeyDown(KeyCode.E)) {
-        float interactrange = 2.0f;
-        Collider[] colliderArray = Physics.OverlapSphere(transform.position,interactrange);
-        foreach(Collider collider in colliderArray){
-            if(collider.TryGetComponent(out EntityInteractable entity)){
-                entity.interact();
+        if (Input.GetKeyDown(interactionKey))
+        {
+            Collider[] colliders = Physics.OverlapSphere(transform.position, interactionRadius);
+
+            foreach (Collider collider in colliders)
+            {
+                if (collider.CompareTag("Interactable"))
+                {
+                    InteractableObject interactableObject = collider.GetComponent<InteractableObject>();
+                    if (interactableObject != null && interactableObject.CanBeInteracted)
+                    {
+                        interactableObject.Interact(handIKTarget, animator);
+                        break; // Interact with only one object at a time (remove this line if you want to interact with multiple objects simultaneously)
+                    }
+                }
             }
         }
-       }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, interactionRadius);
     }
 }

@@ -5,6 +5,7 @@ using TMPro;
 
 public class TooltipManager : MonoBehaviour
 {   public static TooltipManager instance;
+    
     public TMP_Text tooltipui;
     // Start is called before the first frame update
     private void Awake(){
@@ -23,9 +24,12 @@ public class TooltipManager : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    { transform.position = Input.mousePosition;
-        
-    }
+{
+    transform.position = Input.mousePosition;
+
+    // Calculate the distance between the TooltipManager's position and the mouse position
+ 
+}
     public void SetToolTip(string message){
         gameObject.SetActive(true);
         tooltipui.text = message;
