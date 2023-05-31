@@ -23,6 +23,7 @@ public class testingNetworkManager : NetworkBehaviour
 { 
     [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private TMP_InputField nameInputField;
+    [SerializeField] private TMP_Dropdown dropDown;
 
 
 
@@ -41,6 +42,31 @@ public class testingNetworkManager : NetworkBehaviour
 
     // }
 
+    // public void handleDropDownValueChange(int index) {
+    //     switch(index){
+    //         case(0):{
+    //             role = "TRUST_ANCHOR";
+    //             break;
+    //         }
+    //         case(1):{
+    //             role = "Endorser";
+    //             break;
+    //         }
+    //         case(2):{
+    //             role = "Issuer";
+    //             break;
+    //         }
+    //         case(3):{
+    //             role = "Holder";
+    //             break;
+    //         }
+    //         case(4):{
+    //             role = "Mediator";
+    //             break;
+    //         }
+    //     }
+    // }
+
     public void Register(){
 
         //TODO: Add check that name is not already on the blockchain        
@@ -48,6 +74,9 @@ public class testingNetworkManager : NetworkBehaviour
         //Get name and password from input fields
         string name = nameInputField.text;
         string password = passwordInputField.text;
+        string role = dropDown.captionText.text;
+
+        UnityEngine.Debug.Log("Role: " + role);
 
         //Format name into wallet seed which is 32 characters
         int numZero = 32 - nameInputField.text.Length - 1;
@@ -61,7 +90,7 @@ public class testingNetworkManager : NetworkBehaviour
         //register the DID based on the seed value using the von-network webserver
         Dictionary<string, string> registrationData = new Dictionary<string, string>();
         registrationData.Add("seed", seed);
-        registrationData.Add("role", "TRUST_ANCHOR");
+        registrationData.Add("role", role);
         registrationData.Add("alias", nameInputField.text);
         // {
         //     { "seed", seed },
@@ -147,6 +176,7 @@ public class testingNetworkManager : NetworkBehaviour
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
+            WindowStyle =  ProcessWindowStyle.Minimized,
             // CreateNoWindow = true
         };
 
