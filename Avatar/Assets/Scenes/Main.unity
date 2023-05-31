@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -554,6 +554,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   message: Grab AK-47?
+--- !u!114 &441384685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441384682}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae6541e459b40de4c80c7261e1081cd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grabTrigger: Grabitem
+--- !u!136 &441384687
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 441384682}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.056747183
+  m_Height: 1.6016622
+  m_Direction: 2
+  m_Center: {x: 0, y: 0.1, z: 0}
 --- !u!1 &672372486
 GameObject:
   m_ObjectHideFlags: 0
@@ -1333,7 +1360,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1213578884}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b36e29e623ce9b5468984c4324503438, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
@@ -1501,6 +1528,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: cd8d56469cf64654eaa21e15c6ae7c18, type: 3}
       propertyPath: m_Name
       value: Ak-47
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: cd8d56469cf64654eaa21e15c6ae7c18, type: 3}
+      propertyPath: m_TagString
+      value: Interactable
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: cd8d56469cf64654eaa21e15c6ae7c18, type: 3}
       propertyPath: m_RootOrder
@@ -1870,35 +1901,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.0542154
+      value: 7.05361
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.00078360736
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -5.538705
+      value: -5.538375
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9659533
+      value: 0.96591616
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: -0.0020485525
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.2587168
+      value: 0.25870827
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -0.008483953
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: 0.025
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -1906,7 +1937,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 418743750667015485, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 435710118984851061, guid: b09b74a69016b6a4096bcd3290bc0f84, type: 3}
       propertyPath: m_Name
@@ -2278,9 +2309,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.8378151
-  m_Height: 5.5845537
+  m_Height: 6.0197105
   m_Direction: 2
-  m_Center: {x: 0.13263887, y: 0.72782815, z: 0.23770763}
+  m_Center: {x: 0.13263887, y: 0.72782815, z: 0.020129202}
 --- !u!1001 &5967090718242105279
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2339,7 +2370,7 @@ PrefabInstance:
       objectReference: {fileID: 4542614864305072779, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.size
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.data[1].Prefab
@@ -2357,6 +2388,10 @@ PrefabInstance:
       propertyPath: NetworkConfig.NetworkPrefabs.Array.data[4].Prefab
       value: 
       objectReference: {fileID: 4542614864305072779, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
+    - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
+      propertyPath: NetworkConfig.NetworkPrefabs.Array.data[5].Prefab
+      value: 
+      objectReference: {fileID: 2719918207023844646, guid: dc0b486e9d3fc4b43be16091fb4668a3, type: 3}
     - target: {fileID: 5967090718270109272, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: m_Name
       value: Network

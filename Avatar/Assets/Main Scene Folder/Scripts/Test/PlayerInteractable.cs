@@ -7,8 +7,10 @@ public class PlayerInteractable : MonoBehaviour
    public float interactionRadius = 2f; // The radius for detecting nearby objects
     public KeyCode interactionKey = KeyCode.E; // The key to trigger the interaction
     public Transform handIKTarget; // The IK target for the character's hand
-    public Animator animator; // Reference to the animator component
-    private void Start(){}
+    private Animator animator; // Reference to the animator component
+    private void Start(){
+        animator = GetComponent<Animator>();
+    }
     private void Update()
     {
         if (Input.GetKeyDown(interactionKey))
