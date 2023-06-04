@@ -115,6 +115,7 @@ private void GetInCarServerRPC()
 
         Rigidbody carRigidbody = carController.GetComponent<Rigidbody>();
         carRigidbody.velocity = Vector3.zero;
+    
     }
 
     private void OnTriggerEnter(Collider other)
