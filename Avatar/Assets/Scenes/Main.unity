@@ -2367,7 +2367,7 @@ PrefabInstance:
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.PlayerPrefab
       value: 
-      objectReference: {fileID: 4542614864305072779, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
+      objectReference: {fileID: 3843480115980246972, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.size
       value: 6
@@ -2387,7 +2387,7 @@ PrefabInstance:
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.data[4].Prefab
       value: 
-      objectReference: {fileID: 4542614864305072779, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
+      objectReference: {fileID: 3843480115980246972, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.data[5].Prefab
       value: 
@@ -2607,11 +2607,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 421325201500217393, guid: e005c5c7872978746bf06ccde1aad2e8, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9960443
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 421325201500217393, guid: e005c5c7872978746bf06ccde1aad2e8, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.088858046
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 421325201500217393, guid: e005c5c7872978746bf06ccde1aad2e8, type: 3}
       propertyPath: m_LocalRotation.y
