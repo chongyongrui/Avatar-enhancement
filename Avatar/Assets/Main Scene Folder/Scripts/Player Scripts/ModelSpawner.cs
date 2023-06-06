@@ -17,9 +17,9 @@ public class ModelSpawner : NetworkBehaviour
     private  NetworkVariable<bool> spawnedstatus = new NetworkVariable<bool>();
     private void Start()
 {
-    PrometeoCarController carController;
+    
 
-    carController = spawnedModel?.GetComponent<PrometeoCarController>();
+    //carController = spawnedModel?.GetComponent<PrometeoCarController>();
     if (carController == null)
     {
         return;

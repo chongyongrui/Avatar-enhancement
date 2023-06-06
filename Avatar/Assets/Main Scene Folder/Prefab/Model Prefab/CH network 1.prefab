@@ -618,7 +618,7 @@ MonoBehaviour:
   TransitionStateInfoList:
   - Layer: 0
     OriginatingState: -1071854972
-    DestinationState: 596170575
+    DestinationState: 495167119
     TransitionDuration: 0.25
     TriggerNameHash: 596170575
     TransitionIndex: 2
@@ -647,7 +647,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 149ce0d385099ad41b371c6bd136a1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  modelPrefab: {fileID: 642287924342879162, guid: 579156ad604429f418f029b5605c1225, type: 3}
+  modelPrefab: {fileID: 642287924342879162, guid: 268b6b02730701b45b0b84c6c0b13efd, type: 3}
   spawnedModel: {fileID: 0}
   spawnPosition: {x: 0.18, y: -0.74, z: 4.41}
   layer:

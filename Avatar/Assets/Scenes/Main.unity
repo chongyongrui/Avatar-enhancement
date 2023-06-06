@@ -1512,7 +1512,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2070925442191277752, guid: ee4a954ea68905648b4b3bf998fc016a, type: 3}
       propertyPath: ShoulderOffset.y
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -2163,6 +2163,10 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -7359538691094232063, guid: 68220a72a1f582246b8068ca8c9443c1, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 2626079879
+      objectReference: {fileID: 0}
     - target: {fileID: 125691456689537875, guid: 68220a72a1f582246b8068ca8c9443c1, type: 3}
       propertyPath: m_Size.x
       value: 3.0000005
@@ -2312,6 +2316,19 @@ CapsuleCollider:
   m_Height: 6.0197105
   m_Direction: 2
   m_Center: {x: 0.13263887, y: 0.72782815, z: 0.020129202}
+--- !u!114 &5135156708962253512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 642287923853680158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c22be6c63140cb4da4bec59a3f9ce8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  message: Spawn car?
 --- !u!1001 &5967090718242105279
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2367,7 +2384,7 @@ PrefabInstance:
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.PlayerPrefab
       value: 
-      objectReference: {fileID: 3843480115980246972, guid: a171c5756e3fd944ea6e67ce4d09a3a6, type: 3}
+      objectReference: {fileID: 574454473996172294, guid: 5d96eec5bbe67c747976203decfe7294, type: 3}
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.size
       value: 6
@@ -2391,7 +2408,11 @@ PrefabInstance:
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.data[5].Prefab
       value: 
-      objectReference: {fileID: 2719918207023844646, guid: dc0b486e9d3fc4b43be16091fb4668a3, type: 3}
+      objectReference: {fileID: 642287924342879162, guid: 268b6b02730701b45b0b84c6c0b13efd, type: 3}
+    - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
+      propertyPath: NetworkConfig.NetworkPrefabs.Array.data[6].Prefab
+      value: 
+      objectReference: {fileID: 642287924342879162, guid: 268b6b02730701b45b0b84c6c0b13efd, type: 3}
     - target: {fileID: 5967090718270109272, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: m_Name
       value: Network

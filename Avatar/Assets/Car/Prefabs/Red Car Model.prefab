@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 125691456689537875}
   - component: {fileID: 125691456689537871}
   - component: {fileID: 125691456689537874}
+  - component: {fileID: -7359538691094232063}
   m_Layer: 0
   m_Name: Red Car Model
   m_TagString: Untagged
@@ -102,9 +103,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 347a8d43c77e9934592e1a2e89e4edda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  modelSpawner: {fileID: 0}
   interactionDistance: 3
   interactKey: 9
   carController: {fileID: 0}
+  carCameraPosition: {fileID: 0}
 --- !u!65 &125691456689537875
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -144,6 +147,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modelPrefab: {fileID: 642287924342879162, guid: 579156ad604429f418f029b5605c1225, type: 3}
+  spawnedModel: {fileID: 0}
+  spawnPosition: {x: 0.18, y: -0.74, z: 4.41}
+  layer:
+    serializedVersion: 2
+    m_Bits: 0
+  playerController: {fileID: 0}
+--- !u!114 &-7359538691094232063
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673102053055313215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 951099334
+  AlwaysReplicateAsRoot: 0
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!1 &956966727004253190
 GameObject:
   m_ObjectHideFlags: 0

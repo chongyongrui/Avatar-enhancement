@@ -18,6 +18,7 @@ public class GettingInAndOutCar : NetworkBehaviour
     private bool isInsideCar = false;
     private Transform previousParent;
     private CinemachineVirtualCamera playerCamera;
+    [SerializeField] GameObject humanModel;
   
     public override void OnNetworkSpawn ()
     {
@@ -33,6 +34,7 @@ public class GettingInAndOutCar : NetworkBehaviour
                 playerCamera.Follow = transform.GetChild(0).transform;
                 playerCamera.LookAt = transform;
                 playerCamera.gameObject.SetActive(false);
+                humanModel.SetActive(false);
             }
         }
     }
@@ -75,7 +77,7 @@ private void GetInCarServerRPC()
     {
         return;
     }
-
+humanModel.SetActive(true);
     interactingPlayerController.ThirdPersonCam.gameObject.SetActive(false);
     interactingPlayerController.FirstPersonCam.gameObject.SetActive(false);
     isInsideCar = true;
@@ -102,13 +104,14 @@ private void GetInCarServerRPC()
             return;
 
         isInsideCar = false;
+        humanModel.SetActive(false);
         interactingPlayerController.enabled = true;
         interactingPlayerController.ThirdPersonCam.gameObject.SetActive(true);
         carController.carSpeed = 0f;
         carController.enabled = false;
 
         interactingPlayer.transform.SetParent(previousParent);
-        interactingPlayer.transform.position = transform.position + transform.forward * 2f;
+        interactingPlayer.transform.position = transform.position + transform.right * 4f;
         interactingPlayer.SetActive(true);
 
         playerCamera.gameObject.SetActive(false);

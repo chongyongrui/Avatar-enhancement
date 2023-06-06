@@ -1,11 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.Animations.Rigging;
 public class InteractableObject : MonoBehaviour
 { public bool CanBeInteracted { get; private set; } = true; // Can the object be interacted with?
     public string grabTrigger = "Grabitem"; // The name of the grab animation trigger
-
     public void Interact(Transform handIKTarget, Animator animator)
     {
         // Perform object-specific interaction logic here
@@ -17,7 +16,7 @@ public class InteractableObject : MonoBehaviour
         // Set the IK target position
        // SetIKTargetPosition(handIKTarget.position);
 
-handIKTarget.position = transform.position;
+    handIKTarget.position = transform.position;
         // Example interaction: Parent the object to the character's hand
 
         
