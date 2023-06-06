@@ -13,6 +13,7 @@ namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
 #if ENABLE_INPUT_SYSTEM 
+
     [RequireComponent(typeof(PlayerInput))]
 #endif
     public class ThirdPersonController : NetworkBehaviour
@@ -57,6 +58,14 @@ namespace StarterAssets
 
         public LayerMask GroundLayers;
 
+
+        [Header("Player Die")]
+        private int animDying;
+        private bool isDead = false;
+
+        [SerializeField]private GameObject bloodGush;
+
+[SerializeField]private Transform bloodGushOrigin;
         [Header("Cinemachine")]
 
         CinemachineComponentBase componentBase;
@@ -97,6 +106,7 @@ namespace StarterAssets
         private int animJump;
         private int animFreefall;
         private int animMotionSPD;
+    
 
 #if ENABLE_INPUT_SYSTEM 
         private PlayerInput playerInput;
@@ -149,7 +159,7 @@ namespace StarterAssets
             fallTimeoutDelta = FallTimeout;
             transform.position =  new Vector3(0,0,0);
              if (IsOwner &&IsClient)
-            {   
+            {   bloodGush.gameObject.SetActive(false);
               
                 if (ThirdPersonCam == null &&FirstPersonCam == null)
                 {
@@ -178,6 +188,7 @@ namespace StarterAssets
             if (IsOwner)
             {   
                 hasAnim = TryGetComponent(out anim);
+                if(!isDead){
                 GroundedCheck();
                 JumpAndGravity();
                 Move();
@@ -205,6 +216,12 @@ namespace StarterAssets
                     }
 
 
+                }
+                }else{
+                    anim.SetBool(animDying,true);
+                    bloodGush.gameObject.SetActive(true);
+                    bloodGush.transform.position = bloodGushOrigin.position;
+                   
                 }
               
             }
@@ -244,6 +261,7 @@ namespace StarterAssets
             animJump = Animator.StringToHash("Jump");
             animFreefall = Animator.StringToHash("FreeFall");
             animMotionSPD = Animator.StringToHash("MotionSpeed");
+            animDying = Animator.StringToHash("Dying");
         }
 
         private void GroundedCheck()
@@ -512,6 +530,13 @@ namespace StarterAssets
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(controller.center), FootstepAudioVolume);
+            }
+        }
+        private void OnTriggerEnter(Collider other){
+            if(other.CompareTag("PlayerDie")){
+                isDead = true;
+                
+
             }
         }
     }
