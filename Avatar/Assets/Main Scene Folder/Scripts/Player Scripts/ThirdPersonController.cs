@@ -65,7 +65,8 @@ namespace StarterAssets
 
         [SerializeField]private GameObject bloodGush;
 
-[SerializeField]private Transform bloodGushOrigin;
+        [SerializeField]private Transform bloodGushOrigin;
+
         [Header("Cinemachine")]
 
         CinemachineComponentBase componentBase;
@@ -116,8 +117,9 @@ namespace StarterAssets
         private StarterAssetsInputs input;
         private Transform mainCamera;
         public CinemachineVirtualCamera ThirdPersonCam;
-        public CinemachineVirtualCameraBase FirstPersonCam;
-
+        public CinemachineVirtualCamera FirstPersonCam;
+        public GameObject carCamera;
+        
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
         private bool hasAnim;
@@ -150,8 +152,8 @@ namespace StarterAssets
             controller = GetComponent<CharacterController>();
             input = GetComponent<StarterAssetsInputs>();
             //playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
-
-            //            FirstPersonCam.gameObject.SetActive(false);
+        
+           
             AssignAnimationIDs();
 
             // reset our timeouts on start
@@ -177,7 +179,7 @@ namespace StarterAssets
 
                 ThirdPersonCam.Follow = transform.GetChild(0).transform;
                // FirstPersonCam.gameObject.SetActive(false);
-                FirstPersonCam.Follow = transform.GetChild(0).transform;
+                FirstPersonCam.Follow = transform;
             }
 
 
@@ -187,9 +189,9 @@ namespace StarterAssets
         {
             if (IsOwner)
             {   
-                hasAnim = TryGetComponent(out anim);
+                //hasAnim = TryGetComponent(out anim);
                 if(!isDead){
-                GroundedCheck();
+                GroundedCheck();    
                 JumpAndGravity();
                 Move();
                 if (firstpersonstatus == false)

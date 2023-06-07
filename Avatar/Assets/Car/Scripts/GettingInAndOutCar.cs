@@ -17,9 +17,10 @@ public class GettingInAndOutCar : NetworkBehaviour
     private ThirdPersonController interactingPlayerController;
     private bool isInsideCar = false;
     private Transform previousParent;
+
     private CinemachineVirtualCamera playerCamera;
     [SerializeField] GameObject humanModel;
-  
+
     public override void OnNetworkSpawn ()
     {
         if (IsOwner)
@@ -31,9 +32,10 @@ public class GettingInAndOutCar : NetworkBehaviour
             if (playerCamera == null)
             {
                 playerCamera = GameObject.FindGameObjectWithTag("CarCamera").GetComponent<CinemachineVirtualCamera>();
-                playerCamera.Follow = transform.GetChild(0).transform;
-                playerCamera.LookAt = transform;
                 playerCamera.gameObject.SetActive(false);
+                playerCamera.Follow = transform.GetChild(0).transform;
+                //playerCamera.LookAt = transform;
+                
                 humanModel.SetActive(false);
             }
         }

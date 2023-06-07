@@ -10,21 +10,21 @@ public class ModelSpawner : NetworkBehaviour
     private List<GameObject> spawnedPrefabs = new List<GameObject>();
     [SerializeField] Vector3 spawnPosition = new Vector3(0.18f, -0.74f, 4.41f);
 
-    [SerializeField] private LayerMask layer;   
+    [SerializeField] private LayerMask layer;
     public ThirdPersonController playerController;
     private PrometeoCarController carController;
-
-    private  NetworkVariable<bool> spawnedstatus = new NetworkVariable<bool>();
+     
+    private NetworkVariable<bool> spawnedstatus = new NetworkVariable<bool>();
     private void Start()
-{
-    
-
-    //carController = spawnedModel?.GetComponent<PrometeoCarController>();
-    if (carController == null)
     {
-        return;
+       
+
+        //carController = spawnedModel?.GetComponent<PrometeoCarController>();
+        if (carController == null)
+        {
+            return;
+        }
     }
-}
     private void Update()
     {
         if (!IsOwner) { return; }
@@ -46,7 +46,7 @@ public class ModelSpawner : NetworkBehaviour
             }
         }
     }
-    [ServerRpc (RequireOwnership = true)]
+    [ServerRpc(RequireOwnership = true)]
     private void SpawnModelServerRpc()
     {
         Collider[] colliders = Physics.OverlapSphere(spawnPosition, 1f, layer);
@@ -77,5 +77,6 @@ public class ModelSpawner : NetworkBehaviour
         Destroy(spawnedModel);
         spawnedModel = null;
     }
-  
+
+
 }
