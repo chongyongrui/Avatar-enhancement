@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -556,7 +556,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae6541e459b40de4c80c7261e1081cd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  grabTrigger: Grabitem
+  weaponIdentifier: AK47
 --- !u!136 &441384687
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -565,7 +565,7 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 441384682}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   m_Radius: 0.056747183
   m_Height: 1.6016622
@@ -1551,7 +1551,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: cd8d56469cf64654eaa21e15c6ae7c18, type: 3}
       propertyPath: m_Name
-      value: Ak-47
+      value: AK47
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: cd8d56469cf64654eaa21e15c6ae7c18, type: 3}
       propertyPath: m_TagString
@@ -2408,7 +2408,7 @@ PrefabInstance:
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.PlayerPrefab
       value: 
-      objectReference: {fileID: 574454473996172294, guid: 5d96eec5bbe67c747976203decfe7294, type: 3}
+      objectReference: {fileID: 4900686166078442603, guid: cc0322140365f0145b215540af11abda, type: 3}
     - target: {fileID: 5967090718270109270, guid: 1876629bf0a780947a28a0335ecf3706, type: 3}
       propertyPath: NetworkConfig.NetworkPrefabs.Array.size
       value: 6
