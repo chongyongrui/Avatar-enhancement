@@ -3,8 +3,10 @@ using Unity.Netcode;
 using Cinemachine;
 using StarterAssets;
 using TMPro;
+using UnityEngine.Animations.Rigging;
 
-#if ENABLE_INPUT_SYSTEM 
+
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 
 #endif
@@ -63,9 +65,9 @@ namespace StarterAssets
         private int animDying;
         private bool isDead = false;
 
-        [SerializeField]private GameObject bloodGush;
+        [SerializeField] private GameObject bloodGush;
 
-        [SerializeField]private Transform bloodGushOrigin;
+        [SerializeField] private Transform bloodGushOrigin;
 
         [Header("Cinemachine")]
 
@@ -107,9 +109,9 @@ namespace StarterAssets
         private int animJump;
         private int animFreefall;
         private int animMotionSPD;
-    
 
-#if ENABLE_INPUT_SYSTEM 
+
+#if ENABLE_INPUT_SYSTEM
         private PlayerInput playerInput;
 #endif
         private Animator anim;
@@ -119,11 +121,12 @@ namespace StarterAssets
         public CinemachineVirtualCamera ThirdPersonCam;
         public CinemachineVirtualCamera FirstPersonCam;
         public GameObject carCamera;
-        
+
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
         private bool hasAnim;
         private bool firstpersonstatus = false;
+        private RigBuilder rb;
         private bool IsCurrentDeviceMouse
         {
             get
@@ -145,40 +148,41 @@ namespace StarterAssets
 
         private void Start()
         {  // Debug.Log(NetworkManager.Singleton.LocalClientId);
-        
+
             //cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
             hasAnim = TryGetComponent(out anim);
             controller = GetComponent<CharacterController>();
             input = GetComponent<StarterAssetsInputs>();
             //playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
-        
            
+
             AssignAnimationIDs();
 
             // reset our timeouts on start
             jumpWait = JumpTimeout;
             fallTimeoutDelta = FallTimeout;
-            transform.position =  new Vector3(0,0,0);
-             if (IsOwner &&IsClient)
-            {   bloodGush.gameObject.SetActive(false);
-              
-                if (ThirdPersonCam == null &&FirstPersonCam == null)
+            transform.position = new Vector3(0, 0, 0);
+            if (IsOwner && IsClient)
+            {
+                bloodGush.gameObject.SetActive(false);
+
+                if (ThirdPersonCam == null && FirstPersonCam == null)
                 {
                     ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
                     componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
-                     FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                    FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
                 }
 
-                
+
                 if (FirstPersonCam == null)
                 {
                     Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
-                   
+
                 }
 
                 ThirdPersonCam.Follow = transform.GetChild(0).transform;
-               // FirstPersonCam.gameObject.SetActive(false);
+                // FirstPersonCam.gameObject.SetActive(false);
                 FirstPersonCam.Follow = transform;
             }
 
@@ -188,44 +192,47 @@ namespace StarterAssets
         private void Update()
         {
             if (IsOwner)
-            {   
+            {
                 //hasAnim = TryGetComponent(out anim);
-                if(!isDead){
-                GroundedCheck();    
-                JumpAndGravity();
-                Move();
-                if (firstpersonstatus == false)
+                if (!isDead)
                 {
-                    Scroll();
+                    GroundedCheck();
+                    JumpAndGravity();
+                    Move();
+                    if (firstpersonstatus == false)
+                    {
+                        Scroll();
+                    }
+                    if (Input.GetButtonDown("CamToggle"))
+                    {
+                        if (ThirdPersonCam.gameObject.activeSelf)
+                        {
+
+                            FirstPersonCam.gameObject.SetActive(true);
+                            ThirdPersonCam.gameObject.SetActive(false);
+                            firstpersonstatus = true;
+                            FirstPersonCam.Follow = transform.GetChild(0).transform;
+                            Cursor.lockState = CursorLockMode.Locked;
+                        }
+                        else
+                        {
+                            FirstPersonCam.gameObject.SetActive(false);
+                            ThirdPersonCam.gameObject.SetActive(true);
+                            firstpersonstatus = false;
+                            Cursor.lockState = CursorLockMode.None;
+                        }
+
+
+                    }
                 }
-                if (Input.GetButtonDown("CamToggle"))
+                else
                 {
-                    if (ThirdPersonCam.gameObject.activeSelf)
-                    {
-
-                        FirstPersonCam.gameObject.SetActive(true);
-                        ThirdPersonCam.gameObject.SetActive(false);
-                        firstpersonstatus = true;
-                          FirstPersonCam.Follow = transform.GetChild(0).transform;
-                        Cursor.lockState = CursorLockMode.Locked;
-                    }
-                    else
-                    {
-                        FirstPersonCam.gameObject.SetActive(false);
-                        ThirdPersonCam.gameObject.SetActive(true);
-                        firstpersonstatus = false;
-                        Cursor.lockState = CursorLockMode.None;
-                    }
-
-
-                }
-                }else{
-                    anim.SetBool(animDying,true);
+                    anim.SetBool(animDying, true);
                     bloodGush.gameObject.SetActive(true);
                     bloodGush.transform.position = bloodGushOrigin.position;
-                   
+
                 }
-              
+
             }
         }
 
@@ -234,7 +241,7 @@ namespace StarterAssets
             CameraRotation();
         }
         public override void OnNetworkSpawn()
-        {   
+        {
             base.OnNetworkSpawn();
 
             //isClient checks if current instance is client,IsOwner checks if client owns the object,
@@ -243,9 +250,9 @@ namespace StarterAssets
 
 
             if (IsOwner)
-            {   
-              
-                
+            {
+
+
                 playerInput = GetComponent<PlayerInput>();
                 playerInput.enabled = true;
                 //FirstPersonCam.gameObject.SetActive(false);
@@ -253,8 +260,9 @@ namespace StarterAssets
             }
         }
         [ServerRpc]
-        private void TestServerRpc(){
-            Debug.Log("TEst server rpc"+ OwnerClientId);
+        private void TestServerRpc()
+        {
+            Debug.Log("TEst server rpc" + OwnerClientId);
         }
         private void AssignAnimationIDs()
         {   //Take parameters in animators and sets to int in script;
@@ -534,10 +542,12 @@ namespace StarterAssets
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(controller.center), FootstepAudioVolume);
             }
         }
-        private void OnTriggerEnter(Collider other){
-            if(other.CompareTag("PlayerDie")){
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("PlayerDie"))
+            {
                 isDead = true;
-                
+
 
             }
         }

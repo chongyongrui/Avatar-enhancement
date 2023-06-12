@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
+
 public class PlayerInteractable : MonoBehaviour
 {
     public static PlayerInteractable Instance { get; private set; }
@@ -26,6 +28,13 @@ public class PlayerInteractable : MonoBehaviour
     [SerializeField] private float xRotation;
     [SerializeField] private float yRotation;
     [SerializeField] private float zRotation;
+    private RigBuilder rb;
+    private GameObject weapon;
+    private GameObject rblayer;
+    private GameObject rightHandIK;
+    private GameObject leftHandIK;
+    private Transform rightHandgrip;
+    private Transform leftHandgrip;
     private bool hasWeapon;
 
     private void Start()
@@ -34,6 +43,11 @@ public class PlayerInteractable : MonoBehaviour
         weaponPrefabs["AK47"] = AK47prefab;
         anim = GetComponent<Animator>();
         AssignAnimationIDs();
+         rb = GetComponent<RigBuilder>();
+        rightHandIK = GameObject.Find("Righthandik");
+        leftHandIK = GameObject.Find("LeftHandik");
+       // rb.enabled = false;
+        
     }
 
     private void Awake()
@@ -123,13 +137,14 @@ public class PlayerInteractable : MonoBehaviour
         if (weaponPrefab != null)
         {
             // Instantiate the weapon prefab
-            GameObject weapon = Instantiate(weaponPrefab, handBone);
+             weapon = Instantiate(weaponPrefab, handBone);
 
             // Set the weapon's position and rotation based on the placeholder
             weapon.transform.position = weaponPlaceholder.position;
             weapon.transform.rotation = weaponPlaceholder.rotation;
              weapon.transform.localPosition = new Vector3(xOffset, yOffset, zOffset);
         weapon.transform.localRotation = Quaternion.Euler(xRotation, yRotation, zRotation);
+       
         hasWeapon = true;
         SetHasWeaponTrue();
 
@@ -144,7 +159,13 @@ public class PlayerInteractable : MonoBehaviour
     }
     public void SetHasWeaponTrue()
     {
-        anim.SetBool("HasWeapon", true);
+        //anim.SetBool("HasWeapon", true);
+        rb.enabled = true;
+         rightHandgrip = weapon.transform.Find("rightgrip").transform;
+       leftHandgrip = weapon.transform.Find("leftgrip").transform;
+        rightHandIK.GetComponent<TwoBoneIKConstraint>().data.target = rightHandgrip;
+        leftHandIK.GetComponent<TwoBoneIKConstraint>().data.target = leftHandgrip;
+        
     }
 
     // Called from the animation timeline to set the HasWeapon parameter to false
