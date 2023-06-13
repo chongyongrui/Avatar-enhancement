@@ -22,15 +22,15 @@ public class PlayerInteractable : MonoBehaviour
     [SerializeField] private GameObject AK47prefab;
     [SerializeField] private float delayBeforeSpawn;
 
-    [SerializeField] private float xOffset;
-    [SerializeField] private float yOffset;
-    [SerializeField] private float zOffset;
-    [SerializeField] private float xRotation;
-    [SerializeField] private float yRotation;
-    [SerializeField] private float zRotation;
-    private RigBuilder rb;
-    private GameObject weapon;
-    private GameObject rblayer;
+public float xOffset;
+public float yOffset;
+    public float zOffset;
+    public float xRotation;
+    public float yRotation;
+    public float zRotation;
+    public RigBuilder rb;
+    public GameObject weapon;
+   
   
     private Transform rightHandgrip;
     private Transform leftHandgrip;
@@ -127,7 +127,7 @@ public class PlayerInteractable : MonoBehaviour
         {
             // Get the corresponding weapon prefab
             GameObject weaponPrefab = weaponPrefabs[weaponIdentifier];
-
+rb.enabled = true;
             // Call the SpawnWeapon method on the next frame with the correct prefab
             StartCoroutine(DelayedSpawnWeapon(weaponPrefab));
         }
@@ -145,16 +145,31 @@ public class PlayerInteractable : MonoBehaviour
         // Spawn the weapon
         if (weaponPrefab != null)
         {
-            // Instantiate the weapon prefab
-            //  weapon = Instantiate(weaponPrefab);
+           weapon = Instantiate(weaponPrefab);
 
-            // // Set the weapon's position and rotation based on the placeholder
-            //  weapon.transform.position = weaponPlaceholder.position;
-            //  weapon.transform.rotation = weaponPlaceholder.rotation; 
-            SetHasWeaponTrue(weaponPrefab);
+            // Set the weapon's position and rotation based on the placeholder
+            Vector3 weaponPosition = weaponPlaceholder.position + new Vector3(xOffset, yOffset, zOffset);
+        Quaternion weaponRotation = weaponPlaceholder.rotation * Quaternion.Euler(xRotation, yRotation, zRotation);
+
+        // Set the weapon's position and rotation
+        weapon.transform.position = weaponPosition;
+        weapon.transform.rotation = weaponRotation;
+
+            // Set the weapon's parent to the shoulder
+            weapon.transform.SetParent(shoulder);
+
+            // Update TwoBoneIK targets
+            lefthandIK.data.target = weapon.transform.Find("leftgrip").transform;
+            righthandIK.data.target = weapon.transform.Find("rightgrip").transform;
+            
+            // Rebuild the RigBuilder
+            rb.Build();
+
+            // Disable the placeholder
+            weaponPlaceholder.gameObject.SetActive(false);
              
        
-        hasWeapon = true;
+            hasWeapon = true;
        
 
         }
