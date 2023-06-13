@@ -31,12 +31,16 @@ public class PlayerInteractable : MonoBehaviour
     private RigBuilder rb;
     private GameObject weapon;
     private GameObject rblayer;
-    private GameObject rightHandIK;
-    private GameObject leftHandIK;
+  
     private Transform rightHandgrip;
     private Transform leftHandgrip;
+    [SerializeField]Transform shoulder;
     private bool hasWeapon;
+    [SerializeField]private GameObject testingweapon;
 
+    public TwoBoneIKConstraint lefthandIK;
+    public TwoBoneIKConstraint righthandIK;
+   
     private void Start()
     {
         weaponPrefabs = new Dictionary<string, GameObject>();
@@ -44,11 +48,16 @@ public class PlayerInteractable : MonoBehaviour
         anim = GetComponent<Animator>();
         AssignAnimationIDs();
          rb = GetComponent<RigBuilder>();
-        rightHandIK = GameObject.Find("Righthandik");
-        leftHandIK = GameObject.Find("LeftHandik");
-       // rb.enabled = false;
-        
-    }
+      
+       
+        Debug.Log("Hello");
+        rb.enabled = false;
+      
+    //     rb.enabled = true;
+    //      rightHandgrip = testingweapon.transform.Find("rightgrip").transform;
+    //      Debug.Log(rightHandgrip);
+    //    leftHandgrip = testingweapon.transform.Find("leftgrip").transform;
+       }
 
     private void Awake()
     {
@@ -137,16 +146,16 @@ public class PlayerInteractable : MonoBehaviour
         if (weaponPrefab != null)
         {
             // Instantiate the weapon prefab
-             weapon = Instantiate(weaponPrefab, handBone);
+            //  weapon = Instantiate(weaponPrefab);
 
-            // Set the weapon's position and rotation based on the placeholder
-            weapon.transform.position = weaponPlaceholder.position;
-            weapon.transform.rotation = weaponPlaceholder.rotation;
-             weapon.transform.localPosition = new Vector3(xOffset, yOffset, zOffset);
-        weapon.transform.localRotation = Quaternion.Euler(xRotation, yRotation, zRotation);
+            // // Set the weapon's position and rotation based on the placeholder
+            //  weapon.transform.position = weaponPlaceholder.position;
+            //  weapon.transform.rotation = weaponPlaceholder.rotation; 
+            SetHasWeaponTrue(weaponPrefab);
+             
        
         hasWeapon = true;
-        SetHasWeaponTrue();
+       
 
         }
     }
@@ -157,14 +166,37 @@ public class PlayerInteractable : MonoBehaviour
     {
         weaponPlaceholder = placeholder;
     }
-    public void SetHasWeaponTrue()
+    public void SetHasWeaponTrue(GameObject weaponPrefab)
     {
-        //anim.SetBool("HasWeapon", true);
-        rb.enabled = true;
-         rightHandgrip = weapon.transform.Find("rightgrip").transform;
-       leftHandgrip = weapon.transform.Find("leftgrip").transform;
-        rightHandIK.GetComponent<TwoBoneIKConstraint>().data.target = rightHandgrip;
-        leftHandIK.GetComponent<TwoBoneIKConstraint>().data.target = leftHandgrip;
+        anim.SetBool("HasWeapon", true);
+
+    // Calculate the spawn position based on the player's position and offsets
+    Vector3 spawnPosition = transform.position +
+        transform.forward * xOffset +
+        transform.up * yOffset +
+        transform.right * zOffset;
+
+    // Instantiate the weapon prefab at the calculated spawn position
+    weapon = Instantiate(weaponPrefab, spawnPosition, Quaternion.identity);
+
+    // Set the weapon's rotation based on the player's rotation and offsets
+    //Quaternion spawnRotation = Quaternion.Euler(xRotation, yRotation, zRotation);
+   // weapon.transform.rotation = transform.rotation * spawnRotation;
+
+    // Set the weapon's parent to the shoulder
+    weapon.transform.SetParent(shoulder);
+
+    // Enable Rigidbody if needed
+    rb.enabled = true;
+
+    // Update TwoBoneIK targets
+    lefthandIK.data.target = weapon.transform.Find("leftgrip").transform;
+    righthandIK.data.target = weapon.transform.Find("rightgrip").transform;
+
+    // Rebuild the Rigidbody
+    rb.Build();
+       
+        
         
     }
 

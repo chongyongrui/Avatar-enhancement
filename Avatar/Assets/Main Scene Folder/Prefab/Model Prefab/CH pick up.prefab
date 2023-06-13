@@ -702,12 +702,16 @@ MonoBehaviour:
   weaponPlaceholder: {fileID: 9158130385854247779}
   AK47prefab: {fileID: 6918189679785278061, guid: 1c0ed14826a95d4428c81879a1a3f35c, type: 3}
   delayBeforeSpawn: 0.6
-  xOffset: 0.03
-  yOffset: 0.267
-  zOffset: 0.06
-  xRotation: -74
-  yRotation: 80
-  zRotation: 27.4
+  xOffset: 0.056
+  yOffset: 1.223
+  zOffset: 0.188
+  xRotation: 21.658
+  yRotation: -69.68
+  zRotation: 19.806
+  shoulder: {fileID: 4900686166078443486}
+  testingweapon: {fileID: 0}
+  lefthandIK: {fileID: 5405862312422429921}
+  righthandIK: {fileID: 8379077576190644455}
 --- !u!114 &5075346856353519385
 MonoBehaviour:
   m_ObjectHideFlags: 0
