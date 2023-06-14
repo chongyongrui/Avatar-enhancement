@@ -183,7 +183,7 @@ namespace StarterAssets
 
                 ThirdPersonCam.Follow = transform.GetChild(0).transform;
                 // FirstPersonCam.gameObject.SetActive(false);
-                FirstPersonCam.Follow = transform;
+                FirstPersonCam.Follow = transform.GetChild(0).transform;;
             }
 
 

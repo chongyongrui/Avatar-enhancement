@@ -702,18 +702,19 @@ MonoBehaviour:
   weaponPlaceholder: {fileID: 9158130385854247779}
   AK47prefab: {fileID: 6918189679785278061, guid: 1c0ed14826a95d4428c81879a1a3f35c, type: 3}
   delayBeforeSpawn: 0.6
-  xOffset: -0.172
+  xOffset: 0.13
   yOffset: 0
-  zOffset: 0
-  xRotation: 0
-  yRotation: 0
-  zRotation: 0
+  zOffset: 0.5
+  xRotation: 20
+  yRotation: 30
+  zRotation: 95
   rb: {fileID: 0}
   weapon: {fileID: 0}
   shoulder: {fileID: 4900686166078443486}
   testingweapon: {fileID: 0}
   lefthandIK: {fileID: 5405862312422429921}
   righthandIK: {fileID: 8379077576190644455}
+  weaponpose: {fileID: 0}
 --- !u!114 &5075346856353519385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -727,6 +728,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_RigLayers:
+  - m_Rig: {fileID: 0}
+    m_Active: 1
   - m_Rig: {fileID: 4383962087590665384}
     m_Active: 1
   m_Effectors: []
@@ -17561,7 +17564,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5786733372060154297}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.553, y: -0.5, z: 0.2}
+  m_LocalPosition: {x: -0.94, y: -0.5, z: -0.848}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17698,7 +17701,7 @@ GameObject:
   - component: {fileID: 3630059661457672859}
   - component: {fileID: 4383962087590665384}
   m_Layer: 6
-  m_Name: Riglayer
+  m_Name: Riglayer_handik
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
