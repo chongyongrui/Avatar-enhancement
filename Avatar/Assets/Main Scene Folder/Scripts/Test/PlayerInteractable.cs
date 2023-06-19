@@ -12,8 +12,9 @@ public class PlayerInteractable : MonoBehaviour
     private int animPickup;
     private Transform currentInteractable;
     private bool isPickupAnimationPlaying;
+    [SerializeField] private AimTrigger aimTrigger;
 
-    [SerializeField] private Transform handBone; // Reference to the hand bone GameObject;
+    [SerializeField] private Transform pickingupPlaceholder; // Reference to the hand bone GameObject;
     [SerializeField] private Transform weaponPlaceholder; // Empty GameObject acting as a placeholder for the weapon;
 
     // Dictionary to map weapon identifiers to their corresponding prefabs
@@ -22,43 +23,39 @@ public class PlayerInteractable : MonoBehaviour
     [SerializeField] private GameObject AK47prefab;
     [SerializeField] private float delayBeforeSpawn;
 
-public float xOffset;
-public float yOffset;
-    public float zOffset;
-    public float xRotation;
-    public float yRotation;
-    public float zRotation;
-    public RigBuilder rb;
-    public GameObject weapon;
-   
-  
-    private Transform rightHandgrip;
-    private Transform leftHandgrip;
-    [SerializeField]Transform shoulder;
-    private bool hasWeapon;
-    [SerializeField]private GameObject testingweapon;
+    [SerializeField] private RigBuilder rb;
+    private GameObject weapon;
 
-    public TwoBoneIKConstraint lefthandIK;
-    public TwoBoneIKConstraint righthandIK;
-   
-            
+    [SerializeField] Transform shoulder;
+    private bool hasWeapon;
+
+    [SerializeField] private TwoBoneIKConstraint lefthandIK;
+    [SerializeField] private TwoBoneIKConstraint righthandIK;
+    [SerializeField] private MultiParentConstraint weaponPose;
+
+    [SerializeField] private MultiParentConstraint weaponAiming;
+
+    [SerializeField] private Rig rig;
+        public delegate void HasWeaponChanged(bool value);
+    public static event HasWeaponChanged OnHasWeaponChanged;
+
     private void Start()
     {
         weaponPrefabs = new Dictionary<string, GameObject>();
         weaponPrefabs["AK47"] = AK47prefab;
         anim = GetComponent<Animator>();
         AssignAnimationIDs();
-         rb = GetComponent<RigBuilder>();
-      
-       
+        rb = GetComponent<RigBuilder>();
+     
+
         Debug.Log("Hello");
-        rb.enabled = false;
-      
-    //     rb.enabled = true;
-    //      rightHandgrip = testingweapon.transform.Find("rightgrip").transform;
-    //      Debug.Log(rightHandgrip);
-    //    leftHandgrip = testingweapon.transform.Find("leftgrip").transform;
-       }
+      //  rb.enabled = false;
+
+        //     rb.enabled = true;
+        //      rightHandgrip = testingweapon.transform.Find("rightgrip").transform;
+        //      Debug.Log(rightHandgrip);
+        //    leftHandgrip = testingweapon.transform.Find("leftgrip").transform;
+    }
 
     private void Awake()
     {
@@ -105,6 +102,7 @@ public float yOffset;
                 }
             }
         }
+        
     }
 
     public void SetCurrentInteractable(Transform interactable)
@@ -128,7 +126,7 @@ public float yOffset;
         {
             // Get the corresponding weapon prefab
             GameObject weaponPrefab = weaponPrefabs[weaponIdentifier];
-rb.enabled = true;
+            rb.enabled = true;
             // Call the SpawnWeapon method on the next frame with the correct prefab
             StartCoroutine(DelayedSpawnWeapon(weaponPrefab));
         }
@@ -146,80 +144,43 @@ rb.enabled = true;
         // Spawn the weapon
         if (weaponPrefab != null)
         {
-           weapon = Instantiate(weaponPrefab);
 
-            // Set the weapon's position and rotation based on the placeholder
-            Vector3 weaponPosition = weaponPlaceholder.position + new Vector3(xOffset, yOffset, zOffset);
-        Quaternion weaponRotation = weaponPlaceholder.rotation * Quaternion.Euler(xRotation, yRotation, zRotation);
+            SetHasWeaponTrue(weaponPrefab);
+         SetHasWeapon(true);
 
-        // Set the weapon's position and rotation
-        weapon.transform.position = weaponPosition;
-        weapon.transform.rotation = weaponRotation;
 
-            // Set the weapon's parent to the shoulder
-            weapon.transform.SetParent(shoulder);
-
-            // Update TwoBoneIK targets
-            lefthandIK.data.target = weapon.transform.Find("leftgrip").transform;
-            righthandIK.data.target = weapon.transform.Find("rightgrip").transform;
-            
-            // Rebuild the RigBuilder
-            rb.Build();
-
-            // Disable the placeholder
-            weaponPlaceholder.gameObject.SetActive(false);
-             
-       
-            hasWeapon = true;
-       
 
         }
     }
 
+    private void OnAnimatorMove() { }//Callback function by unity to overrirde the default root motion handling this behaviour;
 
-    // Called from the animation timeline when the weapon placeholder needs to be set
-    public void SetWeaponPlaceholder(Transform placeholder)
-    {
-        weaponPlaceholder = placeholder;
-    }
     public void SetHasWeaponTrue(GameObject weaponPrefab)
     {
         anim.SetBool("HasWeapon", true);
+        // Instantiate the weapon prefab at the calculated spawn position
+        weapon = Instantiate(weaponPrefab);
+        weapon.transform.SetParent(transform, false);
 
-    // Calculate the spawn position based on the player's position and offsets
-    Vector3 spawnPosition = transform.position +
-        transform.forward * xOffset +
-        transform.up * yOffset +
-        transform.right * zOffset;
 
-    // Instantiate the weapon prefab at the calculated spawn position
-    weapon = Instantiate(weaponPrefab, spawnPosition, Quaternion.identity);
+        weaponPose.data.constrainedObject = weapon.transform;
+        weaponAiming.data.constrainedObject = weapon.transform;
+        // Set the weapon's position and rotation
 
-    // Set the weapon's rotation based on the player's rotation and offsets
-    //Quaternion spawnRotation = Quaternion.Euler(xRotation, yRotation, zRotation);
-   // weapon.transform.rotation = transform.rotation * spawnRotation;
+        // Update TwoBoneIK targets
+        lefthandIK.data.target = weapon.transform.Find("leftgrip").transform;
+        righthandIK.data.target = weapon.transform.Find("rightgrip").transform;
+        //rb.enabled = true;
 
-    // Set the weapon's parent to the shoulder
-    weapon.transform.SetParent(shoulder);
+        // Rebuild the Rigidbody
+        rb.Build();
 
-    // Enable Rigidbody if needed
-    rb.enabled = true;
 
-    // Update TwoBoneIK targets
-    lefthandIK.data.target = weapon.transform.Find("leftgrip").transform;
-    righthandIK.data.target = weapon.transform.Find("rightgrip").transform;
-
-    // Rebuild the Rigidbody
-    rb.Build();
-       
-        
-        
     }
-
-    // Called from the animation timeline to set the HasWeapon parameter to false
-    public void SetHasWeaponFalse()
+    public void SetHasWeapon(bool value)
     {
-        anim.SetBool("HasWeapon", false);
+        hasWeapon = value;
+        OnHasWeaponChanged?.Invoke(hasWeapon);
     }
 
-}
+ }
