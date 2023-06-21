@@ -13,7 +13,6 @@ public class Surrender : MonoBehaviour
 
     private void Update()
     {
-        // Modify this condition based on your specific trigger condition
         if (Input.GetKeyDown(KeyCode.T))
         {
             ToggleSurrender();

@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
+using Unity.Netcode;
 
-public class PlayerInteractable : MonoBehaviour
+public class PlayerInteractable : NetworkBehaviour
 {
     public static PlayerInteractable Instance { get; private set; }
 
@@ -36,7 +37,7 @@ public class PlayerInteractable : MonoBehaviour
     [SerializeField] private MultiParentConstraint weaponAiming;
 
     [SerializeField] private Rig rig;
-        public delegate void HasWeaponChanged(bool value);
+    public delegate void HasWeaponChanged(bool value);
     public static event HasWeaponChanged OnHasWeaponChanged;
 
     private void Start()
@@ -160,6 +161,7 @@ public class PlayerInteractable : MonoBehaviour
         anim.SetBool("HasWeapon", true);
         // Instantiate the weapon prefab at the calculated spawn position
         weapon = Instantiate(weaponPrefab);
+        weapon.GetComponent<NetworkObject>().Spawn();
         weapon.transform.SetParent(transform, false);
 
 
@@ -182,5 +184,6 @@ public class PlayerInteractable : MonoBehaviour
         hasWeapon = value;
         OnHasWeaponChanged?.Invoke(hasWeapon);
     }
+   
 
  }

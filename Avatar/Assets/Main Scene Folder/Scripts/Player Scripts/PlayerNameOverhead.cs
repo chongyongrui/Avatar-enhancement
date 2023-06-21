@@ -6,42 +6,34 @@ using System.Text;
 using TMPro;
 public class PlayerNameOverhead : NetworkBehaviour
 {
-    
-        [SerializeField] private TextMeshProUGUI displayNameText;
 
-        private NetworkVariable<FixedString32Bytes> displayName = new NetworkVariable<FixedString32Bytes>();
-        public string Playername => displayName.Value.ToString();
+    [SerializeField]
+    private NetworkVariable<NetworkString> playerNetworkName = new NetworkVariable<NetworkString>();
+    [SerializeField]
+    private TextMeshProUGUI localPlayerOverlay;
+    private bool overlaySet = false;
 
-        [ServerRpc(RequireOwnership =false)]
-        public void UpdateplayernameServerRPC(string newPLayername){
-            displayName.Value = new FixedString32Bytes(newPLayername);
-            onUpdatePLayerNameClientRpc(displayName.Value.ToString());
-
+    public override void OnNetworkSpawn()
+    {
+        if (IsServer)
+        {
+            playerNetworkName.Value = $"Player {OwnerClientId}";
         }
-        [ClientRpc]
-        public void onUpdatePLayerNameClientRpc(string newPLayername){
-            Debug.Log(newPLayername);
+    }
+
+    public void SetOverlay()
+    {
+
+        localPlayerOverlay.text = $"{playerNetworkName.Value}";
+    }
+
+    public void Update()
+    {
+        if (!overlaySet && !string.IsNullOrEmpty(playerNetworkName.Value))
+        {
+            SetOverlay();
+            overlaySet = true;
         }
-        private void Awake(){
-            displayName.OnValueChanged += OnPlayerNameChanged;
-        }
-        private void OnPlayerNameChanged(FixedString32Bytes oldName,FixedString32Bytes newName){
-
-        }
-
-        // private void OnEnable()
-        // {
-        //     displayName.OnValueChanged += HandleDisplayNameChanged;
-        // }
-
-        // private void OnDisable()
-        // {
-        //     displayName.OnValueChanged -= HandleDisplayNameChanged;
-        // }
-
-        // private void HandleDisplayNameChanged(FixedString32Bytes oldDisplayName, FixedString32Bytes newDisplayName)
-        // {
-        //     displayNameText.text = newDisplayName.ToString();
-        // }
+    }
 }
 

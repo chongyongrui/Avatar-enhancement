@@ -170,8 +170,12 @@ namespace StarterAssets
                 if (ThirdPersonCam == null && FirstPersonCam == null)
                 {
                     ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
+                     ThirdPersonCam.Follow = transform.GetChild(0).transform;
+                
                     componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
                     FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                          FirstPersonCam.Follow = transform.GetChild(0).transform;
+                          FirstPersonCam.gameObject.SetActive(false);
                 }
 
 
@@ -181,9 +185,7 @@ namespace StarterAssets
 
                 }
 
-                ThirdPersonCam.Follow = transform.GetChild(0).transform;
-                // FirstPersonCam.gameObject.SetActive(false);
-                FirstPersonCam.Follow = transform.GetChild(0).transform;;
+               
             }
 
 
@@ -211,7 +213,7 @@ namespace StarterAssets
                             FirstPersonCam.gameObject.SetActive(true);
                             ThirdPersonCam.gameObject.SetActive(false);
                             firstpersonstatus = true;
-                            FirstPersonCam.Follow = transform.GetChild(0).transform;
+                        
                             Cursor.lockState = CursorLockMode.Locked;
                         }
                         else

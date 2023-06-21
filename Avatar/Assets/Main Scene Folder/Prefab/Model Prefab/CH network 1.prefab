@@ -315,6 +315,7 @@ GameObject:
   - component: {fileID: 2677256835983870477}
   - component: {fileID: 4279322753336384268}
   - component: {fileID: 3410185980023335502}
+  - component: {fileID: -8481338560089895310}
   m_Layer: 6
   m_Name: CH network 1
   m_TagString: Player
@@ -464,6 +465,8 @@ MonoBehaviour:
   look: {x: 0, y: 0}
   jump: 0
   sprint: 0
+  aim: 0
+  fps: 0
   analogMovement: 0
   cursorLocked: 1
   cursorInputForLook: 1
@@ -671,6 +674,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionRange: 2
+  aimTrigger: {fileID: 0}
+  pickingupPlaceholder: {fileID: 0}
+  weaponPlaceholder: {fileID: 0}
+  AK47prefab: {fileID: 0}
+  delayBeforeSpawn: 0
+  rb: {fileID: 0}
+  shoulder: {fileID: 0}
+  lefthandIK: {fileID: 0}
+  righthandIK: {fileID: 0}
+  weaponPose: {fileID: 0}
+  weaponAiming: {fileID: 0}
+  rig: {fileID: 0}
+--- !u!114 &-8481338560089895310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 574454473996172294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9365bd2c80e98584d9e39f7d8b9f29a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  localPlayerOverlay: {fileID: 4306620334232152960}
 --- !u!1 &820983256373343802
 GameObject:
   m_ObjectHideFlags: 0

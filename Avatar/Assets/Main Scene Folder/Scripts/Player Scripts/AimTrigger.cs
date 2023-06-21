@@ -10,19 +10,44 @@ public class AimTrigger : MonoBehaviour
     [SerializeField] private Rig rig;
     [SerializeField] private MultiAimConstraint gunAim;
     [SerializeField] private MultiAimConstraint headAim;
+    [SerializeField] private Shooting shoot;
    private RigBuilder rb;
     [SerializeField] private float aimDuration = 0.3f;
-
+    Vector3 worldobjectposition  = Vector3.zero;
     private GameObject currentTarget;
     private bool hasWeaponSpawned = false;
     private bool isAiming = false;
+    [SerializeField]private float raisingtime = 0.3f;
 
     private void Start()
     {
         FindTargetObjects();
         rb = GetComponent<RigBuilder>();
+        
+        
     }
+    private void Update(){
+        if(Input.GetMouseButton(1) && isAiming != true &&hasWeaponSpawned ==true){
+            rig.weight +=Time.deltaTime / raisingtime;
+        }else{
+            rig.weight -= Time.deltaTime/raisingtime;
+        }
+        if(isAiming== true )
+        {
 
+            if(Input.GetKeyDown(KeyCode.G) && shoot!=null){
+                shoot.isFiring();   
+            }
+        }
+        if(currentTarget!=null){
+            Debug.Log("Now facing "+currentTarget.name);
+            Vector3 Aimtarget =currentTarget.transform.position;
+            Aimtarget.y = transform.position.y;
+            Vector3 aimDirection = (Aimtarget-transform.position).normalized;
+            transform.forward=Vector3.Lerp(transform.forward,aimDirection,Time.deltaTime*20f);
+
+        }
+    }
     private void OnEnable()
     {
         PlayerInteractable.OnHasWeaponChanged += HandleHasWeaponChanged;
@@ -37,7 +62,10 @@ public class AimTrigger : MonoBehaviour
     {
         hasWeaponSpawned = value;
         Debug.Log("Weapon has spawned: " + hasWeaponSpawned);
-        // Use the hasWeapon value as needed
+
+        GameObject weaponinPlayer = GameObject.FindGameObjectWithTag("Weapon");
+      shoot =weaponinPlayer.GetComponent<Shooting>();
+
     }
 
     private void FindTargetObjects()
@@ -62,10 +90,11 @@ public class AimTrigger : MonoBehaviour
                 Debug.Log(currentTarget.name);
                 StartCoroutine(AimAtTarget(targetObjects[index].transform));
                 Debug.Log(targetObjects[index].name);
+ 
             }
         }
     }
-
+    
    private void OnTriggerExit(Collider other)
 {
     if (other.gameObject == currentTarget)
@@ -76,6 +105,7 @@ public class AimTrigger : MonoBehaviour
         {
           
             StartCoroutine(StopAiming());
+            
         }
     }
 }
@@ -110,10 +140,10 @@ private IEnumerator AimAtTarget(Transform target)
     }
 
     rig.weight = targetWeight;
+   
 }
-
 private IEnumerator StopAiming()
-{
+{ isAiming = false;
     // Decrease the rig weight
     float elapsedTime = 0f;
     float startWeight = rig.weight;
@@ -149,6 +179,7 @@ private IEnumerator StopAiming()
     // Set the sourceObjects to an empty WeightedTransformArray
     headAim.data.sourceObjects = new WeightedTransformArray();
     gunAim.data.sourceObjects = new WeightedTransformArray();
+    rb.Build();
 }
 
 
@@ -172,4 +203,6 @@ private void AddSourceObjectToGun(Transform sourceObject)
     {
         constraint.data.sourceObjects.Clear();
     }
+
+ 
 }
