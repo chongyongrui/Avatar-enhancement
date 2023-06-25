@@ -33,10 +33,9 @@ public class PlayerInteractable : NetworkBehaviour
     [SerializeField] private TwoBoneIKConstraint lefthandIK;
     [SerializeField] private TwoBoneIKConstraint righthandIK;
     [SerializeField] private MultiParentConstraint weaponPose;
+    [SerializeField] private MultiParentConstraint TargetAiming;
+    [SerializeField] private MultiParentConstraint rightclickAiming;
 
-    [SerializeField] private MultiParentConstraint weaponAiming;
-
-    [SerializeField] private Rig rig;
     public delegate void HasWeaponChanged(bool value);
     public static event HasWeaponChanged OnHasWeaponChanged;
 
@@ -166,7 +165,9 @@ public class PlayerInteractable : NetworkBehaviour
 
 
         weaponPose.data.constrainedObject = weapon.transform;
-        weaponAiming.data.constrainedObject = weapon.transform;
+          rightclickAiming.data.constrainedObject = weapon.transform;
+        TargetAiming.data.constrainedObject = weapon.transform;
+      
         // Set the weapon's position and rotation
 
         // Update TwoBoneIK targets

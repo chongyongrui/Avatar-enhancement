@@ -27,11 +27,7 @@ public class AimTrigger : MonoBehaviour
         
     }
     private void Update(){
-        if(Input.GetMouseButton(1) && isAiming != true &&hasWeaponSpawned ==true){
-            rig.weight +=Time.deltaTime / raisingtime;
-        }else{
-            rig.weight -= Time.deltaTime/raisingtime;
-        }
+        
         if(isAiming== true )
         {
 

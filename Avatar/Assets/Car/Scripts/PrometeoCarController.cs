@@ -35,7 +35,8 @@ public class PrometeoCarController : NetworkBehaviour
                                     // in the points x = 0 and z = 0 of your car. You can select the value that you want in the y axis,
                                     // however, you must notice that the higher this value is, the more unstable the car becomes.
                                     // Usually the y value goes from 0 to 1.5.
-
+    [SerializeField]public float throttleSensitivity = 1f;      // Adjust the sensitivity for the throttle
+  [SerializeField]public float steeringSensitivity = 1f;     //
     //WHEELS
 
       //[Header("WHEELS")]
@@ -129,6 +130,10 @@ public class PrometeoCarController : NetworkBehaviour
       Rigidbody carRigidbody; // Stores the car's rigidbody.
       float steeringAxis; // Used to know whether the steering wheel has reached the maximum value. It goes from -1 to 1.
       float throttleAxis; // Used to know whether the throttle has reached the maximum value. It goes from -1 to 1.
+      float throttleInput;
+      float throttle;
+      float steeringInput;
+      float steering;
       float driftingAxis;
       float localVelocityZ;
       float localVelocityX;
@@ -156,6 +161,12 @@ public class PrometeoCarController : NetworkBehaviour
       //in the inspector.
       carRigidbody = gameObject.GetComponent<Rigidbody>();
       carRigidbody.centerOfMass = bodyMassCenter;
+        throttleInput = Input.GetAxis("Vertical");
+     steeringInput = Input.GetAxis("Horizontal");
+
+    // Apply sensitivity to the throttle and steering inputs
+     throttle = throttleInput * throttleSensitivity;
+    steering = steeringInput * steeringSensitivity;
 
       //Initial setup to calculate the drift value of the car. This part could look a bit
       //complicated, but do not be afraid, the only thing we're doing here is to save the default
@@ -352,7 +363,8 @@ public class PrometeoCarController : NetworkBehaviour
         if(!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D) && steeringAxis != 0f){
           ResetSteeringAngle();
         }
-
+        
+        
       }
 
 
@@ -484,6 +496,42 @@ public class PrometeoCarController : NetworkBehaviour
     //
     //ENGINE AND BRAKING METHODS
     //
+public void setInputs(float throttle, float steering)
+{
+    throttle = Mathf.Clamp(throttle, -1f, 1f);
+    steering = Mathf.Clamp(steering, -1f, 1f);
+
+    if (throttle > 0f)
+    {
+        CancelInvoke("DecelerateCar");
+        deceleratingCar = false;
+        GoForward();
+    }
+    else if (throttle < 0f)
+    {
+        CancelInvoke("DecelerateCar");
+        deceleratingCar = false;
+        GoReverse();
+    }
+    else
+    {
+        ThrottleOff();
+    }
+
+    // Check the steering value to control the car's turning
+    if (steering < 0f)
+    {
+        TurnLeft();
+    }
+    else if (steering > 0f)
+    {
+        TurnRight();
+    }
+    else
+    {
+        ResetSteeringAngle();
+    }
+}
 
     // This method apply positive torque to the wheels in order to go forward.
     public void GoForward(){
@@ -572,7 +620,7 @@ public class PrometeoCarController : NetworkBehaviour
     		}
       }
     }
-
+    
     //The following function set the motor torque to 0 (in case the user is not pressing either W or S).
     public void ThrottleOff(){
       frontLeftCollider.motorTorque = 0;

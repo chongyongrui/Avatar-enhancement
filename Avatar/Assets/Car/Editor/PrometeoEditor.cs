@@ -25,6 +25,7 @@ public class PrometeoEditor : Editor{
   private SerializedProperty decelerationMultiplier;
   private SerializedProperty handbrakeDriftMultiplier;
   private SerializedProperty bodyMassCenter;
+  
   //
   //
   //WHEELS VARIABLES
