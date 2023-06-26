@@ -17,6 +17,12 @@ TagManager:
   - FirstPersonCamera
   - CarCamera
   - Interactable
+  - Weapon
+  - Turntrigger
+  - PlayerDie
+  - Sceneview
+  - Target
+  - road
   layers:
   - Default
   - TransparentFX
@@ -26,7 +32,7 @@ TagManager:
   - UI
   - Player
   - Model
-  - 
+  - Road
   - 
   - 
   - 
