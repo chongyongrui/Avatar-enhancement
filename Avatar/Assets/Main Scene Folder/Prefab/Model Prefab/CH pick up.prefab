@@ -999,12 +999,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   modelPrefab: {fileID: 642287924342879162, guid: 268b6b02730701b45b0b84c6c0b13efd, type: 3}
-  spawnedModel: {fileID: 0}
   spawnPosition: {x: 0.18, y: -0.74, z: 4.41}
   layer:
     serializedVersion: 2
     m_Bits: 128
-  playerController: {fileID: 0}
 --- !u!114 &4900686166078443104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1030,7 +1028,6 @@ MonoBehaviour:
   weaponPose: {fileID: 3597202028311100565}
   TargetAiming: {fileID: 728091442247835827}
   rightclickAiming: {fileID: 3788969460855052254}
-  rig: {fileID: 4998897057211079409}
 --- !u!114 &5075346856353519385
 MonoBehaviour:
   m_ObjectHideFlags: 0
