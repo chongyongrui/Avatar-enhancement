@@ -5,8 +5,8 @@ public class WaypointPlacer : MonoBehaviour
 {
     [SerializeField] private LayerMask roadLayerMask; // Layer mask for the road
     [SerializeField] private GameObject waypointPrefab;
-    [SerializeField]private List<Waypoint> waypoints = new List<Waypoint>();
-    private Camera camera; // Declare the camera variable
+    [SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
+    private Camera freefly; // Declare the camera variable
 
     private void Start()
     {
@@ -20,10 +20,10 @@ public class WaypointPlacer : MonoBehaviour
         }
 
         // Get the camera from the FreeFlyCamera component
-        camera = freeFlyCamera.GetComponent<Camera>();
+        freefly = freeFlyCamera.GetComponent<Camera>();
 
         // Check if the camera exists
-        if (camera == null)
+        if (freefly == null)
         {
             Debug.LogError("Camera component not found in FreeFlyCamera!");
             return;
@@ -32,19 +32,18 @@ public class WaypointPlacer : MonoBehaviour
 
     private void Update()
     {
-        // ...
-
-        // Place waypoint
         if (Input.GetMouseButtonDown(0))
         {
-            Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, roadLayerMask))
+            Ray ray = freefly.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
             {
-                AddWaypoint(hit.point);
+                if (hit.collider.CompareTag("road"))
+                {
+                    AddWaypoint(hit.point);
+                }
+
             }
         }
-
-        // ...
     }
 
     public void AddWaypoint(Vector3 position)
