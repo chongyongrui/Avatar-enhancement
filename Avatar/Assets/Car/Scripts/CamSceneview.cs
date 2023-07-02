@@ -3,55 +3,50 @@ using System.Collections.Generic;
 using UnityEngine;
 using StarterAssets;
 using Unity.Netcode;
+
 public class CamSceneview : NetworkBehaviour
 {
-    // Start is called before the first frame update
-    [SerializeField] private GameObject sceneviewcam;
+    [SerializeField] private Camera sceneviewCamera;
     [SerializeField] private GameObject thirdpersoncam;
     [SerializeField] private GameObject mainCamera;
+    [SerializeField] private WaypointPlacer waypointPlacer;
     GameObject player;
     ThirdPersonController controller;
+    PrometeoCarController carController;
 
     void Start()
     {
-        sceneviewcam.SetActive(false);
+        sceneviewCamera.enabled = false;
         thirdpersoncam = GameObject.FindGameObjectWithTag("PlayerFollowCamera");
-
-
-
+        waypointPlacer.enabled = false;
     }
+
     public override void OnNetworkSpawn()
     {
         if (!IsOwner) return;
         player = GameObject.FindGameObjectWithTag("Player");
         controller = player.GetComponent<ThirdPersonController>();
+    
     }
+
     private void Update()
     {
-        if ((Input.GetKeyDown(KeyCode.H)))
+        if (Input.GetKeyDown(KeyCode.H))
         {
-            if (sceneviewcam.activeSelf == true)
+            if (sceneviewCamera.enabled)
             {
-                sceneviewcam.SetActive(false);
+                sceneviewCamera.enabled = false;
                 mainCamera.SetActive(true);
                 controller.gameObject.SetActive(true);
-                // thirdpersoncam.SetActive(true);
-                //  firstpersoncam.SetActive(true);
+              waypointPlacer.enabled = false;
             }
             else
             {
-                sceneviewcam.SetActive(true);
+                sceneviewCamera.enabled = true;
                 mainCamera.SetActive(false);
                 controller.gameObject.SetActive(false);
-                // thirdpersoncam.SetActive(false);
-                //  firstpersoncam.SetActive(false);
-
+                waypointPlacer.enabled = true;
             }
-
         }
     }
-
-
-
-
 }

@@ -50,7 +50,7 @@ GameObject:
   - component: {fileID: 7839197865634666871}
   - component: {fileID: 6398135642935424456}
   - component: {fileID: 554421034531054269}
-  - component: {fileID: 8258737690309003427}
+  - component: {fileID: 6536505637208404466}
   m_Layer: 0
   m_Name: Vroom 1
   m_TagString: Untagged
@@ -144,6 +144,7 @@ MonoBehaviour:
   carSpeed: 0
   isDrifting: 0
   isTractionLocked: 0
+  steering: 0
 --- !u!114 &-2157267271221413084
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,7 +219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6c0be61502bb534f922ebb746851216, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8258737690309003427
+--- !u!114 &6536505637208404466
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -227,13 +228,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 642287924342879162}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e12bbabfd394fe34c9af6d3a2e38e677, type: 3}
+  m_Script: {fileID: 11500000, guid: 28b5abfa0f469e64790e09266ca47156, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forwardAmount: 0
-  turnAmount: 0
-  turnTriggerTag: Turntrigger
-  targetPositionTag: Endpoint
+  waypointPlacer: {fileID: 0}
+  carController: {fileID: 627556911}
+  waypointThreshold: 1
+  frontLeftCollider: {fileID: 2239677824950174677}
 --- !u!1 &766808405809898022
 GameObject:
   m_ObjectHideFlags: 0

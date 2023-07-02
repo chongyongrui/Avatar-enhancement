@@ -7,7 +7,7 @@ using Unity.Netcode;
 public class PrometeoCarController : NetworkBehaviour
 {
     public ModelSpawner parent;
-    //CAR SETUP
+    //CAR SETUP 
 
       [Space(20)]
       //[Header("CAR SETUP")]
@@ -130,15 +130,15 @@ public class PrometeoCarController : NetworkBehaviour
       Rigidbody carRigidbody; // Stores the car's rigidbody.
       float steeringAxis; // Used to know whether the steering wheel has reached the maximum value. It goes from -1 to 1.
       float throttleAxis; // Used to know whether the throttle has reached the maximum value. It goes from -1 to 1.
-      float throttleInput;
-      float throttle;
-      float steeringInput;
-      float steering;
+      public float throttle;
+      public float steering;
       float driftingAxis;
       float localVelocityZ;
       float localVelocityX;
       bool deceleratingCar;
       bool touchControlsSetup = false;
+      private float throttleInput;
+     private float steeringInput;
       /*
       The following variables are used to store information about sideways friction of the wheels (such as
       extremumSlip,extremumValue, asymptoteSlip, asymptoteValue and stiffness). We change this values to
@@ -155,18 +155,15 @@ public class PrometeoCarController : NetworkBehaviour
 
     // Start is called before the first frame update
     void Start()
-    {
+    {    
       //In this part, we set the 'carRigidbody' value with the Rigidbody attached to this
       //gameObject. Also, we define the center of mass of the car with the Vector3 given
       //in the inspector.
       carRigidbody = gameObject.GetComponent<Rigidbody>();
       carRigidbody.centerOfMass = bodyMassCenter;
-        throttleInput = Input.GetAxis("Vertical");
-     steeringInput = Input.GetAxis("Horizontal");
+     
 
-    // Apply sensitivity to the throttle and steering inputs
-     throttle = throttleInput * throttleSensitivity;
-    steering = steeringInput * steeringSensitivity;
+    
 
       //Initial setup to calculate the drift value of the car. This part could look a bit
       //complicated, but do not be afraid, the only thing we're doing here is to save the default
@@ -262,11 +259,14 @@ public class PrometeoCarController : NetworkBehaviour
         }
 
     }
-
+    
     // Update is called once per frame
     void Update()
     {
+      //throttleInput = Input.GetAxis("Vertical");
+       // steeringInput = Input.GetAxis("Horizontal");
 
+        // Call the movement functions
       //CAR DATA
 
       // We determine the speed of the car.
@@ -363,7 +363,9 @@ public class PrometeoCarController : NetworkBehaviour
         if(!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D) && steeringAxis != 0f){
           ResetSteeringAngle();
         }
-        
+   
+      
+   
         
       }
 
@@ -496,22 +498,24 @@ public class PrometeoCarController : NetworkBehaviour
     //
     //ENGINE AND BRAKING METHODS
     //
+ 
 public void setInputs(float throttle, float steering)
 {
     throttle = Mathf.Clamp(throttle, -1f, 1f);
     steering = Mathf.Clamp(steering, -1f, 1f);
+    this.steering = steering;
 
     if (throttle > 0f)
     {
         CancelInvoke("DecelerateCar");
         deceleratingCar = false;
-        GoForward();
+        GoForwardSetInput(throttle);
     }
     else if (throttle < 0f)
     {
         CancelInvoke("DecelerateCar");
         deceleratingCar = false;
-        GoReverse();
+        GoReverseSetInput(-throttle);
     }
     else
     {
@@ -531,6 +535,97 @@ public void setInputs(float throttle, float steering)
     {
         ResetSteeringAngle();
     }
+}
+
+    private void Turn(float steering)
+{
+    // Calculate the steering angle based on the steering value
+    var steeringAngle = steering * maxSteeringAngle;
+
+    // Set the steer angle for the front wheel colliders
+    frontLeftCollider.steerAngle = steeringAngle;
+    frontRightCollider.steerAngle = steeringAngle;
+}
+public void GoForwardSetInput(float throttle)
+{
+    if (Mathf.Abs(localVelocityX) > 2.5f)
+    {
+        isDrifting = true;
+        DriftCarPS();
+    }
+    else
+    {
+        isDrifting = false;
+        DriftCarPS();
+    }
+
+    if (localVelocityZ < -1f)
+    {
+        Brakes();
+    }
+    else
+    {
+        if (Mathf.RoundToInt(carSpeed) < maxSpeed)
+        {
+            ApplyMotorTorque(throttle);
+            Turn(steering);
+        }
+        else
+        {
+            StopMotorTorque();
+        }
+    }
+}
+
+public void GoReverseSetInput(float throttle)
+{
+    if (Mathf.Abs(localVelocityX) > 2.5f)
+    {
+        isDrifting = true;
+        DriftCarPS();
+    }
+    else
+    {
+        isDrifting = false;
+        DriftCarPS();
+    }
+
+    if (localVelocityZ > 1f)
+    {
+        Brakes();
+    }
+    else
+    {
+        if (Mathf.RoundToInt(carSpeed) < maxSpeed)
+        {
+            ApplyMotorTorque(-throttle);
+            Turn(-steering);
+        }
+        else
+        {
+            StopMotorTorque();
+        }
+    }
+}
+
+private void ApplyMotorTorque(float throttle)
+{
+    frontLeftCollider.brakeTorque = 0;
+    frontLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttle;
+    frontRightCollider.brakeTorque = 0;
+    frontRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttle;
+    rearLeftCollider.brakeTorque = 0;
+    rearLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttle;
+    rearRightCollider.brakeTorque = 0;
+    rearRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttle;
+}
+
+private void StopMotorTorque()
+{
+    frontLeftCollider.motorTorque = 0;
+    frontRightCollider.motorTorque = 0;
+    rearLeftCollider.motorTorque = 0;
+    rearRightCollider.motorTorque = 0;
 }
 
     // This method apply positive torque to the wheels in order to go forward.
@@ -565,6 +660,7 @@ public void setInputs(float throttle, float steering)
           rearLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
           rearRightCollider.brakeTorque = 0;
           rearRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
+            Turn(steering);
         }else {
           // If the maxSpeed has been reached, then stop applying torque to the wheels.
           // IMPORTANT: The maxSpeed variable should be considered as an approximation; the speed of the car
@@ -609,6 +705,7 @@ public void setInputs(float throttle, float steering)
           rearLeftCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
           rearRightCollider.brakeTorque = 0;
           rearRightCollider.motorTorque = (accelerationMultiplier * 50f) * throttleAxis;
+            Turn(steering);
         }else {
           //If the maxReverseSpeed has been reached, then stop applying torque to the wheels.
           // IMPORTANT: The maxReverseSpeed variable should be considered as an approximation; the speed of the car

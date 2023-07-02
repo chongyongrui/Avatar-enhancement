@@ -5,7 +5,7 @@ public class WaypointPlacer : MonoBehaviour
 {
     [SerializeField] private LayerMask roadLayerMask; // Layer mask for the road
     [SerializeField] private GameObject waypointPrefab;
-    [SerializeField] private List<Waypoint> waypoints = new List<Waypoint>();
+    [SerializeField] public List<Waypoint> waypoints = new List<Waypoint>();
     private Camera freefly; // Declare the camera variable
 
     private void Start()

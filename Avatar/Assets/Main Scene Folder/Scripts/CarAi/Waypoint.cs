@@ -16,4 +16,5 @@ public class Waypoint : MonoBehaviour
     {
         order = newOrder;
     }
+    
 }
