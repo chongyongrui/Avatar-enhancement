@@ -53,7 +53,7 @@ GameObject:
   - component: {fileID: 6536505637208404466}
   m_Layer: 0
   m_Name: Vroom 1
-  m_TagString: Untagged
+  m_TagString: Car
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -144,6 +144,7 @@ MonoBehaviour:
   carSpeed: 0
   isDrifting: 0
   isTractionLocked: 0
+  throttle: 0
   steering: 0
 --- !u!114 &-2157267271221413084
 MonoBehaviour:
@@ -235,6 +236,7 @@ MonoBehaviour:
   carController: {fileID: 627556911}
   waypointThreshold: 1
   frontLeftCollider: {fileID: 2239677824950174677}
+  rotationThreshold: 10
 --- !u!1 &766808405809898022
 GameObject:
   m_ObjectHideFlags: 0

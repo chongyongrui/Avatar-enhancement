@@ -10,7 +10,11 @@ public class ModelSpawner : NetworkBehaviour
     private List<GameObject> spawnedPrefabs = new List<GameObject>();
     [SerializeField] private Vector3 spawnPosition = new Vector3(0.18f, -0.74f, 4.41f);
     [SerializeField] private LayerMask layer;
+    
+    public delegate void VehicleSpawned(bool value);
+    public static event VehicleSpawned OnVehicleSpawned;
 
+    public bool spawned = false;
     private ThirdPersonController playerController;
 
     private void Update()
@@ -30,10 +34,14 @@ public class ModelSpawner : NetworkBehaviour
                 if (spawnedPrefabs.Count == 0)
                 {
                     SpawnModelServerRPC();
+                    spawned = true;
+                    isSpawned(spawned);
                 }
                 else
                 {
                     DestroyModelServerRPC();
+                    spawned = false;
+                    isSpawned(spawned);
                 }
             }
         }
@@ -57,6 +65,7 @@ public class ModelSpawner : NetworkBehaviour
         PrometeoCarController carController = spawnedModel.GetComponent<PrometeoCarController>();
       
         spawnedModel.GetComponent<NetworkObject>().Spawn();
+
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -76,5 +85,10 @@ public class ModelSpawner : NetworkBehaviour
 {
     playerController = player.GetComponent<ThirdPersonController>();
 }
+ public void isSpawned(bool value)
+    {
+        spawned = value;
+        OnVehicleSpawned?.Invoke(spawned);
+    }
 
 }

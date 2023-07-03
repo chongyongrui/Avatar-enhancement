@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FollowWaypoint : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class FollowWaypoint : MonoBehaviour
         currentWaypointIndex = 0;
         isLastWaypoint = false;
         isLooping = false;
+        
     }
 
     private void Update()
