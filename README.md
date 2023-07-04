@@ -70,3 +70,13 @@ For the time being, I shall key in major updates that are pushed. Each update wi
     - Password Authentication
 - Footstep audio for walking and running
 
+### 5/6/2023
+
+- New car feature
+    - Driving with WASD input
+    - Drifting
+-  Gun picking up animation
+    - Auto trigger zones to shoot
+-   Animation rigging
+
+
