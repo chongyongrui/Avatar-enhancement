@@ -16,42 +16,41 @@ public class NetworkManagerUI : NetworkBehaviour
     [SerializeField] private Button LeaveButton;
 
     [SerializeField] private GameObject Holder;
-
+    public static NetworkManagerUI Singleton;
     private static Dictionary<ulong, PlayerData> clientData;//Dictionary to store 
     private bool isServerStarted = false;
 
-
-   // Start is called before the first frame update
+    public PlayerNameOverhead GetPlayerObj(ulong id) => NetworkManager.Singleton.ConnectedClients[id].PlayerObject.GetComponent<PlayerNameOverhead>();
+    public NetworkManager network;
+    public ulong LocalId => network.LocalClient.ClientId;
+    // Start is called before the first frame update
     private void Start()
-    {
-    NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
-     NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
-
-    
-
-
+    { //network = NetworkManager.Singleton;
+        NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnect;
+        NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnect;
     }
     private void Destroy()
     {
         if (NetworkManager.Singleton == null) { return; }
-       // NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
-       // NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
+        // NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
+        // NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
     }
     public void Leave()
-    {   NetworkManager.Singleton.Shutdown();
+    {
+        NetworkManager.Singleton.Shutdown();
         if (IsClient) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
-        
+
 
         if (NetworkManager.Singleton.IsServer)
         {
             NetworkManager.Singleton.ConnectionApprovalCallback -= ApprovalCheck;
-        } 
-        
+        }
+
         Holder.SetActive(true);
 
     }
     public void Client()
-    
+
     {   //Convert to byte array;
         // var payload = JsonUtility.ToJson(new ConnectionPayload()
         // {
@@ -62,32 +61,36 @@ public class NetworkManagerUI : NetworkBehaviour
 
         // byte[] payloadBytes = Encoding.ASCII.GetBytes(payload);
         // NetworkManager.Singleton.NetworkConfig.ConnectionData = payloadBytes;
-        NetworkManager.Singleton.StartClient();
+        if (nameInputField.text.Length < 4)
+        {
+            nameInputField.Select();
+            nameInputField.ActivateInputField();
+        }
+        else
+        {
+            NetworkManager.Singleton.StartClient();
+        }
 
     }
     public void Host()
     {   //Instantiate dictornary 'clientData' for Id->PlayerData;
-        
-    //     clientData = new Dictionary<ulong, PlayerData>();
-    //     clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
-      
-    //    //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
-        NetworkManager.Singleton.StartHost();
+
+        //     clientData = new Dictionary<ulong, PlayerData>();
+        //     clientData[NetworkManager.Singleton.LocalClientId] = new PlayerData(nameInputField.text);
+
+        //    //NetworkManager.Singleton.ConnectionApprovalCallback = ApprovalCheck;
+        if (nameInputField.text.Length < 4)
+        {
+            nameInputField.Select();
+            nameInputField.ActivateInputField();
+        }
+        else
+        {
+            NetworkManager.Singleton.StartHost();
+        }
         //setPassword(passwordInputField.text);
-         
+
     }
-
-    // '?' allows null return for un-nullable;
-    // public static PlayerData? GetPlayerData(ulong clientId)
-    // {   ////For name display;
-    //     ////Get the client data for the specific id;
-    //     if (clientData.TryGetValue(clientId, out PlayerData playerData))
-    //     {
-    //         return playerData;
-    //     }
-
-    //     return null;
-    // }
 
     private void HandleClientDisconnect(ulong clientId)
     {
@@ -106,16 +109,41 @@ public class NetworkManagerUI : NetworkBehaviour
         }
     }
     private void HandleClientConnect(ulong clientId)
-    {Debug.Log($"ClientId {clientId} connected, LocalClientId is {NetworkManager.Singleton.LocalClientId}");
+    {//Debug.Log($"ClientId {clientId} connected, LocalClientId is {NetworkManager.Singleton.LocalClientId}");
         if (clientId == NetworkManager.Singleton.LocalClientId)
         {
             Holder.SetActive(false);
             LeaveButton.gameObject.SetActive(true);
-            
+            //UpdatePlayernameServerRPC(nameInputField.text);
+
 
         }
     }
-    public void setPassword(string password){
+    [ServerRpc(RequireOwnership = false)]
+    public void MyGlobalServerRpc(ServerRpcParams serverRpcParams = default)
+    {
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        if (NetworkManager.ConnectedClients.ContainsKey(clientId))
+        {
+            var client = NetworkManager.ConnectedClients[clientId];
+            // Do things for this client
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdatePlayernameServerRPC(string clientName, ServerRpcParams serverRpcParams)
+    {
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        if (NetworkManager.ConnectedClients.ContainsKey(clientId))
+        {
+            var client = NetworkManager.ConnectedClients[clientId];
+            PlayerNameOverhead playerObj = NetworkManagerUI.Singleton.GetPlayerObj(clientId);
+            // playerObj.UpdateplayernameServerRPC(clientName);
+        }
+    }
+
+    public void setPassword(string password)
+    {
         byte[] hashed = Encoding.ASCII.GetBytes(password);
         NetworkManager.Singleton.NetworkConfig.ConnectionData = hashed;
     }
@@ -130,11 +158,11 @@ public class NetworkManagerUI : NetworkBehaviour
 
         byte[] hostHash = NetworkManager.Singleton.NetworkConfig.ConnectionData;
 
-    // Check if the hashes match
-    
+        // Check if the hashes match
+
         bool approved = clienthash.Equals(hostHash);
 
-   
+
         if (approved)
         {
             // Store their player data in the clientData dictionary
@@ -144,7 +172,7 @@ public class NetworkManagerUI : NetworkBehaviour
             response.Approved = true;
             response.CreatePlayerObject = true;
             // Position to spawn the player object   (if null it uses default of Vector3.zero)
-    
+
         }
         else
         {

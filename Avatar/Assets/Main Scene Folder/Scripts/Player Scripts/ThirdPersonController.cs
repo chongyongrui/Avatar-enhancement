@@ -3,8 +3,10 @@ using Unity.Netcode;
 using Cinemachine;
 using StarterAssets;
 using TMPro;
+using UnityEngine.Animations.Rigging;
 
-#if ENABLE_INPUT_SYSTEM 
+
+#if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 
 #endif
@@ -13,6 +15,7 @@ namespace StarterAssets
 {
     [RequireComponent(typeof(CharacterController))]
 #if ENABLE_INPUT_SYSTEM 
+
     [RequireComponent(typeof(PlayerInput))]
 #endif
     public class ThirdPersonController : NetworkBehaviour
@@ -57,6 +60,15 @@ namespace StarterAssets
 
         public LayerMask GroundLayers;
 
+
+        [Header("Player Die")]
+        private int animDying;
+        private bool isDead = false;
+
+        [SerializeField] private GameObject bloodGush;
+
+        [SerializeField] private Transform bloodGushOrigin;
+
         [Header("Cinemachine")]
 
         CinemachineComponentBase componentBase;
@@ -98,20 +110,23 @@ namespace StarterAssets
         private int animFreefall;
         private int animMotionSPD;
 
-#if ENABLE_INPUT_SYSTEM 
+
+#if ENABLE_INPUT_SYSTEM
         private PlayerInput playerInput;
 #endif
         private Animator anim;
         private CharacterController controller;
         private StarterAssetsInputs input;
         private Transform mainCamera;
-        private CinemachineVirtualCamera ThirdPersonCam;
-        private CinemachineVirtualCameraBase FirstPersonCam;
+        public CinemachineVirtualCamera ThirdPersonCam;
+        public CinemachineVirtualCamera FirstPersonCam;
+        public GameObject carCamera;
 
         private const float thresehold = 0.01f;
         private const float speedOffset = 0.1f;
         private bool hasAnim;
         private bool firstpersonstatus = false;
+        private RigBuilder rb;
         private bool IsCurrentDeviceMouse
         {
             get
@@ -132,20 +147,46 @@ namespace StarterAssets
         }
 
         private void Start()
-        {   Debug.Log(NetworkManager.Singleton.LocalClientId);
-            cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+        {  // Debug.Log(NetworkManager.Singleton.LocalClientId);
+
+            //cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
             hasAnim = TryGetComponent(out anim);
             controller = GetComponent<CharacterController>();
             input = GetComponent<StarterAssetsInputs>();
             //playerNameText = GameObject.FindGameObjectWithTag("nop").GetComponentInChildren<TMP_Text>();
+           
 
-            //            FirstPersonCam.gameObject.SetActive(false);
             AssignAnimationIDs();
 
             // reset our timeouts on start
             jumpWait = JumpTimeout;
             fallTimeoutDelta = FallTimeout;
+            transform.position = new Vector3(0, 0, 0);
+            if (IsOwner && IsClient)
+            {
+                bloodGush.gameObject.SetActive(false);
+
+                if (ThirdPersonCam == null && FirstPersonCam == null)
+                {
+                    ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
+                     ThirdPersonCam.Follow = transform.GetChild(0).transform;
+                
+                    componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
+                    FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
+                          FirstPersonCam.Follow = transform.GetChild(0).transform;
+                          FirstPersonCam.gameObject.SetActive(false);
+                }
+
+
+                if (FirstPersonCam == null)
+                {
+                    Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
+
+                }
+
+               
+            }
 
 
         }
@@ -154,34 +195,46 @@ namespace StarterAssets
         {
             if (IsOwner)
             {
-                hasAnim = TryGetComponent(out anim);
-                GroundedCheck();
-                JumpAndGravity();
-                Move();
-                if (firstpersonstatus == false)
+                //hasAnim = TryGetComponent(out anim);
+                if (!isDead)
                 {
-                    Scroll();
+                    GroundedCheck();
+                    JumpAndGravity();
+                    Move();
+                    if (firstpersonstatus == false)
+                    {
+                        Scroll();
+                    }
+                    if (Input.GetButtonDown("CamToggle"))
+                    {
+                        if (ThirdPersonCam.gameObject.activeSelf)
+                        {
+
+                            FirstPersonCam.gameObject.SetActive(true);
+                            ThirdPersonCam.gameObject.SetActive(false);
+                            firstpersonstatus = true;
+                        
+                            Cursor.lockState = CursorLockMode.Locked;
+                        }
+                        else
+                        {
+                            FirstPersonCam.gameObject.SetActive(false);
+                            ThirdPersonCam.gameObject.SetActive(true);
+                            firstpersonstatus = false;
+                            Cursor.lockState = CursorLockMode.None;
+                        }
+
+
+                    }
                 }
-                if (Input.GetButtonDown("CamToggle"))
+                else
                 {
-                    if (ThirdPersonCam.isActiveAndEnabled)
-                    {
-
-                        FirstPersonCam.gameObject.SetActive(true);
-                        ThirdPersonCam.gameObject.SetActive(false);
-                        firstpersonstatus = true;
-                        Cursor.lockState = CursorLockMode.Locked;
-                    }
-                    else
-                    {
-                        FirstPersonCam.gameObject.SetActive(false);
-                        ThirdPersonCam.gameObject.SetActive(true);
-                        firstpersonstatus = false;
-                        Cursor.lockState = CursorLockMode.None;
-                    }
-
+                    anim.SetBool(animDying, true);
+                    bloodGush.gameObject.SetActive(true);
+                    bloodGush.transform.position = bloodGushOrigin.position;
 
                 }
+
             }
         }
 
@@ -200,30 +253,18 @@ namespace StarterAssets
 
             if (IsOwner)
             {
-              
-                if (ThirdPersonCam == null)
-                {
-                    ThirdPersonCam = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<CinemachineVirtualCamera>();
-                    componentBase = ThirdPersonCam.GetCinemachineComponent(CinemachineCore.Stage.Body);
-                }
 
-                // you turned off first person camera, hence find game object with tag will always return null.
-                // either u try to set the reference here first before CameraSwitcher.cs kicks in
-                // or you save the reference in cameraswitcher and store a reference here.
-                // if u want, can set cameraswitcher to be a singleton
-                if (FirstPersonCam == null)
-                {
-                    Debug.Log(GameObject.FindGameObjectWithTag("FirstPersonCamera"));
-                    FirstPersonCam = GameObject.FindGameObjectWithTag("FirstPersonCamera").GetComponent<CinemachineVirtualCamera>();
-                }
 
-                ThirdPersonCam.Follow = transform.GetChild(0).transform;
-                FirstPersonCam.Follow = transform.GetChild(0).transform;
                 playerInput = GetComponent<PlayerInput>();
                 playerInput.enabled = true;
-                FirstPersonCam.gameObject.SetActive(false);
+                //FirstPersonCam.gameObject.SetActive(false);
 
             }
+        }
+        [ServerRpc]
+        private void TestServerRpc()
+        {
+            Debug.Log("TEst server rpc" + OwnerClientId);
         }
         private void AssignAnimationIDs()
         {   //Take parameters in animators and sets to int in script;
@@ -232,6 +273,7 @@ namespace StarterAssets
             animJump = Animator.StringToHash("Jump");
             animFreefall = Animator.StringToHash("FreeFall");
             animMotionSPD = Animator.StringToHash("MotionSpeed");
+            animDying = Animator.StringToHash("Dying");
         }
 
         private void GroundedCheck()
@@ -500,6 +542,15 @@ namespace StarterAssets
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
                 AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(controller.center), FootstepAudioVolume);
+            }
+        }
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("PlayerDie"))
+            {
+                isDead = true;
+
+
             }
         }
     }
