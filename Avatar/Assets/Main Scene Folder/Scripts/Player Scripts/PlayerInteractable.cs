@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.Netcode;
+using System;
 
 public class PlayerInteractable : NetworkBehaviour
 {
@@ -38,6 +39,10 @@ public class PlayerInteractable : NetworkBehaviour
 
     public delegate void HasWeaponChanged(bool value);
     public static event HasWeaponChanged OnHasWeaponChanged;
+
+    public DemoScript demoScript;
+    [SerializeField]  private Item itemAK47;
+    
 
     private void Start()
     {
@@ -95,12 +100,22 @@ public class PlayerInteractable : NetworkBehaviour
 
                         // Trigger the pickup animation with the weapon identifier
                         TriggerPickupAnimation(collider.transform.position, weaponIdentifier);
-
+                        AddItemToInventory(weaponIdentifier);
                         Debug.Log("Playing");
                         break;
                     }
                 }
             }
+        }
+        
+    }
+
+    private void AddItemToInventory(string weaponIdentifier)
+    {
+        if (weaponIdentifier == "AK47")
+        {
+            InventoryManager.instance.AddItem(itemAK47);
+            
         }
         
     }

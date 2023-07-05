@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
 
+    public static InventoryManager instance; 
+    public Item[] startingItems; 
     public InventorySlot[] InventorySlots;
     public int maxStackedItems = 10;
     public GameObject inventoryItemPrefab;
@@ -12,7 +15,36 @@ public class InventoryManager : MonoBehaviour
     int selectedSlot = 0;
 
 
-    public Item GetSelectedItem(bool used){
+    private void Awake()
+    {
+        instance = this; 
+    }
+
+
+    private void Start()
+    {
+        foreach(var item in startingItems)
+        {
+            AddItem(item);
+        }
+        ChangeSelectedSlot(0);
+    }
+
+    private void Update()
+    {
+       if (Input.inputString!= null)
+        {
+            bool isNumber = int.TryParse(Input.inputString, out int number);
+            if(isNumber && number>0 && number <7)
+            {
+                ChangeSelectedSlot((int)number-1);
+            }
+        }
+
+    }
+
+    public Item GetSelectedItem(bool used)
+    {
         InventorySlot slot = InventorySlots[selectedSlot];
         InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
         if (itemInSlot != null)
@@ -35,25 +67,6 @@ public class InventoryManager : MonoBehaviour
 
         }
         return null;
-    }
-
-
-    private void Start()
-    {
-        ChangeSelectedSlot(0);
-    }
-
-    private void Update()
-    {
-       if (Input.inputString!= null)
-        {
-            bool isNumber = int.TryParse(Input.inputString, out int number);
-            if(isNumber && number>0 && number <7)
-            {
-                ChangeSelectedSlot((int)number-1);
-            }
-        }
-
     }
 
     void ChangeSelectedSlot(int newValue)
@@ -91,6 +104,8 @@ public class InventoryManager : MonoBehaviour
             if (itemInSlot == null)
             {
                 SpawnNewItemInSlot(item, slot);
+                ChangeSelectedSlot(i);
+
                 return true;
             }
             
