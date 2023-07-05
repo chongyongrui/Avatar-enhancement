@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Item M4
   m_EditorClassIdentifier: 
   name: M4 Rifle
-  image: {fileID: 21300000, guid: ab1f5ac245f3c4342a3f6ae863092484, type: 3}
+  image: {fileID: 21300000, guid: 9780febfffc02204c8292717576d9716, type: 3}
   stackable: 0
   prefab: {fileID: 100000, guid: fddeeac0ebed86c4cab4320764b5c227, type: 3}
