@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DemoScript : MonoBehaviour
+public class InventoryMenuScript : MonoBehaviour
 {
     public InventoryManager inventoryManager;
     public Item[] itemsToPickUp ;
-    //public List<Item> itemsToPick = new List<Item>();
+    
 
     public void PickUpItem(int id)
     {

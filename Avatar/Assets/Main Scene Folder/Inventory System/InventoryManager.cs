@@ -41,6 +41,18 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
+
+       if (Input.GetKeyDown(KeyCode.Comma) && selectedSlot!= 0 ) {
+           
+            ChangeSelectedSlot(selectedSlot-1);
+        }
+
+       if (Input.GetKeyDown(KeyCode.Period) && selectedSlot != 5)
+        {
+            
+            ChangeSelectedSlot(selectedSlot+1);
+        }
+
     }
 
     public Item GetSelectedItem(bool used)

@@ -40,7 +40,6 @@ public class PlayerInteractable : NetworkBehaviour
     public delegate void HasWeaponChanged(bool value);
     public static event HasWeaponChanged OnHasWeaponChanged;
 
-    public DemoScript demoScript;
     [SerializeField]  private Item itemAK47;
     
 

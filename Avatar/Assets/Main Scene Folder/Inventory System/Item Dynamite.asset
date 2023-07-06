@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Item Dynamite
   m_EditorClassIdentifier: 
   name: Dynamite
-  image: {fileID: 21300000, guid: 2b1f12b548d31ea44ad2ae1b1a2ec3fb, type: 3}
+  image: {fileID: 21300000, guid: bf1846ef3b3f45b46a2c7b5c1ead5f74, type: 3}
   stackable: 1
-  prefab: {fileID: 1000012442026752, guid: 8631fae872618c44d99e2f58710ed073, type: 3}
+  prefab: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
