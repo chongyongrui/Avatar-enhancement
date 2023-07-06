@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,7 +10,8 @@ public class PickableItemScript : MonoBehaviour
     GameObject objectToPickUp; // the gameobject onwhich you collided with
     public bool hasItem; // a bool to see if you have an item in your hand
     public static PickableItemScript instance;
-    public Camera camera;
+   
+    [SerializeField]Camera aimCam;
 
     List<GameObject> list = new List<GameObject>();
 
@@ -23,7 +25,7 @@ public class PickableItemScript : MonoBehaviour
     {
         canpickup = false;    //setting both to false
         hasItem = false;
-        camera = GameObject.FindGameObjectWithTag("PlayerFollowCamera").GetComponent<Camera>();
+        
 
 
     }
@@ -45,7 +47,7 @@ public class PickableItemScript : MonoBehaviour
                 Quaternion myRotation = Quaternion.identity;
                 myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
                 objectToPickUp.transform.rotation = myRotation;
-                //list.Add(gunToPickUp);
+                
 
             }
 
@@ -65,23 +67,27 @@ public class PickableItemScript : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && hasItem == true && objectToPickUp.name == "Dynamite") // holding dynamite and click to use
+        if (Input.GetKeyDown(KeyCode.Mouse0) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
         {
             objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
-
             objectToPickUp.transform.parent = null; // make the object not be a child of the hands
             hasItem = false;
-
             BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
             bc[1].enabled = true;
-
+            
+            //throw dynamite in direction of camera
+            Vector3 aimDir = Camera.main.transform.forward ;
             Rigidbody rb = objectToPickUp.GetComponent<Rigidbody>();
-            //Vector3 cameraDirection = camera.transform.forward;
-            rb.AddForce(Vector3.up * 2.5f);
-            rb.AddForce(Vector3.forward * 10f);
+            rb.AddForce(aimDir.normalized *20f + Vector3.up * 5f, ForceMode.Impulse);
+
+            //trigger the dynamite to explode 
+            objectToPickUp.GetComponent<Grenade>().isTriggered = true ;
+
 
         }
     }
+
+   
     private void OnTriggerEnter(Collider other) // to see when the player enters the collider
     {
         Debug.Log("Picakable object found");

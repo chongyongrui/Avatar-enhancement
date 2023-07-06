@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Grenade : MonoBehaviour
 {
-
-    public float delay = 10f;
-    public float blastRadius = 10000000;
-    public float explosionForce = 700;
+    public bool isTriggered = false;
+    public float delay = 5f;
+    public float blastRadius = 5;
+    public float explosionForce = 1000000;
 
     public GameObject explosionEffect;
     float countdown;
@@ -21,12 +21,16 @@ public class Grenade : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        countdown -= Time.deltaTime;  
-        if (countdown <= 0 && !isExploeded)
+        if (isTriggered)
         {
-            Explode();
-            isExploeded = true;
+            countdown -= Time.deltaTime;
+            if (countdown <= 0 && !isExploeded)
+            {
+                Explode();
+                isExploeded = true;
+            }
         }
+       
     }
 
     void Explode()
