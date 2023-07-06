@@ -1084,7 +1084,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myHands: {fileID: 4900686166078442691}
   hasItem: 0
-  camera: {fileID: 0}
+  dynamiteItem: {fileID: 11400000, guid: dd122243760acaf448c1b9ee525f0733, type: 2}
+  aimCam: {fileID: 0}
 --- !u!1 &4900686166078442622
 GameObject:
   m_ObjectHideFlags: 0

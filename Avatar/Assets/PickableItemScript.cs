@@ -10,7 +10,9 @@ public class PickableItemScript : MonoBehaviour
     GameObject objectToPickUp; // the gameobject onwhich you collided with
     public bool hasItem; // a bool to see if you have an item in your hand
     public static PickableItemScript instance;
-   
+    [SerializeField] private Item dynamiteItem;
+    
+
     [SerializeField]Camera aimCam;
 
     List<GameObject> list = new List<GameObject>();
@@ -47,6 +49,14 @@ public class PickableItemScript : MonoBehaviour
                 Quaternion myRotation = Quaternion.identity;
                 myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
                 objectToPickUp.transform.rotation = myRotation;
+
+                //add item to inventory slot
+                if (objectToPickUp.GetComponent<Grenade>())
+                {
+                    InventoryManager.instance.AddItem(dynamiteItem);
+                }
+                
+
                 
 
             }
@@ -82,6 +92,9 @@ public class PickableItemScript : MonoBehaviour
 
             //trigger the dynamite to explode 
             objectToPickUp.GetComponent<Grenade>().isTriggered = true ;
+
+            //remove the dynamite from inventory
+            InventoryManager.instance.GetSelectedItem(true);
 
 
         }
