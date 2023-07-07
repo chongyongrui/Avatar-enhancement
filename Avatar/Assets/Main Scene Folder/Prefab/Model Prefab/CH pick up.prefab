@@ -982,7 +982,6 @@ MonoBehaviour:
   weaponPose: {fileID: 3597202028311100565}
   TargetAiming: {fileID: 728091442247835827}
   rightclickAiming: {fileID: 3788969460855052254}
-  demoScript: {fileID: 0}
   itemAK47: {fileID: 11400000, guid: 9ce89312de1b8ec498db04c649d364ba, type: 2}
 --- !u!114 &5075346856353519385
 MonoBehaviour:
@@ -1086,6 +1085,7 @@ MonoBehaviour:
   hasItem: 0
   dynamiteItem: {fileID: 11400000, guid: dd122243760acaf448c1b9ee525f0733, type: 2}
   aimCam: {fileID: 0}
+  newDynamiteItem: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
 --- !u!1 &4900686166078442622
 GameObject:
   m_ObjectHideFlags: 0

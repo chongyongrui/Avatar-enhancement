@@ -1,6 +1,8 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class PickableItemScript : MonoBehaviour
@@ -11,11 +13,12 @@ public class PickableItemScript : MonoBehaviour
     public bool hasItem; // a bool to see if you have an item in your hand
     public static PickableItemScript instance;
     [SerializeField] private Item dynamiteItem;
+    [SerializeField]Camera aimCam;
     
 
-    [SerializeField]Camera aimCam;
-
-    List<GameObject> list = new List<GameObject>();
+    List<GameObject> HiddenItems = new List<GameObject>();
+    Animator animator;
+    [SerializeField] public GameObject newDynamiteItem;
 
 
     private void Awake()
@@ -27,39 +30,74 @@ public class PickableItemScript : MonoBehaviour
     {
         canpickup = false;    //setting both to false
         hasItem = false;
-        
-
-
+        animator = GetComponent<Animator>();
+      
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        
+
+        if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !HoldingPickableObject()) // character is not holding something but has a selected object
+        {
+            Debug.Log("spawning new object into player hand");
+            //spawn object into the players hand
+            Item item = InventoryManager.instance.GetSelectedItem(false);
+            GameObject newObject = new GameObject();
+            if (item.name == "Dynamite")
+            {
+                newObject = Instantiate(newDynamiteItem);
+            }
+            newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
+            BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
+            bc[1].enabled = false;
+            newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
+            newObject.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
+            hasItem = true;
+
+
+        }else if (InventoryManager.instance.GetSelectedItem(false) == null && HoldingPickableObject()) // character has not selected anything
+        {
+
+        }
+
+
+
+
         if (canpickup == true) // if you enter thecollider of the objecct
         {
-            if (Input.GetKeyDown(KeyCode.F) && hasItem == false)
+            if (Input.GetKeyDown(KeyCode.F)) //picks up object and add to inventory manager
             {
+                animator.SetTrigger("Pickup");
                 objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
-                objectToPickUp.transform.position = myHands.transform.position; // sets the position of the object to your hand position
-                objectToPickUp.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
-                hasItem = true;
                 BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
                 bc[1].enabled = false;
-
-                Quaternion myRotation = Quaternion.identity;
-                myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
-                objectToPickUp.transform.rotation = myRotation;
-
                 //add item to inventory slot
                 if (objectToPickUp.GetComponent<Grenade>())
                 {
                     InventoryManager.instance.AddItem(dynamiteItem);
                 }
-                
+
+
+                if (hasItem == true) 
+                {
+                    //make new picked up item disappear 
+                    Destroy(objectToPickUp);
+                }
+                else // visually pick up the new item
+                {
+                    objectToPickUp.transform.position = myHands.transform.position; // sets the position of the object to your hand position
+                    objectToPickUp.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
+                    hasItem = true;
+                    Quaternion myRotation = Quaternion.identity;
+                    myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
+                    objectToPickUp.transform.rotation = myRotation;
+                }
 
                 
-
-            }
+            }   
 
 
         }
@@ -75,12 +113,14 @@ public class PickableItemScript : MonoBehaviour
             bc[1].enabled = true;
 
 
-        }
+        }  
 
         if (Input.GetKeyDown(KeyCode.Mouse0) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
         {
+            //objectToPickUp = GetHeldObject();
             objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
             objectToPickUp.transform.parent = null; // make the object not be a child of the hands
+            animator.SetTrigger("Throw");
             hasItem = false;
             BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
             bc[1].enabled = true;
@@ -95,7 +135,6 @@ public class PickableItemScript : MonoBehaviour
 
             //remove the dynamite from inventory
             InventoryManager.instance.GetSelectedItem(true);
-
 
         }
     }
@@ -115,5 +154,24 @@ public class PickableItemScript : MonoBehaviour
     {
         canpickup = false; //when you leave the collider set the canpickup bool to false
 
+    }
+
+    public bool HoldingPickableObject()
+    {
+        foreach (Transform child in instance.transform)
+        {
+            if (child.tag == "PickableObject")
+                return true;
+        }
+        return false;
+    }
+    public GameObject GetHeldObject()
+    {
+        foreach (Transform child in instance.transform)
+        {
+            if (child.tag == "PickableObject")
+                return child.gameObject;
+        }
+        return null;
     }
 }

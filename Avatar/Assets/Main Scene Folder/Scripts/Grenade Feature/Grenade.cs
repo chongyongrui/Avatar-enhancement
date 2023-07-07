@@ -12,10 +12,12 @@ public class Grenade : MonoBehaviour
     public GameObject explosionEffect;
     float countdown;
     bool isExploeded = false;
+    public AudioClip soundEffect;
     // Start is called before the first frame update
     void Start()
     {
         countdown = delay;
+       
     }
 
     // Update is called once per frame
@@ -37,6 +39,7 @@ public class Grenade : MonoBehaviour
     {
         // show effect
         Instantiate(explosionEffect, transform.position, transform.rotation);
+        AudioSource.PlayClipAtPoint(soundEffect, transform.position);
 
         // get nearby objects
         Collider[] colliders = Physics.OverlapSphere(transform.position, blastRadius);
@@ -47,6 +50,7 @@ public class Grenade : MonoBehaviour
             if (rb != null)
             {
                 rb.AddExplosionForce(explosionForce, transform.position, blastRadius);
+                
             }
         }
 

@@ -35,7 +35,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7110251769516457737
 MeshFilter:
@@ -133,6 +133,7 @@ MonoBehaviour:
   blastRadius: 5
   explosionForce: 1000000
   explosionEffect: {fileID: 1121192042590650, guid: e1b08032bec16ba4eb1ae23cbd572664, type: 3}
+  soundEffect: {fileID: 8300000, guid: dc9a8b109d30b5d40a6ffc1b4b8bd1cc, type: 3}
 --- !u!65 &7128753838982334005
 BoxCollider:
   m_ObjectHideFlags: 0

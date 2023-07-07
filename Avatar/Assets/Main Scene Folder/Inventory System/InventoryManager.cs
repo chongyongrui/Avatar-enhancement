@@ -8,9 +8,11 @@ public class InventoryManager : MonoBehaviour
 
     public static InventoryManager instance; 
     public Item[] startingItems; 
-    public InventorySlot[] InventorySlots;
+    public InventorySlot[] inventorySlots;
     public int maxStackedItems = 10;
     public GameObject inventoryItemPrefab;
+    public Item selectedItem;
+    public List<GameObject> hiddenInventoryBackpackItems;
 
     int selectedSlot = 0;
 
@@ -27,41 +29,38 @@ public class InventoryManager : MonoBehaviour
         {
             AddItem(item);
         }
-        ChangeSelectedSlot(0);
+        ChangeSelectedSlot(1);
     }
 
     private void Update()
     {
-       if (Input.inputString!= null)
-        {
-            bool isNumber = int.TryParse(Input.inputString, out int number);
-            if(isNumber && number>0 && number <7)
-            {
-                ChangeSelectedSlot((int)number-1);
-            }
-        }
-
-
-       if (Input.GetKeyDown(KeyCode.Comma) && selectedSlot!= 0 ) {
+ 
+       if (Input.GetKeyDown(KeyCode.Comma) && selectedSlot!= 0 ) {  // user changes selcted slot 
            
             ChangeSelectedSlot(selectedSlot-1);
+            selectedItem = GetSelectedItem(false);
         }
 
        if (Input.GetKeyDown(KeyCode.Period) && selectedSlot != 5)
         {
             
             ChangeSelectedSlot(selectedSlot+1);
+            selectedItem = GetSelectedItem(false);
+           
         }
+      
+       
 
     }
 
     public Item GetSelectedItem(bool used)
     {
-        InventorySlot slot = InventorySlots[selectedSlot];
+        InventorySlot slot = inventorySlots[selectedSlot];
         InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-        if (itemInSlot != null)
+        if (itemInSlot != null) //there exists an item in the selcted slot 
         {
             Item item = itemInSlot.item;
+
             if (used)
             {
                 itemInSlot.count--;
@@ -74,6 +73,7 @@ public class InventoryManager : MonoBehaviour
                     itemInSlot.RefreshCount();
                 }
             }
+            
 
             return item;
 
@@ -85,19 +85,19 @@ public class InventoryManager : MonoBehaviour
     {
         if (selectedSlot >= 0)
         {
-            InventorySlots[selectedSlot].Unselect();
+            inventorySlots[selectedSlot].Unselect();
         }
-        
-        InventorySlots[newValue].Select();
+
+        inventorySlots[newValue].Select();
         selectedSlot = newValue;
     }
 
 
     public bool AddItem(Item item)
     {
-        for (int i = 0; i < InventorySlots.Length; i++)
+        for (int i = 0; i < inventorySlots.Length; i++)
         {
-            InventorySlot slot = InventorySlots[i];
+            InventorySlot slot = inventorySlots[i];
             InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
             if (itemInSlot != null && itemInSlot.item == item && itemInSlot.count < maxStackedItems && itemInSlot.item.stackable)
             {
@@ -109,9 +109,9 @@ public class InventoryManager : MonoBehaviour
         }
 
 
-        for (int i = 0; i < InventorySlots.Length; i++)
+        for (int i = 0; i < inventorySlots.Length; i++)
         {
-           InventorySlot slot = InventorySlots[i];
+           InventorySlot slot = inventorySlots[i];
            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
             if (itemInSlot == null)
             {
@@ -131,4 +131,6 @@ public class InventoryManager : MonoBehaviour
         InventoryItem inventoryItem = newItemGameObject.GetComponent<InventoryItem>();
         inventoryItem.InitialiseItem(item);
     }
+
+    
 }
