@@ -6,50 +6,53 @@ using UnityEngine;
 public class InventoryManager : MonoBehaviour
 {
 
-    public static InventoryManager instance; 
-    public Item[] startingItems; 
+    public static InventoryManager instance;
+    
     public InventorySlot[] inventorySlots;
     public int maxStackedItems = 10;
     public GameObject inventoryItemPrefab;
     public Item selectedItem;
     public List<GameObject> hiddenInventoryBackpackItems;
+    public int playerID;
 
     int selectedSlot = 0;
 
 
     private void Awake()
     {
-        instance = this; 
+        instance = this;
     }
 
 
     private void Start()
     {
-        foreach(var item in startingItems)
+        foreach (var item in DatabaseScript.instance.startingItems)
         {
-            AddItem(item);
+            AddItem(item, false);
+            Debug.Log("added item   " + item.name);
         }
         ChangeSelectedSlot(1);
     }
 
     private void Update()
     {
- 
-       if (Input.GetKeyDown(KeyCode.Comma) && selectedSlot!= 0 ) {  // user changes selcted slot 
-           
-            ChangeSelectedSlot(selectedSlot-1);
+
+        if (Input.GetKeyDown(KeyCode.Comma) && selectedSlot != 0)
+        {  // user changes selcted slot 
+
+            ChangeSelectedSlot(selectedSlot - 1);
             selectedItem = GetSelectedItem(false);
         }
 
-       if (Input.GetKeyDown(KeyCode.Period) && selectedSlot != 5)
+        if (Input.GetKeyDown(KeyCode.Period) && selectedSlot != 5)
         {
-            
-            ChangeSelectedSlot(selectedSlot+1);
+
+            ChangeSelectedSlot(selectedSlot + 1);
             selectedItem = GetSelectedItem(false);
-           
+
         }
-      
-       
+
+
 
     }
 
@@ -73,7 +76,7 @@ public class InventoryManager : MonoBehaviour
                     itemInSlot.RefreshCount();
                 }
             }
-            
+
 
             return item;
 
@@ -93,8 +96,14 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    public bool AddItem(Item item)
+    public bool AddItem(Item item, bool isNewItem)
     {
+        if (isNewItem)
+        {
+            AddItemInventoryDB(item);
+        }
+        
+
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             InventorySlot slot = inventorySlots[i];
@@ -111,8 +120,8 @@ public class InventoryManager : MonoBehaviour
 
         for (int i = 0; i < inventorySlots.Length; i++)
         {
-           InventorySlot slot = inventorySlots[i];
-           InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
+            InventorySlot slot = inventorySlots[i];
+            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
             if (itemInSlot == null)
             {
                 SpawnNewItemInSlot(item, slot);
@@ -120,7 +129,7 @@ public class InventoryManager : MonoBehaviour
 
                 return true;
             }
-            
+
         }
         return false;
     }
@@ -132,5 +141,41 @@ public class InventoryManager : MonoBehaviour
         inventoryItem.InitialiseItem(item);
     }
 
-    
+
+    public void AddItemInventoryDB(Item item)
+    {
+
+
+        int quantity = 1;
+        int weaponID = -1;
+
+
+
+        switch (item.name)
+        {
+            case "Ak47":
+                weaponID = 1;
+                break;
+            case "Dynamite":
+                weaponID = 2;
+                break;
+            case "M4 Rifle":
+                weaponID = 3;
+                break;
+            case "Smg":
+                weaponID = 4;
+                break;
+
+
+        }
+
+
+
+        DatabaseScript.instance.AddWeapon(playerID, weaponID, quantity);
+    }
+
+
+
+
 }
+

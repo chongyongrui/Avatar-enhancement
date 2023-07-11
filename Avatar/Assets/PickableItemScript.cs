@@ -77,7 +77,7 @@ public class PickableItemScript : MonoBehaviour
                 //add item to inventory slot
                 if (objectToPickUp.GetComponent<Grenade>())
                 {
-                    InventoryManager.instance.AddItem(dynamiteItem);
+                    InventoryManager.instance.AddItem(dynamiteItem, true);
                 }
 
 

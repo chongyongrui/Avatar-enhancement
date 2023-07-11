@@ -113,7 +113,7 @@ public class PlayerInteractable : NetworkBehaviour
     {
         if (weaponIdentifier == "AK47")
         {
-            InventoryManager.instance.AddItem(itemAK47);
+            InventoryManager.instance.AddItem(itemAK47, true);
             
         }
         
@@ -179,7 +179,7 @@ public class PlayerInteractable : NetworkBehaviour
 
 
         weaponPose.data.constrainedObject = weapon.transform;
-          rightclickAiming.data.constrainedObject = weapon.transform;
+        rightclickAiming.data.constrainedObject = weapon.transform;
         TargetAiming.data.constrainedObject = weapon.transform;
       
         // Set the weapon's position and rotation
