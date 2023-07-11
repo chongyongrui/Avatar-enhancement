@@ -10,7 +10,12 @@ public class PlayerLocationUpdate : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        
+        int[] startingCoordinates = DatabaseScript.instance.getStartingLocation(playerID);
+        int startingx = startingCoordinates[0];
+        int startingy = startingCoordinates[1];
+        int startingz = startingCoordinates[2];
+        transform.position = new Vector3(startingx, startingy, startingz);
     }
 
     // Update is called once per frame

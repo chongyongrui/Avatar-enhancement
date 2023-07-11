@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Mono.Data.Sqlite;
+using UnityEditorInternal.Profiling.Memory.Experimental;
+using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 
 public class DatabaseScript : MonoBehaviour
 {
 
     public Item[] startingItems;
     public static DatabaseScript instance;
-    private int playerID;
+    private int playerID = 0;
     [SerializeField] private Item Ak47Item;
     [SerializeField] private Item dynamiteItem;
     [SerializeField] private Item M4Item;
@@ -82,6 +84,26 @@ public class DatabaseScript : MonoBehaviour
         Debug.Log("Weapon added with id: " +  weaponid);
     }
 
+    public void RemoveWeapon(int playerid, int weaponid, int quantity)
+    {
+        using (var connection = new SqliteConnection(dbName))
+        {
+            connection.Open();
+
+            using (var command = connection.CreateCommand())
+            {
+
+                //correct format is " DELETE FROM weapons WHERE playerid = player ANS weaponid = id; "
+                command.CommandText = "DELETE FROM weapons WHERE playerid = " + playerid + " AND weaponid = " + weaponid  + " ;";
+                command.ExecuteNonQuery();
+
+            }
+
+            connection.Close();
+        }
+        Debug.Log("Weapon added with id: " + weaponid);
+    }
+
 
     public void DisplayWeapons()
     {
@@ -106,6 +128,8 @@ public class DatabaseScript : MonoBehaviour
                 }
             }
 
+            connection.Close();
+
 
         }
     }
@@ -114,21 +138,55 @@ public class DatabaseScript : MonoBehaviour
 
     public void UpdatePlayerLocation(int playerID, int x, int y, int z)
     {
+        bool dataFound = false;
         using (var connection = new SqliteConnection(dbName))
         {
 
             connection.Open();
-
+            
 
             using (var command = connection.CreateCommand())
             {
-                //update the players location while ensuring playerid is correct
-                //  UPDATE userdata SET x = x, SET y = y, SET z = z WHERE playerid = playerid;
-                command.CommandText = "UPDATE userlocation SET x = " + x + ", y = " + y + ", Z = " + z + " WHERE playerid = " + playerID + ";";
-                command.ExecuteNonQuery();
-                //Debug.Log("player location is now : x=" + x + " y= " + y + " z= " + z);
 
+                command.CommandText = "SELECT * FROM userlocation WHERE playerid = " + playerID + ";";
+
+                using (System.Data.IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        if (reader["playerID"] == null)
+                        {
+                            Debug.Log("no prior location data found");
+                            dataFound = false;
+
+                        }
+                        else
+                        {
+                            dataFound = true;
+                        }
+                    }
+                    reader.Close();
+                }
+
+                if (dataFound)
+                {
+                    
+                        //update the players location while ensuring playerid is correct
+                        //  UPDATE userdata SET x = x, SET y = y, SET z = z WHERE playerid = playerid;
+                        command.CommandText = "UPDATE userlocation SET x = " + x + ", y = " + y + ", Z = " + z + " WHERE playerid = " + playerID + ";";
+                        command.ExecuteNonQuery();
+                        Debug.Log("player location is now : x=" + x + " y= " + y + " z= " + z);
+
+                    
+                }else if (!dataFound){
+                    command.CommandText = "INSERT INTO userlocation (playerid,x,y,z) VALUES (" + playerID + "," + x + "," + y + "," + z + ");";
+                    command.ExecuteNonQuery();
+                }
             }
+
+            
+
+          
 
             connection.Close();
 
@@ -156,18 +214,7 @@ public class DatabaseScript : MonoBehaviour
                     while (reader.Read())
                     {
                         int weaponid = (int)reader["weaponid"];
-                        Item newItem = new Item();
-                        switch (weaponid)
-                        {
-                            case 1: newItem = Ak47Item;
-                            break;
-                            case 2: newItem = dynamiteItem;
-                            break;
-                            case 3: newItem = M4Item;
-                            break;
-                            case 4: newItem = SMGItem;
-                            break;
-                        }
+                        Item newItem = HashToItem(weaponid);                        
                         items.Add(newItem);
                     }
                     reader.Close();
@@ -181,6 +228,64 @@ public class DatabaseScript : MonoBehaviour
 
         Item[] startingItems = items.ToArray();
         return startingItems;
+    }
+
+    public int[] getStartingLocation(int playerID)
+    {
+
+        int[] startingCoordinates = new int[3];
+        using (var connection = new SqliteConnection(dbName))
+        {
+
+            connection.Open();
+
+
+            using (var command = connection.CreateCommand())
+            {
+
+                command.CommandText = "SELECT * FROM userlocation WHERE playerid =" + playerID + ";";
+
+                using (System.Data.IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        startingCoordinates[0] = (int)reader["x"];
+                        startingCoordinates[1] = (int)reader["y"];
+                        startingCoordinates[2] = (int)reader["z"];
+                        
+                    }
+                    reader.Close();
+                }
+            }
+
+            connection.Close();
+
+
+        }
+
+        
+        return startingCoordinates;
+    }
+
+    public Item HashToItem(int weaponid)
+    {
+        Item newItem = new Item();
+        switch (weaponid)
+        {
+            case 1:
+                newItem = Ak47Item;
+                break;
+            case 2:
+                newItem = dynamiteItem;
+                break;
+            case 3:
+                newItem = M4Item;
+                break;
+            case 4:
+                newItem = SMGItem;
+                break;
+        }
+        return newItem;
     }
 
 }

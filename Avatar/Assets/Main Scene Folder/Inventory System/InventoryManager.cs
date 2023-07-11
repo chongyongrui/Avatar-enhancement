@@ -13,7 +13,7 @@ public class InventoryManager : MonoBehaviour
     public GameObject inventoryItemPrefab;
     public Item selectedItem;
     public List<GameObject> hiddenInventoryBackpackItems;
-    public int playerID;
+    public int playerID = 0;
 
     int selectedSlot = 0;
 
@@ -75,6 +75,8 @@ public class InventoryManager : MonoBehaviour
                 {
                     itemInSlot.RefreshCount();
                 }
+                int weaponID = ItemToHash(item);
+                DatabaseScript.instance.RemoveWeapon(playerID, weaponID, 1);
             }
 
 
@@ -144,13 +146,15 @@ public class InventoryManager : MonoBehaviour
 
     public void AddItemInventoryDB(Item item)
     {
-
-
         int quantity = 1;
         int weaponID = -1;
+        weaponID = ItemToHash(item);
+        DatabaseScript.instance.AddWeapon(playerID, weaponID, quantity);
+    }
 
-
-
+    public int ItemToHash(Item item)
+    {
+        int weaponID = -1;
         switch (item.name)
         {
             case "Ak47":
@@ -168,10 +172,7 @@ public class InventoryManager : MonoBehaviour
 
 
         }
-
-
-
-        DatabaseScript.instance.AddWeapon(playerID, weaponID, quantity);
+        return weaponID;
     }
 
 
