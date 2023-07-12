@@ -39,9 +39,9 @@ public class PickableItemScript : MonoBehaviour
     void Update()
     {
 
-        
 
-        if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !HoldingPickableObject()) // character is not holding something but has a selected object
+        // character is not holding something but has a selected object
+        if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !HoldingPickableObject()) 
         {
             Debug.Log("spawning new object into player hand");
             //spawn object into the players hand
@@ -59,9 +59,19 @@ public class PickableItemScript : MonoBehaviour
             hasItem = true;
 
 
-        }else if (InventoryManager.instance.GetSelectedItem(false) == null && HoldingPickableObject()) // character has not selected anything
+        }else if (InventoryManager.instance.GetSelectedItem(false) == null && canpickup ) // character has not selected anything
         {
-
+            //delete the gameobject that is in the players hands
+            GameObject currentHeldObject = GameObject.FindGameObjectWithTag("PickableObject");
+            //Destroy(currentHeldObject);
+            /*
+            foreach (Transform child in instance.transform)
+            {
+                if (child.tag == "PickableObject")
+                    Destroy(child);
+            }
+            */
+            hasItem = false;
         }
 
 
@@ -117,7 +127,7 @@ public class PickableItemScript : MonoBehaviour
 
         }  
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
+        if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
         {
             //objectToPickUp = GetHeldObject();
             objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
@@ -176,4 +186,6 @@ public class PickableItemScript : MonoBehaviour
         }
         return null;
     }
+
+    
 }

@@ -40,6 +40,7 @@ public class InventoryManager : MonoBehaviour
 
             ChangeSelectedSlot(selectedSlot - 1);
             selectedItem = GetSelectedItem(false);
+
         }
 
         if (Input.GetKeyDown(KeyCode.Period) && selectedSlot != 5)
@@ -47,7 +48,6 @@ public class InventoryManager : MonoBehaviour
 
             ChangeSelectedSlot(selectedSlot + 1);
             selectedItem = GetSelectedItem(false);
-
         }
 
 

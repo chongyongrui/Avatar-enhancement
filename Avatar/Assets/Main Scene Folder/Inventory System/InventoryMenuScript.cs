@@ -10,8 +10,9 @@ public class InventoryMenuScript : MonoBehaviour
 
     public void PickUpItem(int id)
     {
+        int playerID = NetworkManagerUI.instance.playerID;
         Debug.Log(itemsToPickUp.Length);
-        bool result = inventoryManager.AddItem(itemsToPickUp[id], true, 0);
+        bool result = inventoryManager.AddItem(itemsToPickUp[id], true, playerID);
         if (result == true)
         {
             Debug.Log("added item");
