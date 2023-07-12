@@ -111,9 +111,10 @@ public class PlayerInteractable : NetworkBehaviour
 
     private void AddItemToInventory(string weaponIdentifier)
     {
+        int playerID = NetworkManagerUI.instance.playerID;
         if (weaponIdentifier == "AK47")
         {
-            InventoryManager.instance.AddItem(itemAK47, true);
+            InventoryManager.instance.AddItem(itemAK47, true, playerID);
             
         }
         

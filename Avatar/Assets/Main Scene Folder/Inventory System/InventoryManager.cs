@@ -13,7 +13,7 @@ public class InventoryManager : MonoBehaviour
     public GameObject inventoryItemPrefab;
     public Item selectedItem;
     public List<GameObject> hiddenInventoryBackpackItems;
-    public int playerID = 0;
+    public int playerID = -1;
 
     int selectedSlot = 0;
 
@@ -26,9 +26,11 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
+        playerID = NetworkManagerUI.instance.playerID;
+
         foreach (var item in DatabaseScript.instance.startingItems)
         {
-            AddItem(item, false);
+            AddItem(item, false, playerID);
             Debug.Log("added item   " + item.name);
         }
         ChangeSelectedSlot(1);
@@ -58,6 +60,7 @@ public class InventoryManager : MonoBehaviour
 
     public Item GetSelectedItem(bool used)
     {
+        
         InventorySlot slot = inventorySlots[selectedSlot];
         InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
         if (itemInSlot != null) //there exists an item in the selcted slot 
@@ -75,7 +78,8 @@ public class InventoryManager : MonoBehaviour
                 {
                     itemInSlot.RefreshCount();
                 }
-                int weaponID = ItemToHash(item);
+                int weaponID = ItemToHash(item); 
+                int playerID = NetworkManagerUI.instance.playerID;
                 DatabaseScript.instance.RemoveWeapon(playerID, weaponID, 1);
             }
 
@@ -98,11 +102,11 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    public bool AddItem(Item item, bool isNewItem)
+    public bool AddItem(Item item, bool isNewItem, int playerID)
     {
         if (isNewItem)
         {
-            AddItemInventoryDB(item);
+            AddItemInventoryDB(item, playerID);
         }
         
 
@@ -144,7 +148,7 @@ public class InventoryManager : MonoBehaviour
     }
 
 
-    public void AddItemInventoryDB(Item item)
+    public void AddItemInventoryDB(Item item, int playerID)
     {
         int quantity = 1;
         int weaponID = -1;

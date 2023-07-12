@@ -5,12 +5,12 @@ using System;
 
 public class PlayerLocationUpdate : MonoBehaviour
 {
-    public int playerID = 0;
 
+    private int playerID;
     // Start is called before the first frame update
     void Start()
     {
-        
+        playerID = NetworkManagerUI.instance.playerID;
         int[] startingCoordinates = DatabaseScript.instance.getStartingLocation(playerID);
         int startingx = startingCoordinates[0];
         int startingy = startingCoordinates[1];

@@ -19,7 +19,7 @@ public class PickableItemScript : MonoBehaviour
     List<GameObject> HiddenItems = new List<GameObject>();
     Animator animator;
     [SerializeField] public GameObject newDynamiteItem;
-
+    public int playerID;
 
     private void Awake()
     {
@@ -31,7 +31,8 @@ public class PickableItemScript : MonoBehaviour
         canpickup = false;    //setting both to false
         hasItem = false;
         animator = GetComponent<Animator>();
-      
+        playerID = NetworkManagerUI.instance.playerID;
+
     }
 
     // Update is called once per frame
@@ -77,10 +78,11 @@ public class PickableItemScript : MonoBehaviour
                 //add item to inventory slot
                 if (objectToPickUp.GetComponent<Grenade>())
                 {
-                    InventoryManager.instance.AddItem(dynamiteItem, true);
+                    Debug.Log("Adding item to player inventory with ID = " + playerID);
+                    InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
                 }
 
-
+                
                 if (hasItem == true) 
                 {
                     //make new picked up item disappear 

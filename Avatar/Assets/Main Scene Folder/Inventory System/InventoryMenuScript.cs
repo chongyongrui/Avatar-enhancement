@@ -11,7 +11,7 @@ public class InventoryMenuScript : MonoBehaviour
     public void PickUpItem(int id)
     {
         Debug.Log(itemsToPickUp.Length);
-        bool result = inventoryManager.AddItem(itemsToPickUp[id], true);
+        bool result = inventoryManager.AddItem(itemsToPickUp[id], true, 0);
         if (result == true)
         {
             Debug.Log("added item");

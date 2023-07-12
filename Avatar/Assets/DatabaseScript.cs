@@ -32,6 +32,7 @@ public class DatabaseScript : MonoBehaviour
 
         //display records to the console
         DisplayWeapons();
+        playerID = NetworkManagerUI.instance.playerID;
         startingItems = getStartingItems(playerID);
     }
 
@@ -64,7 +65,7 @@ public class DatabaseScript : MonoBehaviour
     }
 
 
-    public void AddWeapon(int playerid, int weaponid, int quantity)
+    public void AddWeapon(int playerID, int weaponid, int quantity)
     {
         using (var connection = new SqliteConnection(dbName))
         {
@@ -74,17 +75,17 @@ public class DatabaseScript : MonoBehaviour
             {
 
                 //correct format is " INSERT INTO weapons (playerid,weponid,quantity) VALUES (playerid, weaponid, quantity); "
-                command.CommandText = "INSERT INTO weapons (playerid,weaponid,quantity) VALUES (" + playerid + "," + weaponid + "," + quantity + ");";
+                command.CommandText = "INSERT INTO weapons (playerid,weaponid,quantity) VALUES (" + playerID + "," + weaponid + "," + quantity + ");";
                 command.ExecuteNonQuery();
-
+                Debug.Log("Weapon added with id: " + weaponid + " to player with ID = " + playerID);
             }
 
             connection.Close();
         }
-        Debug.Log("Weapon added with id: " +  weaponid);
+        
     }
 
-    public void RemoveWeapon(int playerid, int weaponid, int quantity)
+    public void RemoveWeapon(int playerID, int weaponid, int quantity)
     {
         using (var connection = new SqliteConnection(dbName))
         {
@@ -94,7 +95,7 @@ public class DatabaseScript : MonoBehaviour
             {
 
                 //correct format is " DELETE FROM weapons WHERE playerid = player ANS weaponid = id; "
-                command.CommandText = "DELETE FROM weapons WHERE playerid = " + playerid + " AND weaponid = " + weaponid  + " ;";
+                command.CommandText = "DELETE FROM weapons WHERE playerid = " + playerID + " AND weaponid = " + weaponid  + " ;";
                 command.ExecuteNonQuery();
 
             }
@@ -143,7 +144,7 @@ public class DatabaseScript : MonoBehaviour
         {
 
             connection.Open();
-            
+
 
             using (var command = connection.CreateCommand())
             {
@@ -170,24 +171,21 @@ public class DatabaseScript : MonoBehaviour
 
                 if (dataFound)
                 {
-                    
-                        //update the players location while ensuring playerid is correct
-                        //  UPDATE userdata SET x = x, SET y = y, SET z = z WHERE playerid = playerid;
-                        command.CommandText = "UPDATE userlocation SET x = " + x + ", y = " + y + ", Z = " + z + " WHERE playerid = " + playerID + ";";
-                        command.ExecuteNonQuery();
-                        Debug.Log("player location is now : x=" + x + " y= " + y + " z= " + z);
 
-                    
-                }else if (!dataFound){
+                    //update the players location while ensuring playerid is correct
+                    //  UPDATE userdata SET x = x, SET y = y, SET z = z WHERE playerid = playerid;
+                    command.CommandText = "UPDATE userlocation SET x = " + x + ", y = " + y + ", Z = " + z + " WHERE playerid = " + playerID + ";";
+                    command.ExecuteNonQuery();
+                    //Debug.Log("player location is now : x=" + x + " y= " + y + " z= " + z);
+
+
+                }
+                else if (!dataFound)
+                {
                     command.CommandText = "INSERT INTO userlocation (playerid,x,y,z) VALUES (" + playerID + "," + x + "," + y + "," + z + ");";
                     command.ExecuteNonQuery();
                 }
             }
-
-            
-
-          
-
             connection.Close();
 
 
