@@ -32,8 +32,7 @@ public class DatabaseScript : MonoBehaviour
 
         //display records to the console
         DisplayWeapons();
-        playerID = NetworkManagerUI.instance.playerID;
-        startingItems = getStartingItems(playerID);
+        
     }
 
     // Update is called once per frame
@@ -105,7 +104,7 @@ public class DatabaseScript : MonoBehaviour
         Debug.Log("Weapon added with id: " + weaponid);
     }
 
-
+    //prints out all items stored in the DB for all users
     public void DisplayWeapons()
     {
         using (var connection = new SqliteConnection(dbName))
@@ -192,7 +191,7 @@ public class DatabaseScript : MonoBehaviour
         }
     }
 
-    public Item[] getStartingItems(int playerID)
+    public Item[] GetStartingItems(int playerID)
     {
 
         List<Item> items = new List<Item>();
@@ -205,14 +204,15 @@ public class DatabaseScript : MonoBehaviour
             using (var command = connection.CreateCommand())
             {
 
-                command.CommandText = "SELECT * FROM weapons WHERE playerid ="+ playerID + ";";
+                command.CommandText = "SELECT * FROM weapons WHERE playerid =" + playerID + ";";
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        int weaponid = (int)reader["weaponid"];
-                        Item newItem = HashToItem(weaponid);                        
+                        Debug.Log("Item found with id " + reader["weaponid"]);
+                        Item newItem = HashToItem((int)reader["weaponid"]);
+                        Debug.Log("Item found with name " + newItem.name);
                         items.Add(newItem);
                     }
                     reader.Close();
@@ -220,7 +220,7 @@ public class DatabaseScript : MonoBehaviour
             }
 
             connection.Close();
-            
+
 
         }
 

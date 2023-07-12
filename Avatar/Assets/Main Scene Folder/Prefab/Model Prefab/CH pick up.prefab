@@ -652,6 +652,7 @@ GameObject:
   - component: {fileID: 6465202230211059319}
   - component: {fileID: 143349829506510557}
   - component: {fileID: 8302934349524953237}
+  - component: {fileID: 9111397821296253801}
   m_Layer: 6
   m_Name: CH pick up
   m_TagString: Player
@@ -924,7 +925,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4218043773
+  GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -1087,6 +1088,7 @@ MonoBehaviour:
   dynamiteItem: {fileID: 11400000, guid: dd122243760acaf448c1b9ee525f0733, type: 2}
   aimCam: {fileID: 0}
   newDynamiteItem: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+  playerID: 0
 --- !u!114 &8302934349524953237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1099,7 +1101,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6276344a880546a4da8083fa82ee07c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerID: 1
+--- !u!114 &9111397821296253801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4900686166078442603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53c04f23d03a92b4fabc473f1a042911, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4900686166078442622
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class InventoryManager : MonoBehaviour
     public Item selectedItem;
     public List<GameObject> hiddenInventoryBackpackItems;
     public int playerID = -1;
-
+    
     int selectedSlot = 0;
 
 
@@ -27,13 +28,8 @@ public class InventoryManager : MonoBehaviour
     private void Start()
     {
         playerID = NetworkManagerUI.instance.playerID;
-
-        foreach (var item in DatabaseScript.instance.startingItems)
-        {
-            AddItem(item, false, playerID);
-            Debug.Log("added item   " + item.name);
-        }
-        ChangeSelectedSlot(1);
+        Debug.Log("inveotry playerid is   " + playerID);
+        
     }
 
     private void Update()
@@ -90,7 +86,7 @@ public class InventoryManager : MonoBehaviour
         return null;
     }
 
-    void ChangeSelectedSlot(int newValue)
+    public void ChangeSelectedSlot(int newValue)
     {
         if (selectedSlot >= 0)
         {
@@ -151,8 +147,7 @@ public class InventoryManager : MonoBehaviour
     public void AddItemInventoryDB(Item item, int playerID)
     {
         int quantity = 1;
-        int weaponID = -1;
-        weaponID = ItemToHash(item);
+        int weaponID = ItemToHash(item);
         DatabaseScript.instance.AddWeapon(playerID, weaponID, quantity);
     }
 
