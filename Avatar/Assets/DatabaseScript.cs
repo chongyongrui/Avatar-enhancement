@@ -21,7 +21,7 @@ public class DatabaseScript : MonoBehaviour
         instance = this;
     }
 
-    private string dbName = "URI=file:usersdata1.db";
+    private string dbName = "URI=file:databasefiles.db";
     // Start is called before the first frame update
     void Start()
     {

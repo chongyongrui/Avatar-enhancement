@@ -53,7 +53,7 @@ public class PickableItemScript : MonoBehaviour
             }
             newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
             BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
-            bc[1].enabled = false;
+            bc[0].enabled = false;
             newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
             newObject.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
             hasItem = true;
@@ -74,7 +74,7 @@ public class PickableItemScript : MonoBehaviour
                 animator.SetTrigger("Pickup");
                 objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
                 BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
-                bc[1].enabled = false;
+                bc[0].enabled = false;  //disable the collider, KEEP TRIGGER ACTIVE
                 //add item to inventory slot
                 if (objectToPickUp.GetComponent<Grenade>())
                 {
@@ -85,18 +85,18 @@ public class PickableItemScript : MonoBehaviour
                 
                 if (hasItem == true) 
                 {
-                    //make new picked up item disappear 
-                    Destroy(objectToPickUp);
+                    // destroy the old gameobject and attatch the new one
+                    GameObject currentHeldObject = GameObject.FindGameObjectWithTag("PickableObject");
+                    Destroy(currentHeldObject);
                 }
-                else // visually pick up the new item
-                {
+                
                     objectToPickUp.transform.position = myHands.transform.position; // sets the position of the object to your hand position
                     objectToPickUp.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
                     hasItem = true;
                     Quaternion myRotation = Quaternion.identity;
                     myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
                     objectToPickUp.transform.rotation = myRotation;
-                }
+                
 
                 
             }   
@@ -112,7 +112,7 @@ public class PickableItemScript : MonoBehaviour
             hasItem = false;
 
             BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
-            bc[1].enabled = true;
+            bc[0].enabled = true;
 
 
         }  
@@ -125,7 +125,7 @@ public class PickableItemScript : MonoBehaviour
             animator.SetTrigger("Throw");
             hasItem = false;
             BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
-            bc[1].enabled = true;
+            bc[0].enabled = true;
             
             //throw dynamite in direction of camera
             Vector3 aimDir = Camera.main.transform.forward ;
