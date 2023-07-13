@@ -82,33 +82,8 @@ public class PickableItemScript : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.F)) //picks up object and add to inventory manager
             {
                 animator.SetTrigger("Pickup");
-                objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
-                BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
-                bc[0].enabled = false;  //disable the collider, KEEP TRIGGER ACTIVE
-                //add item to inventory slot
-                if (objectToPickUp.GetComponent<Grenade>())
-                {
-                    Debug.Log("Adding item to player inventory with ID = " + playerID);
-                    InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
-                }
+                StartCoroutine(DelayedPickUp(objectToPickUp)); 
 
-                
-                if (hasItem == true) 
-                {
-                    // destroy the old gameobject and attatch the new one
-                    GameObject currentHeldObject = GameObject.FindGameObjectWithTag("PickableObject");
-                    Destroy(currentHeldObject);
-                }
-                
-                    objectToPickUp.transform.position = myHands.transform.position; // sets the position of the object to your hand position
-                    objectToPickUp.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
-                    hasItem = true;
-                    Quaternion myRotation = Quaternion.identity;
-                    myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
-                    objectToPickUp.transform.rotation = myRotation;
-                
-
-                
             }   
 
 
@@ -128,26 +103,10 @@ public class PickableItemScript : MonoBehaviour
         }  
 
         if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
-        {
-            //objectToPickUp = GetHeldObject();
-            objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
-            objectToPickUp.transform.parent = null; // make the object not be a child of the hands
+        {    
             animator.SetTrigger("Throw");
-            hasItem = false;
-            BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
-            bc[0].enabled = true;
+            StartCoroutine(DelayedThrow(objectToPickUp));
             
-            //throw dynamite in direction of camera
-            Vector3 aimDir = Camera.main.transform.forward ;
-            Rigidbody rb = objectToPickUp.GetComponent<Rigidbody>();
-            rb.AddForce(aimDir.normalized *20f + Vector3.up * 5f, ForceMode.Impulse);
-
-            //trigger the dynamite to explode 
-            objectToPickUp.GetComponent<Grenade>().isTriggered = true ;
-
-            //remove the dynamite from inventory
-            InventoryManager.instance.GetSelectedItem(true);
-
         }
     }
 
@@ -187,5 +146,56 @@ public class PickableItemScript : MonoBehaviour
         return null;
     }
 
-    
+    private IEnumerator DelayedThrow(GameObject objectToThrow)
+    {
+        // Wait for x seconds
+        yield return new WaitForSeconds(0.713f);
+        objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
+        objectToPickUp.transform.parent = null; // make the object not be a child of the hands 
+        hasItem = false;
+        BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
+        bc[0].enabled = true;
+        //throw dynamite in direction of camera
+        Vector3 aimDir = Camera.main.transform.forward;
+        Rigidbody rb = objectToPickUp.GetComponent<Rigidbody>();
+        //trigger the dynamite to explode 
+        objectToPickUp.GetComponent<Grenade>().isTriggered = true;
+        //remove the dynamite from inventory
+        InventoryManager.instance.GetSelectedItem(true);
+        rb.AddForce(aimDir.normalized * 20f + Vector3.up * 5f, ForceMode.Impulse);
+        
+    }
+    private IEnumerator DelayedPickUp(GameObject objectToPickUp) {
+        // Wait for x seconds
+        yield return new WaitForSeconds(0.713f);
+        objectToPickUp.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
+        BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
+        bc[0].enabled = false;  //disable the collider, KEEP TRIGGER ACTIVE
+                                //add item to inventory slot
+        if (objectToPickUp.GetComponent<Grenade>())
+        {
+            Debug.Log("Adding item to player inventory with ID = " + playerID);
+            InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
+        }
+
+
+        if (hasItem == true)
+        {
+            // destroy the old gameobject and attatch the new one
+            GameObject currentHeldObject = GameObject.FindGameObjectWithTag("PickableObject");
+            Destroy(currentHeldObject);
+        }
+
+        objectToPickUp.transform.position = myHands.transform.position; // sets the position of the object to your hand position
+        objectToPickUp.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
+        hasItem = true;
+        Quaternion myRotation = Quaternion.identity;
+        myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
+        objectToPickUp.transform.rotation = myRotation;
+
+    }
+
+
+
+
 }
