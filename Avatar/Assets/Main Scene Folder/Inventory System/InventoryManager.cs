@@ -28,7 +28,7 @@ public class InventoryManager : MonoBehaviour
     private void Start()
     {
         playerID = NetworkManagerUI.instance.playerID;
-        Debug.Log("inveotry playerid is   " + playerID);
+        //Debug.Log("inveotry playerid is   " + playerID);
         
     }
 
@@ -39,6 +39,7 @@ public class InventoryManager : MonoBehaviour
         {  // user changes selcted slot 
 
             ChangeSelectedSlot(selectedSlot - 1);
+            selectedItem = GetSelectedItem(false);
             selectedItem = GetSelectedItem(false);
 
         }

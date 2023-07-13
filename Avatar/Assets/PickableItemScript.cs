@@ -13,12 +13,14 @@ public class PickableItemScript : MonoBehaviour
     public bool hasItem; // a bool to see if you have an item in your hand
     public static PickableItemScript instance;
     [SerializeField] private Item dynamiteItem;
+
     [SerializeField]Camera aimCam;
     
 
     List<GameObject> HiddenItems = new List<GameObject>();
     Animator animator;
     [SerializeField] public GameObject newDynamiteItem;
+    [SerializeField] public GameObject newAk47Item;
     public int playerID;
 
     private void Awake()
@@ -43,29 +45,42 @@ public class PickableItemScript : MonoBehaviour
         // character is not holding something but has a selected object
         if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !HoldingPickableObject()) 
         {
-            Debug.Log("spawning new object into player hand");
+           // Debug.Log("spawning new object into player hand");
             //spawn object into the players hand
             Item item = InventoryManager.instance.GetSelectedItem(false);
             GameObject newObject = new GameObject();
             if (item.name == "Dynamite")
             {
                 newObject = Instantiate(newDynamiteItem);
+                newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
+                BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
+                bc[0].enabled = false;
+                newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
+                newObject.transform.parent = myHands.transform;
             }
-            newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
-            BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
-            bc[0].enabled = false;
-            newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
-            newObject.transform.parent = myHands.transform; //makes the object become a child of the parent so that it moves with the hands
+            else if (item.name == "Ak47")
+            {
+                newObject = Instantiate(newAk47Item);
+                PlayerInteractable.Instance.TriggerPickupAnimation(newObject.transform.position,"AK47");
+            }
+            //makes the object become a child of the parent so that it moves with the hands
             hasItem = true;
 
 
         }else if (InventoryManager.instance.GetSelectedItem(false) == null  ) // character has not selected anything
         {
-            Debug.Log("Player not holding anything");
+            //Debug.Log("Player not holding anything");
             //delete the gameobject that is in the players hands
             foreach (Transform transform in myHands.transform)
             {
                 if (transform.CompareTag("PickableObject"))
+                {
+                    Destroy(transform.gameObject);
+                    break;
+                }
+
+                //INSERT CODE HERE TO KEEP AK47
+                if (transform.CompareTag("Weapon"))
                 {
                     Destroy(transform.gameObject);
                     break;
@@ -82,7 +97,7 @@ public class PickableItemScript : MonoBehaviour
 
         if (canpickup == true) // if you enter thecollider of the objecct
         {
-            if (Input.GetKeyDown(KeyCode.F)) //picks up object and add to inventory manager
+            if (Input.GetKeyDown(KeyCode.F) && !hasItem) //picks up object and add to inventory manager
             {
                 animator.SetTrigger("Pickup");
                 StartCoroutine(DelayedPickUp(objectToPickUp)); 
@@ -92,7 +107,7 @@ public class PickableItemScript : MonoBehaviour
 
         }
 
-        if (Input.GetKeyDown(KeyCode.G) && hasItem == true) // if you have an item and get the key to remove the object, again can be any key
+        if (Input.GetKeyDown(KeyCode.F) && hasItem) // if you have an item and get the key to remove the object, again can be any key
         {
             objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
 
@@ -116,12 +131,12 @@ public class PickableItemScript : MonoBehaviour
    
     private void OnTriggerEnter(Collider other) // to see when the player enters the collider
     {
-        Debug.Log("Picakable object found");
+       // Debug.Log("Picakable object found");
         if (other.gameObject.tag == "PickableObject") //on the object you want to pick up set the tag to be anything, in this case "object"
         {
             canpickup = true;  //set the pick up bool to true
             objectToPickUp = other.gameObject; //set the gameobject you collided with to one you can reference
-            Debug.Log("Picakable object found");
+          //  Debug.Log("Picakable object found");
         }
     }
     private void OnTriggerExit(Collider other)
@@ -177,7 +192,7 @@ public class PickableItemScript : MonoBehaviour
                                 //add item to inventory slot
         if (objectToPickUp.GetComponent<Grenade>())
         {
-            Debug.Log("Adding item to player inventory with ID = " + playerID);
+           // Debug.Log("Adding item to player inventory with ID = " + playerID);
             InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
         }
 

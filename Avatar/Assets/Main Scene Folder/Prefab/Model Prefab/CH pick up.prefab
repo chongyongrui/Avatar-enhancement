@@ -1088,6 +1088,7 @@ MonoBehaviour:
   dynamiteItem: {fileID: 11400000, guid: dd122243760acaf448c1b9ee525f0733, type: 2}
   aimCam: {fileID: 0}
   newDynamiteItem: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+  newAk47Item: {fileID: 8533659323394300343, guid: ecb35b5db372f864fa34b8780e260cce, type: 3}
   playerID: 0
 --- !u!114 &8302934349524953237
 MonoBehaviour:
