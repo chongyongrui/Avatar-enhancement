@@ -38,7 +38,7 @@ public class PickableItemScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+       
 
         // character is not holding something but has a selected object
         if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !HoldingPickableObject()) 
@@ -59,18 +59,21 @@ public class PickableItemScript : MonoBehaviour
             hasItem = true;
 
 
-        }else if (InventoryManager.instance.GetSelectedItem(false) == null && canpickup ) // character has not selected anything
+        }else if (InventoryManager.instance.GetSelectedItem(false) == null  ) // character has not selected anything
         {
+            Debug.Log("Player not holding anything");
             //delete the gameobject that is in the players hands
-            GameObject currentHeldObject = GameObject.FindGameObjectWithTag("PickableObject");
-            //Destroy(currentHeldObject);
-            /*
-            foreach (Transform child in instance.transform)
+            foreach (Transform transform in myHands.transform)
             {
-                if (child.tag == "PickableObject")
-                    Destroy(child);
+                if (transform.CompareTag("PickableObject"))
+                {
+                    Destroy(transform.gameObject);
+                    break;
+                }
             }
-            */
+            
+            
+            
             hasItem = false;
         }
 
@@ -177,7 +180,6 @@ public class PickableItemScript : MonoBehaviour
             Debug.Log("Adding item to player inventory with ID = " + playerID);
             InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
         }
-
 
         if (hasItem == true)
         {
