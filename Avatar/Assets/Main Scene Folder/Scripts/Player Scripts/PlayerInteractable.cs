@@ -37,7 +37,7 @@ public class PlayerInteractable : NetworkBehaviour
     [SerializeField] private MultiParentConstraint TargetAiming;
     [SerializeField] private MultiParentConstraint rightclickAiming;
     
-    private ThirdPersonController playerController;
+    private StarterAssets.ThirdPersonController playerController;
     public delegate void HasWeaponChanged(bool value);
     public static event HasWeaponChanged OnHasWeaponChanged;
 
@@ -51,7 +51,7 @@ public class PlayerInteractable : NetworkBehaviour
         anim = GetComponent<Animator>();
         AssignAnimationIDs();
         rb = GetComponent<RigBuilder>();
-        playerController = GetComponent<ThirdPersonController>();
+        playerController = GetComponent<StarterAssets.ThirdPersonController>();
 
      
 
