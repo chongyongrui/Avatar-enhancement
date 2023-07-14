@@ -13,7 +13,7 @@ public class PlayerInteractable : NetworkBehaviour
     private Animator anim;
     private int animPickup;
     private Transform currentInteractable;
-    private bool isPickupAnimationPlaying;
+    [SerializeField] public bool isAnimationPlaying = false;
     [SerializeField] private AimTrigger aimTrigger;
 
     [SerializeField] private Transform pickingupPlaceholder; // Reference to the hand bone GameObject;
@@ -106,6 +106,15 @@ public class PlayerInteractable : NetworkBehaviour
                 }
             }
         }
+
+
+        if (anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0f && (anim.GetCurrentAnimatorStateInfo(0).IsName("Throw") || anim.GetCurrentAnimatorStateInfo(0).IsName("Pickup"))){
+            isAnimationPlaying = true;
+        }
+        else
+        {
+            isAnimationPlaying = false;
+        }
         
     }
 
@@ -134,7 +143,7 @@ public class PlayerInteractable : NetworkBehaviour
 
         // Trigger the pickup animation
         anim.SetTrigger(animPickup);
-        isPickupAnimationPlaying = true;
+        
 
         // Check if the weapon identifier exists in the dictionary
         if (weaponPrefabs.ContainsKey(weaponIdentifier))
@@ -182,7 +191,7 @@ public class PlayerInteractable : NetworkBehaviour
         weaponPose.data.constrainedObject = weapon.transform;
         rightclickAiming.data.constrainedObject = weapon.transform;
         TargetAiming.data.constrainedObject = weapon.transform;
-      
+
         // Set the weapon's position and rotation
 
         // Update TwoBoneIK targets
