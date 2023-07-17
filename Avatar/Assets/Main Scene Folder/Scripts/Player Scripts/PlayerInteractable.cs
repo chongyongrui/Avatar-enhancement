@@ -150,7 +150,7 @@ public class PlayerInteractable : NetworkBehaviour
         
 
         // Check if the weapon identifier exists in the dictionary
-        if (weaponPrefabs.  ContainsKey(weaponIdentifier))
+        if (weaponPrefabs.ContainsKey(weaponIdentifier))
         {
             // Get the corresponding weapon prefab
             GameObject weaponPrefab = weaponPrefabs[weaponIdentifier];
