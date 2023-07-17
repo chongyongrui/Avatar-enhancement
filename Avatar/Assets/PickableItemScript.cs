@@ -118,14 +118,26 @@ public class PickableItemScript : MonoBehaviour
             bc[0].enabled = true;
 
 
-        }  
-
-        if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
-        {    
-            animator.SetTrigger("Throw");
-            StartCoroutine(DelayedThrow(objectToPickUp));
-            
         }
+
+
+        try
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
+            {
+                animator.SetTrigger("Throw");
+                StartCoroutine(DelayedThrow(objectToPickUp));
+
+            }
+        }
+        catch (NullReferenceException e)
+        {
+            //  Block of code to handle errors
+            Console.WriteLine(e.Message);
+            Debug.Log("Player not holding throwable item");
+
+        }
+        
     }
 
    
