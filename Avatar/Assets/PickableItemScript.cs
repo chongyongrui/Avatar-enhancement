@@ -43,14 +43,15 @@ public class PickableItemScript : MonoBehaviour
        
 
         // character is not holding something but has a selected object
-        if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !HoldingPickableObject()) 
+        if (!hasItem && InventoryManager.instance.GetSelectedItem(false) != null && !hasItem) 
         {
            // Debug.Log("spawning new object into player hand");
             //spawn object into the players hand
             Item item = InventoryManager.instance.GetSelectedItem(false);
-            GameObject newObject = new GameObject();
+            
             if (item.name == "Dynamite")
             {
+                GameObject newObject = new GameObject();
                 newObject = Instantiate(newDynamiteItem);
                 newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
                 BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
@@ -60,8 +61,8 @@ public class PickableItemScript : MonoBehaviour
             }
             else if (item.name == "Ak47")
             {
-                newObject = Instantiate(newAk47Item);
-                PlayerInteractable.Instance.TriggerPickupAnimation(newObject.transform.position,"AK47");
+                //newObject = Instantiate(newAk47Item);
+                PlayerInteractable.Instance.TriggerPickupAnimation(this.transform.position,"AK47");
             }
             //makes the object become a child of the parent so that it moves with the hands
             hasItem = true;
@@ -123,10 +124,17 @@ public class PickableItemScript : MonoBehaviour
 
         try
         {
-            if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem == true && objectToPickUp.GetComponent<Grenade>())  // holding dynamite and click to use
+           
+            if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem == true && !PlayerInteractable.Instance.hasWeapon)  // holding a pickable object
             {
-                animator.SetTrigger("Throw");
-                StartCoroutine(DelayedThrow(objectToPickUp));
+
+                //if the pickableobject is a dynamite
+                if (objectToPickUp.GetComponent<Grenade>() != null)
+                {
+                    animator.SetTrigger("Throw");
+                    StartCoroutine(DelayedThrow(objectToPickUp));
+                }
+               
 
             }
         }
@@ -157,24 +165,7 @@ public class PickableItemScript : MonoBehaviour
 
     }
 
-    public bool HoldingPickableObject()
-    {
-        foreach (Transform child in instance.transform)
-        {
-            if (child.tag == "PickableObject")
-                return true;
-        }
-        return false;
-    }
-    public GameObject GetHeldObject()
-    {
-        foreach (Transform child in instance.transform)
-        {
-            if (child.tag == "PickableObject")
-                return child.gameObject;
-        }
-        return null;
-    }
+
 
     private IEnumerator DelayedThrow(GameObject objectToThrow)
     {

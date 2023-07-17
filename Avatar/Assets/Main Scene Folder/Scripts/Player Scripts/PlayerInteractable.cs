@@ -29,7 +29,7 @@ public class PlayerInteractable : NetworkBehaviour
     private GameObject weapon;
 
     [SerializeField] Transform shoulder;
-    private bool hasWeapon;
+    public bool hasWeapon;
 
     [SerializeField] private TwoBoneIKConstraint lefthandIK;
     [SerializeField] private TwoBoneIKConstraint righthandIK;
@@ -103,6 +103,7 @@ public class PlayerInteractable : NetworkBehaviour
                         // Trigger the pickup animation with the weapon identifier
                         TriggerPickupAnimation(collider.transform.position, weaponIdentifier);
                         AddItemToInventory(weaponIdentifier);
+                        PickableItemScript.instance.hasItem = true;
                         Debug.Log("Playing");
                         break;
                     }
@@ -173,7 +174,8 @@ public class PlayerInteractable : NetworkBehaviour
         {
 
             SetHasWeaponTrue(weaponPrefab);
-         SetHasWeapon(true);
+            SetHasWeapon(true);
+            PickableItemScript.instance.hasItem = true;
 
 
 
