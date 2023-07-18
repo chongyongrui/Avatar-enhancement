@@ -87,7 +87,7 @@ public class PlayerInteractable : NetworkBehaviour
                 if (collider.CompareTag("Interactable"))
                 {
                     InteractableObject objectInteraction = collider.GetComponent<InteractableObject>();
-                    if (objectInteraction != null)
+                    if (objectInteraction != null && InventoryManager.instance.FindItemInSlot(objectInteraction.GetWeaponIdentifier()) == false) //add condition to check if weapon does not already exist in inventory
                     {
                         // Face the object
                         Vector3 lookDirection = collider.transform.position - transform.position;
@@ -112,7 +112,8 @@ public class PlayerInteractable : NetworkBehaviour
         }
 
 
-        if (anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0f && (anim.GetCurrentAnimatorStateInfo(0).IsName("Throw") || anim.GetCurrentAnimatorStateInfo(0).IsName("Pickup"))){
+        if (anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0f && 
+            (anim.GetCurrentAnimatorStateInfo(0).IsName("Throw") || anim.GetCurrentAnimatorStateInfo(0).IsName("Pickup"))){
             isAnimationPlaying = true;
         }
         else
@@ -209,6 +210,27 @@ public class PlayerInteractable : NetworkBehaviour
         rb.Build();
 
 
+    }
+
+    public void SetHasWeaponFalse()
+    {
+        anim.SetBool("HasWeapon", false);
+
+        // Remove the parent-child relationship between the character and the weapon
+        if (weapon != null)
+        {
+            weapon.transform.SetParent(null);
+            // Reset the TwoBoneIK targets
+            lefthandIK.data.target = null;
+            righthandIK.data.target = null;
+
+            // Destroy the weapon object
+            Destroy(weapon);
+
+            // Rebuild the Rigidbody
+            rb.Build();
+        }
+       
     }
     public void SetHasWeapon(bool value)
     {

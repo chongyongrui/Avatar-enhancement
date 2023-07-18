@@ -157,7 +157,7 @@ public class InventoryManager : MonoBehaviour
         int weaponID = -1;
         switch (item.name)
         {
-            case "Ak47":
+            case "AK47":
                 weaponID = 1;
                 break;
             case "Dynamite":
@@ -175,6 +175,22 @@ public class InventoryManager : MonoBehaviour
         return weaponID;
     }
 
+
+    public bool FindItemInSlot(string itemName)
+    {
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            InventorySlot slot = inventorySlots[i];
+            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
+            if (itemInSlot != null && itemInSlot.item.name == itemName )
+            {
+                return true;
+            }
+
+        }
+
+        return false;
+    }
 
 
 
