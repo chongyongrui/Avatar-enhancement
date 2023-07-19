@@ -229,6 +229,7 @@ public class PlayerInteractable : NetworkBehaviour
 
             // Rebuild the Rigidbody
             rb.Build();
+            
         }
        
     }

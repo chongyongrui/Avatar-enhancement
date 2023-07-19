@@ -743,6 +743,7 @@ MonoBehaviour:
   RotationSpeed: 0.5
   RotationSmoothTime: 0.12
   SpeedChangeRate: 10
+  inventorySlots: {fileID: 0}
   LandingAudioClip: {fileID: 8300000, guid: ff697d3070687ce4583faa0561a145a2, type: 3}
   FootstepAudioClips:
   - {fileID: 8300000, guid: 72f526a6a9890f643a88e85a61c86c8a, type: 3}
@@ -959,6 +960,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   spawned: 0
+  sceneviewCamera: {fileID: 0}
 --- !u!114 &4900686166078443104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -972,6 +974,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionRange: 2
+  isAnimationPlaying: 0
   aimTrigger: {fileID: 5657885543610946343}
   pickingupPlaceholder: {fileID: 0}
   weaponPlaceholder: {fileID: 3821555268861744110}
@@ -979,6 +982,7 @@ MonoBehaviour:
   delayBeforeSpawn: 1.8
   rb: {fileID: 5075346856353519385}
   shoulder: {fileID: 4900686166078443486}
+  hasWeapon: 0
   lefthandIK: {fileID: 5405862312422429921}
   righthandIK: {fileID: 8379077576190644455}
   weaponPose: {fileID: 3597202028311100565}
@@ -1090,6 +1094,7 @@ MonoBehaviour:
   newDynamiteItem: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
   newAk47Item: {fileID: 8533659323394300343, guid: ecb35b5db372f864fa34b8780e260cce, type: 3}
   playerID: 0
+  currItem: {fileID: 0}
 --- !u!114 &8302934349524953237
 MonoBehaviour:
   m_ObjectHideFlags: 0
