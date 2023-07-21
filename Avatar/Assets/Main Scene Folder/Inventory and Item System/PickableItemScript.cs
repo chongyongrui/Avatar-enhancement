@@ -64,10 +64,10 @@ public class PickableItemScript : MonoBehaviour
         }
 
 
-        GameObject currentHeldObject = GameObject.FindGameObjectWithTag("PickableObject");
-        
+        Transform currentHeldObject = FindWithTag(gameObject, "PickableObject");
+        Debug.Log("object to pick = " + objectToPickUp + " and the object held = " + currentHeldObject);
 
-        if (canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp) // if you enter thecollider of the object and press F
+        if (canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp ) // if you enter thecollider of the object and press F
         { 
                 animator.SetTrigger("Pickup");
                 StartCoroutine(DelayedPickUp(objectToPickUp));
@@ -83,18 +83,19 @@ public class PickableItemScript : MonoBehaviour
             BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
             bc[0].enabled = true;
             InventoryManager.instance.GetSelectedItem(true);
-
+            
         }
 
 
         //throw the object
 
-         else if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem && !PlayerInteractable.Instance.hasWeapon /*&& currentHeldObject.transform.IsChildOf(gameObject.transform)*/ ) // holding a pickable object
+         else if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem && !PlayerInteractable.Instance.hasWeapon ) // holding a pickable object
             {
 
-            Debug.Log("detected pickable object to throw)");
+           
 
             Transform objectToThrow = FindWithTag(gameObject, "PickableObject");
+            Debug.Log("detected pickable object to throw" + objectToThrow );
 
             //if the pickableobject is a dynamite
             if ((objectToThrow.GetComponent<Grenade>() != null))
@@ -153,6 +154,7 @@ public class PickableItemScript : MonoBehaviour
     private void SpawnNewPlayerItem()
     {
         Item item = InventoryManager.instance.GetSelectedItem(false);
+        Debug.Log("Item detected holding get is " + item.name);
 
         if (item != null && item.name == "Dynamite")
         {
@@ -192,7 +194,7 @@ public class PickableItemScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) // to see when the player enters the collider
     {
-         Debug.Log("Picakable object found");
+         Debug.Log("Picakable object found" + other);
         if (other.gameObject.tag == "PickableObject") //on the object you want to pick up set the tag to be anything, in this case "object"
         {
             canpickup = true;  //set the pick up bool to true
@@ -212,23 +214,23 @@ public class PickableItemScript : MonoBehaviour
     {
         // Wait for x seconds
         yield return new WaitForSeconds(0.713f);
-        objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
-        objectToPickUp.transform.parent = null; // make the object not be a child of the hands 
+        objectToThrow.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
+        objectToThrow.transform.parent = null; // make the object not be a child of the hands 
         hasItem = false;
-        BoxCollider[] bc = objectToPickUp.GetComponents<BoxCollider>();
+        BoxCollider[] bc = objectToThrow.GetComponents<BoxCollider>();
         bc[0].enabled = true;
         //throw dynamite in direction of camera
         //Vector3 aimDir = Camera.main.transform.forward;
         Vector3 aimDir = transform.forward;
-        Rigidbody rb = objectToPickUp.GetComponent<Rigidbody>();
+        Rigidbody rb = objectToThrow.GetComponent<Rigidbody>();
         //trigger the dynamite to explode
         if (objectToThrow.GetComponent<Grenade>() != null)
         {
-            objectToPickUp.GetComponent<Grenade>().isTriggered = true;
+            objectToThrow.GetComponent<Grenade>().isTriggered = true;
         }
         else if (objectToThrow.GetComponent<SmokeGrenade>() != null)
         {
-            objectToPickUp.GetComponent<SmokeGrenade>().isTriggered = true;
+            objectToThrow.GetComponent<SmokeGrenade>().isTriggered = true;
         }
 
         InventoryManager.instance.GetSelectedItem(true);
@@ -281,6 +283,12 @@ public class PickableItemScript : MonoBehaviour
             if (t.CompareTag(tag)) return t;
         }
         return null;
+    }
+
+    bool AnimatorIsPlaying()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).length >
+               animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
     }
 
 
