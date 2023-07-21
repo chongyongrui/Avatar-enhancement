@@ -219,7 +219,9 @@ public class PlayerInteractable : NetworkBehaviour
         // Remove the parent-child relationship between the character and the weapon
         if (weapon != null)
         {
+            // weapon.transform.SetParent(null);
             weapon.transform.SetParent(null);
+            
             // Reset the TwoBoneIK targets
             lefthandIK.data.target = null;
             righthandIK.data.target = null;
@@ -228,8 +230,16 @@ public class PlayerInteractable : NetworkBehaviour
             Destroy(weapon);
 
             // Rebuild the Rigidbody
-            rb.Build();
+            try
+            {
+                rb.Build();
+            } catch (Exception e)
+            {
+                Debug.Log(e);
+            }
             
+        
+
         }
        
     }

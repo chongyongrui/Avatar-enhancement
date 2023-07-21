@@ -5,12 +5,37 @@ using System.Data.SqlClient;
 using UnityEngine;
 using System.Data.SqlClient;
 using System.Configuration;
+using System.Data;
+using System.Drawing;
 
 public class SQLConnection : MonoBehaviour
 {
    void Start()
         {
+        var builder = new System.Data.SqlClient.SqlConnectionStringBuilder
+        {
+            DataSource = "localhost\\MSSQLSERVER01",
+            InitialCatalog = "AvatarProject",
+            PersistSecurityInfo = false,
+            IntegratedSecurity = true
 
+        };
+        string connstring = "Server=localhost\\MSSQLSERVER01;Database=AvatarProject;Trusted_Connection=True;";
+        SqlConnection con = new SqlConnection(connstring);
+        con.Open();
+
+
+        string query = "SELECT * FROM  weaponInventoryList";
+        SqlCommand sqlCommand = new SqlCommand(query, con);
+        SqlDataReader reader = sqlCommand.ExecuteReader();
+        while (reader.Read())
+        {
+            string output = "Output playerID = " + reader.GetValue(0) + " and weaponID = " + reader.GetValue(1);
+            Debug.Log(output);
+        }
+        con.Close();
+        //ConnectToDatabase();
+        //CloseConnection();
         //DisplayWeapons();
 
 
@@ -38,21 +63,23 @@ public class SQLConnection : MonoBehaviour
         conn.Open();
         */
         //string connectionString = "data source=DESKTOP-2P23NMB;initial catalog=AvatarProject;Integrated Security=true";
-         //SqlConnection con = new SqlConnection(builder.ConnectionString);
-         SqlConnection conn = new SqlConnection("data source =.;initial catalog=master;integrated security=true;");
-        conn.Open();
-        string query = "SELECT * FROM  weaponInventoryList";
-        SqlCommand sqlCommand = new SqlCommand(query, conn);
-        SqlDataReader reader = sqlCommand.ExecuteReader();
-        while (reader.Read())
-        {
-            string output = "Output playerID = " + reader.GetValue(0) + " and weaponID = " + reader.GetValue(1);
-            Debug.Log(output);
-        }
+        //SqlConnection con = new SqlConnection(builder.ConnectionString);
+        /*
 
+        SqlConnection conn = new SqlConnection("Server=localhost\\MSSQLSERVER01;Database=master;Trusted_Connection=True;");
+       conn.Open();
+       string query = "SELECT * FROM  weaponInventoryList";
+       SqlCommand sqlCommand = new SqlCommand(query, conn);
+       SqlDataReader reader = sqlCommand.ExecuteReader();
+       while (reader.Read())
+       {
+           string output = "Output playerID = " + reader.GetValue(0) + " and weaponID = " + reader.GetValue(1);
+           Debug.Log(output);
+       }
 
+       */
 
-        }
+    }
 
 
     public void DisplayWeapons()
@@ -86,5 +113,32 @@ public class SQLConnection : MonoBehaviour
 
         }
     }
+
+    private string connectionString = "Data Source=localhost\\MSSQLSERVER01;Database=AvatarProject;Trusted_Connection=True;";
+    private SqlConnection connection;
+    
+    public void ConnectToDatabase()
+    {
+        connection = new SqlConnection(connectionString);
+        try
+        {
+            connection.Open();
+            Debug.Log("Connected to the database.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError("Error connecting to the database: " + ex.Message);
+        }
+    }
+
+    public void CloseConnection()
+    {
+        if (connection != null && connection.State != ConnectionState.Closed)
+        {
+            connection.Close();
+            Debug.Log("Connection closed.");
+        }
+    }
+
 }
 

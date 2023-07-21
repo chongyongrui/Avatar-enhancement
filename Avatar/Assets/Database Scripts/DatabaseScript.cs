@@ -15,6 +15,7 @@ public class DatabaseScript : MonoBehaviour
     [SerializeField] private Item dynamiteItem;
     [SerializeField] private Item M4Item;
     [SerializeField] private Item SMGItem;
+    [SerializeField] private Item smokeGrenadeItem;
 
     private void Awake()
     {
@@ -281,6 +282,9 @@ public class DatabaseScript : MonoBehaviour
                 break;
             case 4:
                 newItem = SMGItem;
+                break;
+            case 5:
+                newItem = smokeGrenadeItem;
                 break;
         }
         return newItem;
