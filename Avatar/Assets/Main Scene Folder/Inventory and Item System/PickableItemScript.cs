@@ -178,14 +178,14 @@ public class PickableItemScript : MonoBehaviour
             {
 
                 newObject = Instantiate(newDynamiteObj);
-                SpawnAndHold(newObject);
+                SpawnAndHold(newObject, GetTransform());
 
             }
             else if (item != null && item.name == "Grenade")
             {
 
                 newObject = Instantiate(newGrenadeObj);
-                SpawnAndHold(newObject);
+                SpawnAndHold(newObject, GetTransform());
 
             }
 
@@ -193,7 +193,7 @@ public class PickableItemScript : MonoBehaviour
             {
 
                 newObject = Instantiate(newSmokeGrenadeObj);
-                SpawnAndHold(newObject);
+                SpawnAndHold(newObject, GetTransform());
 
             }
             else if (item != null && item.name == "AK47")
@@ -215,13 +215,19 @@ public class PickableItemScript : MonoBehaviour
         
     }
 
-    private void SpawnAndHold(GameObject newObject)
+    private Transform GetTransform()
+    {
+        return transform;
+    }
+
+    private void SpawnAndHold(GameObject newObject, Transform transform)
     {
         newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
         BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
         bc[0].enabled = false;
         newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
         newObject.transform.parent = myHands.transform;
+        newObject.transform.rotation = Quaternion.Euler(myHands.transform.eulerAngles.x, myHands.transform.eulerAngles.y, myHands.transform.eulerAngles.z - 90);
     }
 
 
@@ -325,14 +331,6 @@ public class PickableItemScript : MonoBehaviour
         }
         return null;
     }
-
-    bool AnimatorIsPlaying()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).length >
-               animator.GetCurrentAnimatorStateInfo(0).normalizedTime;
-    }
-
-
 
 
 }
