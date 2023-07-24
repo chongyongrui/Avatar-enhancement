@@ -16,6 +16,7 @@ public class DatabaseScript : MonoBehaviour
     [SerializeField] private Item M4Item;
     [SerializeField] private Item SMGItem;
     [SerializeField] private Item smokeGrenadeItem;
+    [SerializeField] private Item grenadeItem;
 
     private void Awake()
     {
@@ -212,7 +213,7 @@ public class DatabaseScript : MonoBehaviour
                     while (reader.Read())
                     {
                         Debug.Log("Item found with id " + reader["weaponid"]);
-                        Item newItem = HashToItem((int)reader["weaponid"]);
+                        Item newItem = SQLConnection.instance.HashToItem((int)reader["weaponid"]);
                         Debug.Log("Item found with name " + newItem.name);
                         items.Add(newItem);
                     }
@@ -266,28 +267,6 @@ public class DatabaseScript : MonoBehaviour
         return startingCoordinates;
     }
 
-    public Item HashToItem(int weaponid)
-    {
-        Item newItem = new Item();
-        switch (weaponid)
-        {
-            case 1:
-                newItem = Ak47Item;
-                break;
-            case 2:
-                newItem = dynamiteItem;
-                break;
-            case 3:
-                newItem = M4Item;
-                break;
-            case 4:
-                newItem = SMGItem;
-                break;
-            case 5:
-                newItem = smokeGrenadeItem;
-                break;
-        }
-        return newItem;
-    }
+    
 
 }

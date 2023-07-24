@@ -16,6 +16,7 @@ public class SQLConnection : MonoBehaviour
     [SerializeField] private Item M4Item;
     [SerializeField] private Item SMGItem;
     [SerializeField] private Item smokeGrenadeItem;
+    [SerializeField] private Item grenadeItem;
     void Start()
     {
         //create the table
@@ -300,6 +301,9 @@ public class SQLConnection : MonoBehaviour
                 break;
             case 5:
                 newItem = smokeGrenadeItem;
+                break;
+            case 6:
+                newItem = grenadeItem;
                 break;
         }
         return newItem;

@@ -15,6 +15,7 @@ public class PickableItemScript : MonoBehaviour
     public static PickableItemScript instance;
     [SerializeField] private Item dynamiteItem;
     [SerializeField] private Item smokeGrenadeItem;
+    [SerializeField] private Item grenadeItem;
 
     [SerializeField] Camera aimCam;
 
@@ -24,8 +25,10 @@ public class PickableItemScript : MonoBehaviour
     [SerializeField] public GameObject newDynamiteObj;
     [SerializeField] public GameObject newSmokeGrenadeObj;
     [SerializeField] public GameObject newAk47Obj;
+    [SerializeField] public GameObject newGrenadeObj;
     public int playerID;
     public Item currItem;
+    public bool isPlayingAnimation = false;
 
     private void Awake()
     {
@@ -44,8 +47,13 @@ public class PickableItemScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       //character has chosen another object
-        if (hasItem && InventoryManager.instance.GetSelectedItem(false) != currItem)
+
+        if (InventoryManager.instance.GetSelectedItem(false) == null) // character has not selected anything
+        {
+            RemovePlayerHeldItem();
+        }
+        //character has chosen another object
+        else if (hasItem && InventoryManager.instance.GetSelectedItem(false) != currItem)
         {
             RemovePlayerHeldItem();
             SpawnNewPlayerItem();
@@ -58,24 +66,33 @@ public class PickableItemScript : MonoBehaviour
             SpawnNewPlayerItem();
 
         }
-        else if (InventoryManager.instance.GetSelectedItem(false) == null ) // character has not selected anything
+
+        if (this.animator.GetCurrentAnimatorStateInfo(0).IsName("Pickup") || this.animator.GetCurrentAnimatorStateInfo(0).IsName("Throw"))
         {
-            RemovePlayerHeldItem();
+            isPlayingAnimation = true;
+            Debug.Log("playing pickup or throw");
+        }
+        else
+        {
+            isPlayingAnimation = false;
         }
 
 
-        Transform currentHeldObject = FindWithTag(gameObject, "PickableObject");
-        Debug.Log("object to pick = " + objectToPickUp + " and the object held = " + currentHeldObject);
 
-        if (canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp ) // if you enter thecollider of the object and press F
+
+        Transform currentHeldObject = FindWithTag(gameObject, "PickableObject");
+        //Debug.Log("object to pick = " + objectToPickUp + " and the object held = " + currentHeldObject);
+
+        if (!isPlayingAnimation && canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp ) // if you enter thecollider of the object and press F
         { 
+                isPlayingAnimation = true;
                 animator.SetTrigger("Pickup");
                 StartCoroutine(DelayedPickUp(objectToPickUp));
                 hasItem = true;
            
         }
 
-        else if (Input.GetKeyDown(KeyCode.V) && hasItem) // DROP THE OBJECT
+        else if (!isPlayingAnimation && Input.GetKeyDown(KeyCode.V) && hasItem) // DROP THE OBJECT
         {
             objectToPickUp.GetComponent<Rigidbody>().isKinematic = false; // make the rigidbody work again
             objectToPickUp.transform.parent = null; // make the object not be a child of the hands
@@ -89,7 +106,7 @@ public class PickableItemScript : MonoBehaviour
 
         //throw the object
 
-         else if (Input.GetKeyDown(KeyCode.Mouse1) && hasItem && !PlayerInteractable.Instance.hasWeapon ) // holding a pickable object
+         else if (!isPlayingAnimation && Input.GetKeyDown(KeyCode.Mouse1) && hasItem && !PlayerInteractable.Instance.hasWeapon ) // holding a pickable object
             {
 
            
@@ -153,44 +170,60 @@ public class PickableItemScript : MonoBehaviour
 
     private void SpawnNewPlayerItem()
     {
-        Item item = InventoryManager.instance.GetSelectedItem(false);
-        Debug.Log("Item detected holding get is " + item.name);
-
-        if (item != null && item.name == "Dynamite")
+        Item item = InventoryManager.instance.GetSelectedItem(false); 
+        try
         {
             GameObject newObject = new GameObject();
-            newObject = Instantiate(newDynamiteObj);
-            newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
-            BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
-            bc[0].enabled = false;
-            newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
-            newObject.transform.parent = myHands.transform;
+            if (item != null && item.name == "Dynamite")
+            {
 
+                newObject = Instantiate(newDynamiteObj);
+                SpawnAndHold(newObject);
+
+            }
+            else if (item != null && item.name == "Grenade")
+            {
+
+                newObject = Instantiate(newGrenadeObj);
+                SpawnAndHold(newObject);
+
+            }
+
+            else if (item != null && item.name == "SmokeGrenade")
+            {
+
+                newObject = Instantiate(newSmokeGrenadeObj);
+                SpawnAndHold(newObject);
+
+            }
+            else if (item != null && item.name == "AK47")
+            {
+
+                newObject = Instantiate(newAk47Obj);
+                PlayerInteractable.Instance.TriggerPickupAnimation(newObject.transform.position, "AK47", false);
+            }
+            //makes the object become a child of the parent so that it moves with the hands
+            hasItem = true;
+            currItem = item;
         }
-
-        else if (item != null && item.name == "SmokeGrenade")
+        catch(Exception e)
         {
-            GameObject newObject = new GameObject();
-            newObject = Instantiate(newSmokeGrenadeObj);
-            newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
-            BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
-            bc[0].enabled = false;
-            newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
-            newObject.transform.parent = myHands.transform;
+            Debug.Log(e);
+        }
+        
 
-        }
-        else if (item != null && item.name == "AK47")
-        {
-            GameObject newObject = new GameObject();
-            newObject = Instantiate(newAk47Obj);
-            PlayerInteractable.Instance.TriggerPickupAnimation(newObject.transform.position, "AK47");
-        }
-        //makes the object become a child of the parent so that it moves with the hands
-        hasItem = true;
-        currItem = item;
+        
     }
 
-    
+    private void SpawnAndHold(GameObject newObject)
+    {
+        newObject.GetComponent<Rigidbody>().isKinematic = true;   //makes the rigidbody not be acted upon by forces
+        BoxCollider[] bc = newObject.GetComponents<BoxCollider>();
+        bc[0].enabled = false;
+        newObject.transform.position = myHands.transform.position; // sets the position of the object to your hand position
+        newObject.transform.parent = myHands.transform;
+    }
+
 
     private void OnTriggerEnter(Collider other) // to see when the player enters the collider
     {
@@ -248,8 +281,16 @@ public class PickableItemScript : MonoBehaviour
         if (objectToPickUp.GetComponent<Grenade>())
         {
             Debug.Log("Adding item to player inventory with ID = " + playerID);
-            InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
-            currItem = dynamiteItem;
+            if (objectToPickUp.GetComponent<Grenade>().type == 0)
+            {
+                InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
+                currItem = dynamiteItem;
+            }else if (objectToPickUp.GetComponent<Grenade>().type == 1)
+            {
+                InventoryManager.instance.AddItem(grenadeItem, true, playerID);
+                currItem = grenadeItem;
+            }
+            
         }
         else if (objectToPickUp.GetComponent<SmokeGrenade>())
         {

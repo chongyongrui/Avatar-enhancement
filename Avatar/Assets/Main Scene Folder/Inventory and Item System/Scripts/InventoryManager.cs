@@ -173,6 +173,9 @@ public class InventoryManager : MonoBehaviour
             case "SmokeGrenade":
                 weaponID = 5;
                 break;
+            case "Grenade":
+                weaponID = 6;
+                break;
 
 
         }

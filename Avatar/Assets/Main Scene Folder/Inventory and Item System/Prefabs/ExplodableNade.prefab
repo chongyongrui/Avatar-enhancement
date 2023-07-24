@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 100000, guid: bc47d6d03a2cd0b4ab4297dfd2edfe5f, type: 3}
       propertyPath: m_Name
-      value: WPN_MK2Grenade
+      value: ExplodableNade
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: bc47d6d03a2cd0b4ab4297dfd2edfe5f, type: 3}
       propertyPath: m_TagString
@@ -18,7 +18,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: bc47d6d03a2cd0b4ab4297dfd2edfe5f, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: bc47d6d03a2cd0b4ab4297dfd2edfe5f, type: 3}
       propertyPath: m_LocalScale.x
@@ -142,6 +142,7 @@ MonoBehaviour:
   isTriggered: 0
   delay: 5
   blastRadius: 20
-  explosionForce: 10000
+  explosionForce: 100000
+  type: 1
   explosionEffect: {fileID: 1121192042590650, guid: e1b08032bec16ba4eb1ae23cbd572664, type: 3}
   soundEffect: {fileID: 8300000, guid: 09512265d2858a948977c3125444b470, type: 3}

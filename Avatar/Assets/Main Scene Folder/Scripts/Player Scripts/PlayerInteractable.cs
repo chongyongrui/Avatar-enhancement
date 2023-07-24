@@ -101,9 +101,9 @@ public class PlayerInteractable : NetworkBehaviour
                         string weaponIdentifier = objectInteraction.GetWeaponIdentifier();
 
                         // Trigger the pickup animation with the weapon identifier
-                        TriggerPickupAnimation(collider.transform.position, weaponIdentifier);
-                        AddItemToInventory(weaponIdentifier);
+                        TriggerPickupAnimation(collider.transform.position, weaponIdentifier,true);
                         PickableItemScript.instance.hasItem = true;
+                        //AddItemToInventory(weaponIdentifier);
                         Debug.Log("Playing");
                         break;
                     }
@@ -139,15 +139,19 @@ public class PlayerInteractable : NetworkBehaviour
         currentInteractable = interactable;
     }
 
-    public void TriggerPickupAnimation(Vector3 objectPosition, string weaponIdentifier)
+    public void TriggerPickupAnimation(Vector3 objectPosition, string weaponIdentifier, bool playAnimation)
     {
-        // Face the object
-        Vector3 lookDirection = objectPosition - transform.position;
-        lookDirection.y = 0f;
-        transform.rotation = Quaternion.LookRotation(lookDirection);
 
         // Trigger the pickup animation
-        anim.SetTrigger(animPickup);
+        if (playAnimation)
+        { 
+            // Face the object
+            Vector3 lookDirection = objectPosition - transform.position;
+            lookDirection.y = 0f;
+            transform.rotation = Quaternion.LookRotation(lookDirection);
+            anim.SetTrigger(animPickup);
+        }
+        
         
 
         // Check if the weapon identifier exists in the dictionary
@@ -157,7 +161,7 @@ public class PlayerInteractable : NetworkBehaviour
             GameObject weaponPrefab = weaponPrefabs[weaponIdentifier];
             rb.enabled = true;
             // Call the SpawnWeapon method on the next frame with the correct prefab
-            StartCoroutine(DelayedSpawnWeapon(weaponPrefab));
+            StartCoroutine(DelayedSpawnWeapon(weaponPrefab,playAnimation, weaponIdentifier));
         }
         else
         {
@@ -165,10 +169,16 @@ public class PlayerInteractable : NetworkBehaviour
         }
     }
 
-    private IEnumerator DelayedSpawnWeapon(GameObject weaponPrefab)
+    private IEnumerator DelayedSpawnWeapon(GameObject weaponPrefab,bool playAnimation, string weaponIdentifier)
     {
         //Delay before instantiating the weapon into the hand;
-        yield return new WaitForSeconds(delayBeforeSpawn);
+        if (playAnimation)
+        {
+            yield return new WaitForSeconds(delayBeforeSpawn);
+            PickableItemScript.instance.hasItem = true;
+            AddItemToInventory(weaponIdentifier);
+        }
+        
 
         // Spawn the weapon
         if (weaponPrefab != null)
@@ -176,7 +186,7 @@ public class PlayerInteractable : NetworkBehaviour
 
             SetHasWeaponTrue(weaponPrefab);
             SetHasWeapon(true);
-            PickableItemScript.instance.hasItem = true;
+            
 
 
 

@@ -130,8 +130,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isTriggered: 0
   delay: 5
-  blastRadius: 5
-  explosionForce: 1000000
+  blastRadius: 20
+  explosionForce: 10000
+  type: 0
   explosionEffect: {fileID: 1121192042590650, guid: e1b08032bec16ba4eb1ae23cbd572664, type: 3}
   soundEffect: {fileID: 8300000, guid: dc9a8b109d30b5d40a6ffc1b4b8bd1cc, type: 3}
 --- !u!65 &7128753838982334005
