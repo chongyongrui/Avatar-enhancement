@@ -56,7 +56,7 @@ public class DatabaseScript : MonoBehaviour
                 command.ExecuteNonQuery();
                 command.CommandText = "CREATE TABLE IF NOT EXISTS weapons (playerid INT, weaponid INT, quantity INT);";
                 command.ExecuteNonQuery();
-                command.CommandText = "CREATE TABLE IF NOT EXISTS userlocation (playerid INT, x INT, y INT, z INT);";
+                command.CommandText = "CREATE TABLE IF NOT EXISTS playerlocation (playerid INT, x INT, y INT, z INT);";
                 command.ExecuteNonQuery();
             }
 
@@ -149,7 +149,7 @@ public class DatabaseScript : MonoBehaviour
             using (var command = connection.CreateCommand())
             {
 
-                command.CommandText = "SELECT * FROM userlocation WHERE playerid = " + playerID + ";";
+                command.CommandText = "SELECT * FROM playerlocation WHERE playerid = " + playerID + ";";
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
@@ -174,7 +174,7 @@ public class DatabaseScript : MonoBehaviour
 
                     //update the players location while ensuring playerid is correct
                     //  UPDATE userdata SET x = x, SET y = y, SET z = z WHERE playerid = playerid;
-                    command.CommandText = "UPDATE userlocation SET x = " + x + ", y = " + y + ", Z = " + z + " WHERE playerid = " + playerID + ";";
+                    command.CommandText = "UPDATE playerlocation SET x = " + x + ", y = " + y + ", Z = " + z + " WHERE playerid = " + playerID + ";";
                     command.ExecuteNonQuery();
                     //Debug.Log("player location is now : x=" + x + " y= " + y + " z= " + z);
 
@@ -182,7 +182,7 @@ public class DatabaseScript : MonoBehaviour
                 }
                 else if (!dataFound)
                 {
-                    command.CommandText = "INSERT INTO userlocation (playerid,x,y,z) VALUES (" + playerID + "," + x + "," + y + "," + z + ");";
+                    command.CommandText = "INSERT INTO playerlocation (playerid,x,y,z) VALUES (" + playerID + "," + x + "," + y + "," + z + ");";
                     command.ExecuteNonQuery();
                 }
             }
@@ -242,7 +242,7 @@ public class DatabaseScript : MonoBehaviour
             using (var command = connection.CreateCommand())
             {
 
-                command.CommandText = "SELECT * FROM userlocation WHERE playerid =" + playerID + ";";
+                command.CommandText = "SELECT * FROM playerlocation WHERE playerid =" + playerID + ";";
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
