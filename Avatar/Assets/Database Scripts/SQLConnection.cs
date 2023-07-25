@@ -7,7 +7,7 @@ using UnityEngine;
 public class SQLConnection : MonoBehaviour
 {
 
-
+    public bool SQLServerConnected = false;
     public Item[] startingItems;
     public static SQLConnection instance;
     private int playerID = 0;
@@ -28,16 +28,19 @@ public class SQLConnection : MonoBehaviour
         try {
             con.Open();
             Debug.Log("SQL server connection successful!");
+            SQLServerConnected = true;
+            CreateDB(connstring);
+
+            DisplayWeapons();
+
+            con.Close();
+
         }
         catch(Exception e) {
             Debug.Log("ERROR SQL server connection unsuccessful!");
         }
         
-        CreateDB(connstring);
-
-        DisplayWeapons();
-
-        con.Close();
+        
     }
 
     public void DisplayWeapons()

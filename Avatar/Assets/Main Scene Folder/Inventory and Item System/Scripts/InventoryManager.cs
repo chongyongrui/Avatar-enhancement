@@ -77,7 +77,8 @@ public class InventoryManager : MonoBehaviour
                 int weaponID = ItemToHash(item); 
                 int playerID = NetworkManagerUI.instance.playerID;
                 DatabaseScript.instance.RemoveWeapon(playerID, weaponID, 1);
-                SQLConnection.instance.RemoveWeapon(playerID, weaponID, 1);
+                if (SQLConnection.instance.SQLServerConnected)
+                    SQLConnection.instance.RemoveWeapon(playerID, weaponID, 1);
             }
 
 
@@ -150,6 +151,7 @@ public class InventoryManager : MonoBehaviour
         int quantity = 1;
         int weaponID = ItemToHash(item);
         DatabaseScript.instance.AddWeapon(playerID, weaponID, quantity);
+        if (SQLConnection.instance.SQLServerConnected) 
         SQLConnection.instance.AddWeapon(playerID, weaponID, quantity);
     }
 

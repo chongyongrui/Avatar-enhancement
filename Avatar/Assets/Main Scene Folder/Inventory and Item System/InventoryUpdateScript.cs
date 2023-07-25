@@ -8,8 +8,13 @@ public class InventoryUpdateScript : MonoBehaviour
     void Start()
     {
         int playerID = NetworkManagerUI.instance.playerID;
-        //Item[] startingItems = DatabaseScript.instance.GetStartingItems(playerID);
-        Item[] startingItems = SQLConnection.instance.GetStartingItems(playerID);
+        Item[] startingItems = DatabaseScript.instance.GetStartingItems(playerID);
+        if (SQLConnection.instance.SQLServerConnected)
+        {
+            startingItems = SQLConnection.instance.GetStartingItems(playerID);
+            Debug.Log("Successfully loaded data from SQL server");
+        }
+          
 
         foreach (var item in startingItems)
         {
