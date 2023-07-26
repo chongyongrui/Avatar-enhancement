@@ -85,11 +85,12 @@ public class PickableItemScript : MonoBehaviour
 
         if (!isPlayingAnimation && canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp ) // if you enter thecollider of the object and press F
         { 
+                canpickup = false;
                 isPlayingAnimation = true;
                 animator.SetTrigger("Pickup");
                 StartCoroutine(DelayedPickUp(objectToPickUp));
                 hasItem = true;
-           
+
         }
 
         else if (!isPlayingAnimation && Input.GetKeyDown(KeyCode.V) && hasItem) // DROP THE OBJECT

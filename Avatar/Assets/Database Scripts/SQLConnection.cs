@@ -24,6 +24,7 @@ public class SQLConnection : MonoBehaviour
 
 
         string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
+        //string connstring = "Data Source=192.168.56.1;Network Library=DBMSSOCN;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         SqlConnection con = new SqlConnection(connstring);
         try {
             con.Open();
