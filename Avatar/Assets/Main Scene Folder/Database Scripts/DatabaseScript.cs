@@ -17,6 +17,7 @@ public class DatabaseScript : MonoBehaviour
     [SerializeField] private Item SMGItem;
     [SerializeField] private Item smokeGrenadeItem;
     [SerializeField] private Item grenadeItem;
+    
 
     private void Awake()
     {

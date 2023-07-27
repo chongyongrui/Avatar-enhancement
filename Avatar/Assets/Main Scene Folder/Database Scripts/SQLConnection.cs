@@ -2,7 +2,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Drawing;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class SQLConnection : MonoBehaviour
 {
@@ -17,6 +21,7 @@ public class SQLConnection : MonoBehaviour
     [SerializeField] private Item SMGItem;
     [SerializeField] private Item smokeGrenadeItem;
     [SerializeField] private Item grenadeItem;
+    [SerializeField] Sprite NewtorkStatusIcon;
     void Start()
     {
         //create the table
@@ -24,8 +29,9 @@ public class SQLConnection : MonoBehaviour
 
 
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         SqlConnection con = new SqlConnection(connstring);
         try {
             con.Open();
@@ -40,22 +46,61 @@ public class SQLConnection : MonoBehaviour
         }
         catch(Exception e) {
             Debug.Log("ERROR SQL server connection unsuccessful!");
+            SQLServerConnected = false;
         }
         
+    }
+
+    private void Update()
+    {
+
+        
+        /*
+        if ( !SQLServerConnected )
+        {
+            StartCoroutine(TestConnection());
+        }
+        */
+        
+    }
+
+
+    public void TestConnection()
+    {
+        //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        SqlConnection con = new SqlConnection(connstring);
+        
+            Debug.Log("Testing SQL Server connection");
+            try
+            {
+                con.Open();
+                SQLServerConnected = true;
+                con.Close();
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Failed to connect to SQL server");
+            }
+            
+
         
     }
 
     public void DisplayWeapons()
     {
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         try
         {
             using (SqlConnection connection = new SqlConnection(connstring))
             {
 
                 connection.Open();
-
+                SQLServerConnected = true;
 
                 using (var command = connection.CreateCommand())
                 {
@@ -79,6 +124,7 @@ public class SQLConnection : MonoBehaviour
         }catch (Exception e)
         {
             Debug.Log("(SQL server) Error displaying weapons from SQL server");
+            SQLServerConnected = false;
         }
         
     }
@@ -101,7 +147,7 @@ public class SQLConnection : MonoBehaviour
             {
 
                 connection.Open();
-
+                SQLServerConnected = true;
                 //set up objeect called command to allow db control
                 using (var command = connection.CreateCommand())
                 {
@@ -120,6 +166,7 @@ public class SQLConnection : MonoBehaviour
         }catch (Exception e)
         {
             Debug.Log("(SQL Server) Error creating new database. Get admin to create database!");
+            SQLServerConnected = false;
         }
         
     }
@@ -127,7 +174,8 @@ public class SQLConnection : MonoBehaviour
 
     public void AddWeapon(int playerID, int weaponid, int quantity)
     {
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;"; 
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
 
         try
@@ -137,7 +185,7 @@ public class SQLConnection : MonoBehaviour
             using (SqlConnection connection = new SqlConnection(connstring))
             {
                 connection.Open();
-
+                SQLServerConnected = true;
                 using (var command = connection.CreateCommand())
                 {
 
@@ -152,13 +200,15 @@ public class SQLConnection : MonoBehaviour
         } catch (Exception e)
         {
             Debug.Log("(SQL Server) Error adding weapon into DB");
+            SQLServerConnected = false;
         }
 
     }
 
     public void RemoveWeapon(int playerID, int weaponid, int quantity)
     {
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;"; 
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
 
         try
@@ -168,7 +218,7 @@ public class SQLConnection : MonoBehaviour
             using (SqlConnection connection = new SqlConnection(connstring))
             {
                 connection.Open();
-
+                SQLServerConnected = true;
                 using (var command = connection.CreateCommand())
                 {
 
@@ -184,6 +234,7 @@ public class SQLConnection : MonoBehaviour
         } catch (Exception e)
         {
             Debug.Log("(SQL Server) Error removing weapon from DB");
+            SQLServerConnected = false;
         }
     }
 
@@ -193,7 +244,8 @@ public class SQLConnection : MonoBehaviour
 
     public void UpdatePlayerLocation(int playerID, int x, int y, int z)
     {
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;"; 
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;"; 
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;"; 
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         bool dataFound = false;
 
@@ -206,7 +258,7 @@ public class SQLConnection : MonoBehaviour
 
                 connection.Open();
 
-
+                SQLServerConnected = true;
                 using (var command = connection.CreateCommand())
                 {
 
@@ -254,13 +306,14 @@ public class SQLConnection : MonoBehaviour
         } catch (Exception e)
         {
             Debug.Log("(SQL Server) Error updating player location");
+            SQLServerConnected = false;
         }
     }
 
     public Item[] GetStartingItems(int playerID)
     {
-
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;"; 
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;"; 
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         List<Item> items = new List<Item>();
         try
@@ -271,7 +324,7 @@ public class SQLConnection : MonoBehaviour
             {
 
                 connection.Open();
-
+                SQLServerConnected = true;
 
                 using (var command = connection.CreateCommand())
                 {
@@ -298,6 +351,7 @@ public class SQLConnection : MonoBehaviour
         } catch (Exception e)
         {
             Debug.Log("(SQL Server) Error getting starting items");
+            SQLServerConnected = false;
         }
 
         Item[] startingItems = items.ToArray();
@@ -306,7 +360,8 @@ public class SQLConnection : MonoBehaviour
 
     public int[] getStartingLocation(int playerID)
     {
-        string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;"; 
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;"; 
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;"; 
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         int[] startingCoordinates = new int[3];
         try
@@ -317,7 +372,7 @@ public class SQLConnection : MonoBehaviour
             {
 
                 connection.Open();
-
+                SQLServerConnected = true;
 
                 using (var command = connection.CreateCommand())
                 {
@@ -345,6 +400,7 @@ public class SQLConnection : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("(SQL Server) Error getting starting player location");
+            SQLServerConnected = false;
         }
 
 
