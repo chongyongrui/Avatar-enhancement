@@ -12,6 +12,11 @@ public class PlayerLocationUpdate : MonoBehaviour
     {
         playerID = NetworkManagerUI.instance.playerID;
         int[] startingCoordinates = DatabaseScript.instance.getStartingLocation(playerID);
+        if (SQLConnection.instance.SQLServerConnected)
+        {
+            startingCoordinates = SQLConnection.instance.getStartingLocation(playerID);
+        }
+       
         int startingx = startingCoordinates[0];
         int startingy = startingCoordinates[1];
         int startingz = startingCoordinates[2];
@@ -25,5 +30,7 @@ public class PlayerLocationUpdate : MonoBehaviour
      int ypos = (int)Math.Ceiling(transform.position.y);
      int zpos = (int)Math.Ceiling(transform.position.z);
      DatabaseScript.instance.UpdatePlayerLocation(playerID, xpos, ypos, zpos);
+     if (SQLConnection.instance.SQLServerConnected)
+            SQLConnection.instance.UpdatePlayerLocation(playerID, xpos, ypos, zpos);
     }
 }
