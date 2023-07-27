@@ -9122,6 +9122,10 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 887200425696635232, guid: 45e315c30c1006b428956b688daf56ba, type: 3}
+      propertyPath: smokeGrenadeItem
+      value: 
+      objectReference: {fileID: 11400000, guid: dd9259f9f5f327249985d6a49e884866, type: 2}
     - target: {fileID: 887200425696635233, guid: 45e315c30c1006b428956b688daf56ba, type: 3}
       propertyPath: m_RootOrder
       value: 10
@@ -9536,6 +9540,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DatabaseSQLite
       objectReference: {fileID: 0}
+    - target: {fileID: 5443805268259923131, guid: 1a932713719ee7a4681e4c34f853cccd, type: 3}
+      propertyPath: grenadeItem
+      value: 
+      objectReference: {fileID: 11400000, guid: df70229a2535fd149a3b26f3fae9c138, type: 2}
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 1a932713719ee7a4681e4c34f853cccd, type: 3}
