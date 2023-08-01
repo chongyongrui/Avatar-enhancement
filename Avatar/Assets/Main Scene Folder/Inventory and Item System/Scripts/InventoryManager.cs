@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -27,10 +28,12 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
-        playerID = NetworkManagerUI.instance.playerID;
+        playerID = LoginController.Instance.verifiedUsername.GetHashCode();
         //Debug.Log("inveotry playerid is   " + playerID);
         
     }
+
+  
 
     private void Update()
     {
@@ -75,7 +78,7 @@ public class InventoryManager : MonoBehaviour
                     itemInSlot.RefreshCount();
                 }
                 int weaponID = ItemToHash(item); 
-                int playerID = NetworkManagerUI.instance.playerID;
+                int playerID = LoginController.Instance.verifiedUsername.GetHashCode();
                 DatabaseScript.instance.RemoveWeapon(playerID, weaponID, 1);
                 if (SQLConnection.instance.SQLServerConnected)
                     SQLConnection.instance.RemoveWeapon(playerID, weaponID, 1);

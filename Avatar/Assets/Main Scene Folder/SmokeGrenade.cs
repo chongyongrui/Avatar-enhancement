@@ -12,6 +12,7 @@ public class SmokeGrenade : MonoBehaviour
     float countdown;
     bool isExploeded = false;
     public AudioClip soundEffect;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -39,11 +40,7 @@ public class SmokeGrenade : MonoBehaviour
         // show effect
         Instantiate(smokeEffect, transform.position, transform.rotation);
         AudioSource.PlayClipAtPoint(soundEffect, transform.position);
-
-        //remove grenade
-
         Destroy(gameObject);
-
         Debug.Log("Smoke Grenade exploeded");
 
     }

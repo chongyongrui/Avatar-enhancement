@@ -40,14 +40,14 @@ public class PickableItemScript : MonoBehaviour
         canpickup = false;    //setting both to false
         hasItem = false;
         animator = GetComponent<Animator>();
-        playerID = NetworkManagerUI.instance.playerID;
+        playerID = LoginController.Instance.verifiedUsername.GetHashCode();
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdatePlayerHeldItem();
+        
 
         if (this.animator.GetCurrentAnimatorStateInfo(0).IsName("Pickup") || this.animator.GetCurrentAnimatorStateInfo(0).IsName("Throw"))
         {
@@ -58,8 +58,9 @@ public class PickableItemScript : MonoBehaviour
         {
             isPlayingAnimation = false;
         }
-
+        
         ActivatePlayerAction();
+        UpdatePlayerHeldItem();
 
     }
 
@@ -71,6 +72,7 @@ public class PickableItemScript : MonoBehaviour
         //pick the object
         if (!isPlayingAnimation && canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp) // if you enter thecollider of the object and press F
         {
+            PlayerInteractable.Instance.SetHasWeaponFalse();
             canpickup = false;
             isPlayingAnimation = true;
             animator.SetTrigger("Pickup");
@@ -142,11 +144,16 @@ public class PickableItemScript : MonoBehaviour
         hasItem = false;
         //Debug.Log("Player not holding anything");
         //delete the gameobject that is in the players hands
-        DestroyHeldItem();
+        
+        
         if (PlayerInteractable.Instance.hasWeapon)
         {
             PlayerInteractable.Instance.SetHasWeaponFalse();
             PlayerInteractable.Instance.SetHasWeapon(false);
+        }
+        else
+        {
+            DestroyHeldItem();
         }
 
         hasItem = false;

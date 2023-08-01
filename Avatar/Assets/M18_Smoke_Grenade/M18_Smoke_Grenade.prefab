@@ -120,7 +120,7 @@ Transform:
   - {fileID: 7235754447569512155}
   - {fileID: 4219413463074674219}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &794944093
 Rigidbody:
@@ -167,6 +167,7 @@ MonoBehaviour:
   delay: 5
   smokeEffect: {fileID: 6661834016148608521, guid: a89e89c54bfd8af4887149fbb70e5abf, type: 3}
   soundEffect: {fileID: 8300000, guid: 98753a3b04abbde47aa56d4d8e39f02f, type: 3}
+  usedSmokeGrenadeShell: {fileID: 3442810844120767547, guid: 0b4ff18ce6ba34741a6e4bdba9bafedb, type: 3}
 --- !u!65 &3666314830630759280
 BoxCollider:
   m_ObjectHideFlags: 0

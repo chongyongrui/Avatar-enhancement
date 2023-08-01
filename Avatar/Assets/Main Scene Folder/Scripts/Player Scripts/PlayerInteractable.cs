@@ -125,7 +125,7 @@ public class PlayerInteractable : NetworkBehaviour
 
     private void AddItemToInventory(string weaponIdentifier)
     {
-        int playerID = NetworkManagerUI.instance.playerID;
+        int playerID = LoginController.Instance.verifiedUsername.GetHashCode();
         if (weaponIdentifier == "AK47")
         {
             InventoryManager.instance.AddItem(itemAK47, true, playerID);
@@ -235,6 +235,9 @@ public class PlayerInteractable : NetworkBehaviour
             // Reset the TwoBoneIK targets
             lefthandIK.data.target = null;
             righthandIK.data.target = null;
+            weaponPose.data.constrainedObject = null;
+            rightclickAiming.data.constrainedObject = null;
+            TargetAiming.data.constrainedObject = null;
 
             // Destroy the weapon object
             Destroy(weapon);

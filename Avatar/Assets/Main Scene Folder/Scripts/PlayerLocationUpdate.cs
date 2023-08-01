@@ -10,7 +10,7 @@ public class PlayerLocationUpdate : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerID = NetworkManagerUI.instance.playerID;
+        playerID = LoginController.Instance.verifiedUsername.GetHashCode();
         int[] startingCoordinates = DatabaseScript.instance.getStartingLocation(playerID);
         if (SQLConnection.instance.SQLServerConnected)
         {

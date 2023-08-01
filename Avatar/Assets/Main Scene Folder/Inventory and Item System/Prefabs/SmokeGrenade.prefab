@@ -8,17 +8,9 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 794944092, guid: c9e3fd1f9cd651a45a0598432ecc1076, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 794944093, guid: c9e3fd1f9cd651a45a0598432ecc1076, type: 3}
-      propertyPath: m_IsKinematic
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 193393197051745813, guid: c9e3fd1f9cd651a45a0598432ecc1076, type: 3}
       propertyPath: m_RootOrder
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 193393197051745813, guid: c9e3fd1f9cd651a45a0598432ecc1076, type: 3}
       propertyPath: m_LocalPosition.x

@@ -22,24 +22,26 @@ public class SQLConnection : MonoBehaviour
     [SerializeField] private Item smokeGrenadeItem;
     [SerializeField] private Item grenadeItem;
     [SerializeField] Sprite NewtorkStatusIcon;
+    public string adminConString;
+    public string userConString;
     void Start()
     {
         //create the table
-        
+
 
 
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
-        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
-        SqlConnection con = new SqlConnection(connstring);
+        adminConString = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        SqlConnection con = new SqlConnection(adminConString);
         try {
             con.Open();
             Debug.Log("SQL server connection successful!");
             SQLServerConnected = true;
-            CreateDB(connstring);
+            CreateDB(adminConString);
 
-            DisplayWeapons();
+            //DisplayWeapons();
 
             con.Close();
 
@@ -48,30 +50,24 @@ public class SQLConnection : MonoBehaviour
             Debug.Log("ERROR SQL server connection unsuccessful!");
             SQLServerConnected = false;
         }
-        
+
+        ConfigureUserConnectionString(LoginController.Instance.verifiedUsername, LoginController.Instance.verifiedPassword);
+
+
     }
 
-    private void Update()
+    public void ConfigureUserConnectionString(string username, string password)
     {
-
-        
-        /*
-        if ( !SQLServerConnected )
-        {
-            StartCoroutine(TestConnection());
-        }
-        */
-        
+        userConString = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=" + username + ";Password=" + password +";";
     }
-
 
     public void TestConnection()
     {
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
-        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
-        SqlConnection con = new SqlConnection(connstring);
+        //string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        SqlConnection con = new SqlConnection(adminConString);
         
             Debug.Log("Testing SQL Server connection");
             try
@@ -92,11 +88,11 @@ public class SQLConnection : MonoBehaviour
     public void DisplayWeapons()
     {
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
-        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        //string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         try
         {
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (SqlConnection connection = new SqlConnection(userConString))
             {
 
                 connection.Open();
@@ -182,7 +178,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (SqlConnection connection = new SqlConnection(userConString))
             {
                 connection.Open();
                 SQLServerConnected = true;
@@ -215,7 +211,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (SqlConnection connection = new SqlConnection(userConString))
             {
                 connection.Open();
                 SQLServerConnected = true;
@@ -253,7 +249,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (SqlConnection connection = new SqlConnection(userConString))
             {
 
                 connection.Open();
@@ -320,7 +316,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (SqlConnection connection = new SqlConnection(userConString))
             {
 
                 connection.Open();
@@ -368,7 +364,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (SqlConnection connection = new SqlConnection(userConString))
             {
 
                 connection.Open();
@@ -433,6 +429,8 @@ public class SQLConnection : MonoBehaviour
         }
         return newItem;
     }
+
+    
 
 
 
