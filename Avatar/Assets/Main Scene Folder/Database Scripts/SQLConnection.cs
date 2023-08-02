@@ -33,7 +33,7 @@ public class SQLConnection : MonoBehaviour
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
-        adminConString = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        adminConString = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
         SqlConnection con = new SqlConnection(adminConString);
         try {
             con.Open();

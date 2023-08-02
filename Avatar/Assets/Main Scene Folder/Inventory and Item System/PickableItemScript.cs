@@ -70,7 +70,11 @@ public class PickableItemScript : MonoBehaviour
         //Debug.Log("object to pick = " + objectToPickUp + " and the object held = " + currentHeldObject);
 
         //pick the object
-        if (!isPlayingAnimation && canpickup == true && Input.GetKeyDown(KeyCode.F) && currentHeldObject != objectToPickUp) // if you enter thecollider of the object and press F
+        if (!isPlayingAnimation && canpickup == true 
+            && Input.GetKeyDown(KeyCode.F) 
+            && currentHeldObject != objectToPickUp
+            && !isHoldingInteractableObject()) // if you enter thecollider of the object and press F
+
         {
             PlayerInteractable.Instance.SetHasWeaponFalse();
             canpickup = false;
@@ -346,6 +350,19 @@ public class PickableItemScript : MonoBehaviour
             if (t.CompareTag(tag)) return t;
         }
         return null;
+    }
+
+    public bool isHoldingInteractableObject()
+    {
+        if (InventoryManager.instance.GetSelectedItem(false) == null)
+        {
+            return false;
+        }
+        else if (InventoryManager.instance.GetSelectedItem(false).name == "AK47")
+        {
+            return true;
+        }
+        return false;
     }
 
 

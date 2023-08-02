@@ -9,7 +9,6 @@ public class InventoryManager : MonoBehaviour
 {
 
     public static InventoryManager instance;
-    
     public InventorySlot[] inventorySlots;
     public int maxStackedItems = 10;
     public GameObject inventoryItemPrefab;
@@ -28,6 +27,7 @@ public class InventoryManager : MonoBehaviour
 
     private void Start()
     {
+        instance = this;
         playerID = LoginController.Instance.verifiedUsername.GetHashCode();
         //Debug.Log("inveotry playerid is   " + playerID);
         

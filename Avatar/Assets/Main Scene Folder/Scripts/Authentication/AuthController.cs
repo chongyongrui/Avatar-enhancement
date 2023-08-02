@@ -225,7 +225,7 @@ public class AuthController : NetworkBehaviour
     public void CreateNewUserAccount(string username, string password)
     {
         string DBname = "AvatarProject";
-        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         try
         {
@@ -245,7 +245,7 @@ public class AuthController : NetworkBehaviour
                      * 
                      */
 
-                    command.CommandText = "CREATE LOGIN " + username + " WITH PASSWORD = '" + password + "'; " +
+                    command.CommandText = "CREATE LOGIN " + username + " WITH PASSWORD = '" + password + "', CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF; " +
                         "USE " + DBname + "; CREATE USER " + username + " FOR LOGIN " + username + "; " +
                         "USE " + DBname + "; GRANT SELECT, INSERT, UPDATE, DELETE TO " + username + "; ";
 
