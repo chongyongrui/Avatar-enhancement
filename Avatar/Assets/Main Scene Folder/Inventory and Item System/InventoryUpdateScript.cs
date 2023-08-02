@@ -7,7 +7,17 @@ public class InventoryUpdateScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        int playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+        int playerID;
+        try
+        {
+            playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+        }
+        catch (System.Exception e)
+        {
+            playerID = NetworkManagerUI.instance.localPlayerID;
+            Debug.Log("Unable to get playerID from SQL Server. Using default playerID from local username: " + playerID);
+        }
+
         Item[] startingItems = DatabaseScript.instance.GetStartingItems(playerID);
         if (SQLConnection.instance.SQLServerConnected)
         {

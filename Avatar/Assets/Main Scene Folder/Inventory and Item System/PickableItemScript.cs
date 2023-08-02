@@ -40,7 +40,15 @@ public class PickableItemScript : MonoBehaviour
         canpickup = false;    //setting both to false
         hasItem = false;
         animator = GetComponent<Animator>();
-        playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+        try
+        {
+            playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+        }
+        catch (System.Exception e)
+        {
+            playerID = NetworkManagerUI.instance.localPlayerID;
+            Debug.Log("Unable to get playerID from SQL Server. Using default playerID from local username: " + playerID);
+        }
 
     }
 

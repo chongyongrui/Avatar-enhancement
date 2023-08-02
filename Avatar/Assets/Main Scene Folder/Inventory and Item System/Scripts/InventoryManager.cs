@@ -28,7 +28,16 @@ public class InventoryManager : MonoBehaviour
     private void Start()
     {
         instance = this;
-        playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+        try
+        {
+            playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+        }
+        catch(System.Exception e)
+        {
+            playerID = NetworkManagerUI.instance.localPlayerID;
+            Debug.Log("Unable to get playerID from SQL Server. Using default playerID from local username: " +playerID);
+        }
+        
         //Debug.Log("inveotry playerid is   " + playerID);
         
     }
@@ -77,8 +86,16 @@ public class InventoryManager : MonoBehaviour
                 {
                     itemInSlot.RefreshCount();
                 }
-                int weaponID = ItemToHash(item); 
-                int playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+                int weaponID = ItemToHash(item);
+                try
+                {
+                    playerID = LoginController.Instance.verifiedUsername.GetHashCode();
+                }
+                catch (System.Exception e)
+                {
+                    playerID = NetworkManagerUI.instance.localPlayerID;
+                    Debug.Log("Unable to get playerID from SQL Server. Using default playerID from local username: " + playerID);
+                }
                 DatabaseScript.instance.RemoveWeapon(playerID, weaponID, 1);
                 if (SQLConnection.instance.SQLServerConnected)
                     SQLConnection.instance.RemoveWeapon(playerID, weaponID, 1);

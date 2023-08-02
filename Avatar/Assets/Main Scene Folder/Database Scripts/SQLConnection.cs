@@ -40,7 +40,7 @@ public class SQLConnection : MonoBehaviour
             Debug.Log("SQL server connection successful!");
             SQLServerConnected = true;
             CreateDB(adminConString);
-
+            ConfigureUserConnectionString(LoginController.Instance.verifiedUsername, LoginController.Instance.verifiedPassword);
             //DisplayWeapons();
 
             con.Close();
@@ -51,7 +51,7 @@ public class SQLConnection : MonoBehaviour
             SQLServerConnected = false;
         }
 
-        ConfigureUserConnectionString(LoginController.Instance.verifiedUsername, LoginController.Instance.verifiedPassword);
+       
 
 
     }
