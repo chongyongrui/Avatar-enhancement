@@ -16,6 +16,7 @@ public class PickableItemScript : MonoBehaviour
     [SerializeField] private Item dynamiteItem;
     [SerializeField] private Item smokeGrenadeItem;
     [SerializeField] private Item grenadeItem;
+    [SerializeField] private Item backpackItem;
 
     [SerializeField] Camera aimCam;
 
@@ -131,9 +132,15 @@ public class PickableItemScript : MonoBehaviour
 
     private void UpdatePlayerHeldItem()
     {
+       
         if (InventoryManager.instance.GetSelectedItem(false) == null) // character has not selected anything
         {
             RemovePlayerHeldItem();
+        }
+        else if (InventoryManager.instance.GetSelectedItem(false).name == "Backpack")
+        {
+            //trigger inventory menu
+            InventoryManager.instance.backpackScreen.SetActive(true);
         }
         //character has chosen another object
         else if (hasItem && InventoryManager.instance.GetSelectedItem(false) != currItem)

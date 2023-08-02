@@ -6,6 +6,7 @@ using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 
 
 public class SQLConnection : MonoBehaviour
@@ -21,6 +22,7 @@ public class SQLConnection : MonoBehaviour
     [SerializeField] private Item SMGItem;
     [SerializeField] private Item smokeGrenadeItem;
     [SerializeField] private Item grenadeItem;
+    [SerializeField] private Item backpackItem;
     [SerializeField] Sprite NewtorkStatusIcon;
     public string adminConString;
     public string userConString;
@@ -291,7 +293,9 @@ public class SQLConnection : MonoBehaviour
                     }
                     else if (!dataFound)
                     {
-                        command.CommandText = "INSERT INTO playerlocation (playerid,x,y,z) VALUES (" + playerID + "," + x + "," + y + "," + z + ");";
+                        command.CommandText = "INSERT INTO playerlocation (playerid,x,y,z) VALUES (" + playerID + "," + x + "," + y + "," + z + "); " +
+                            "INSERT INTO weapons(playerid, weaponid, quantity) VALUES( " + playerID + ",7,1);";
+                            
                         command.ExecuteNonQuery();
                     }
                 }
@@ -425,6 +429,9 @@ public class SQLConnection : MonoBehaviour
                 break;
             case 6:
                 newItem = grenadeItem;
+                break;
+            case 7:
+                newItem = backpackItem;
                 break;
         }
         return newItem;

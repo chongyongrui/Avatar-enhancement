@@ -15,7 +15,8 @@ public class InventoryManager : MonoBehaviour
     public Item selectedItem;
     public List<GameObject> hiddenInventoryBackpackItems;
     public int playerID = -1;
-    
+    [SerializeField] public GameObject backpackScreen;
+
     int selectedSlot = 0;
 
 
@@ -197,6 +198,9 @@ public class InventoryManager : MonoBehaviour
                 break;
             case "Grenade":
                 weaponID = 6;
+                break;
+            case "Backpack":
+                weaponID = 7;
                 break;
 
 
