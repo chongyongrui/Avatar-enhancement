@@ -160,11 +160,11 @@ public class PickableItemScript : MonoBehaviour
 
     private void RemovePlayerHeldItem()
     {
+        InventoryManager.instance.backpackScreen.SetActive(false);
         hasItem = false;
         //Debug.Log("Player not holding anything");
         //delete the gameobject that is in the players hands
-        
-        
+
         if (PlayerInteractable.Instance.hasWeapon)
         {
             PlayerInteractable.Instance.SetHasWeaponFalse();
@@ -201,6 +201,7 @@ public class PickableItemScript : MonoBehaviour
 
     private void SpawnNewPlayerItem()
     {
+        InventoryManager.instance.backpackScreen.SetActive(false);
         Item item = InventoryManager.instance.GetSelectedItem(false); 
         try
         {

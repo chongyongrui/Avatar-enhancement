@@ -63,6 +63,15 @@ public class InventoryManager : MonoBehaviour
             selectedItem = GetSelectedItem(false);
         }
 
+        if (selectedItem != null && selectedItem.name == "Backpack")
+        {
+            backpackScreen.SetActive(true);
+        }
+        else
+        {
+            backpackScreen.SetActive(false);
+        }
+
 
 
     }

@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class InventoryUpdateScript : MonoBehaviour
 {
+
+    [SerializeField] Item backpackItem; 
     // Start is called before the first frame update
     void Start()
     {
@@ -24,8 +27,8 @@ public class InventoryUpdateScript : MonoBehaviour
             startingItems = SQLConnection.instance.GetStartingItems(playerID);
             Debug.Log("Successfully loaded data from SQL server");
         }
-          
-
+        //add the backpack item 
+        InventoryManager.instance.AddItem(backpackItem, false, playerID);
         foreach (var item in startingItems)
         {
             InventoryManager.instance.AddItem(item, false, playerID);

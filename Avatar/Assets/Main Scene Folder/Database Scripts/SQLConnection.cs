@@ -325,7 +325,7 @@ public class SQLConnection : MonoBehaviour
 
                 connection.Open();
                 SQLServerConnected = true;
-
+                /*
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "SELECT * FROM weapons WHERE playerid = " + playerID + "AND weaponid = 7;";
@@ -343,6 +343,7 @@ public class SQLConnection : MonoBehaviour
                         reader.Close();
                     }
                 }
+                */
 
                 using (var command = connection.CreateCommand())
                 {

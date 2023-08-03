@@ -1308,6 +1308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53c04f23d03a92b4fabc473f1a042911, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backpackItem: {fileID: 11400000, guid: e6eb453579f598d4996e747ddbd5774c, type: 2}
 --- !u!114 &8793682441582430714
 MonoBehaviour:
   m_ObjectHideFlags: 0

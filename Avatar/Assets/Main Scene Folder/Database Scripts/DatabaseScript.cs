@@ -202,8 +202,11 @@ public class DatabaseScript : MonoBehaviour
         {
 
             connection.Open();
+            /*
             using (var command = connection.CreateCommand())
             {
+
+                
                 command.CommandText = "SELECT * FROM weapons WHERE playerid = " + playerID + "AND weaponid = 7;";
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
@@ -219,7 +222,8 @@ public class DatabaseScript : MonoBehaviour
                     reader.Close();
                 }
             }
-            
+            */
+
 
             using (var command = connection.CreateCommand())
             {
