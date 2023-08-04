@@ -5,12 +5,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PickableItemScript : MonoBehaviour
 {
     public GameObject myHands; //reference to your hands/the position where you want your object to go
     bool canpickup; //a bool to see if you can or cant pick up the item
     GameObject objectToPickUp; // the gameobject onwhich you collided with
+    GameObject collidedObject;
     public bool hasItem; // a bool to see if you have an item in your hand
     public static PickableItemScript instance;
     [SerializeField] private Item dynamiteItem;
@@ -57,7 +59,7 @@ public class PickableItemScript : MonoBehaviour
     void Update()
     {
         
-
+        
         if (this.animator.GetCurrentAnimatorStateInfo(0).IsName("Pickup") || this.animator.GetCurrentAnimatorStateInfo(0).IsName("Throw"))
         {
             isPlayingAnimation = true;
@@ -70,6 +72,11 @@ public class PickableItemScript : MonoBehaviour
         
         ActivatePlayerAction();
         UpdatePlayerHeldItem();
+        if (collidedObject != null && collidedObject.tag == "MiniGameTrigger" && Input.GetKeyDown(KeyCode.Return))
+        {
+            SceneManager.LoadScene("Shooting Game"aaa);
+        }
+        //Debug.Log(collidedObject.tag);
 
     }
 
@@ -269,17 +276,23 @@ public class PickableItemScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) // to see when the player enters the collider
     {
-         Debug.Log("Picakable object found" + other);
+         Debug.Log("Collided with " + other.gameObject);
         if (other.gameObject.tag == "PickableObject") //on the object you want to pick up set the tag to be anything, in this case "object"
         {
+            Debug.Log("Picakable object found" + other);
             canpickup = true;  //set the pick up bool to true
             objectToPickUp = other.gameObject; //set the gameobject you collided with to one you can reference
                                                //  Debug.Log("Picakable object found");
         }
+        collidedObject = other.gameObject;
+
+        //open mini game scene
+        
     }
     private void OnTriggerExit(Collider other)
     {
         canpickup = false; //when you leave the collider set the canpickup bool to false
+        collidedObject = null;
 
     }
 
