@@ -223,51 +223,11 @@ public class AuthController : NetworkBehaviour
         errorWindow.SetActive(true);
     }
 
-    public void CreateNewDB()
-    {
-        string connstring = "Data Source=10.255.253.29;Initial Catalog=master;User ID=sa;Password=D5taCard;";
-        try
-        {
-            using (SqlConnection connection = new SqlConnection(connstring))
-            {
-
-                connection.Open();
-
-
-                using (var command = connection.CreateCommand())
-                {
-                    /*
-                     *  IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'DataBase')
-                        BEGIN
-                             CREATE DATABASE [DataBase]
-
-
-                            END
-
-                     * 
-                     */
-
-                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
-                        "BEGIN  CREATE DATABASE AvatarProject  END";
-
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-
-
-            }
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.Log("(SQL server) Error creating AvatarProject DB");
-
-        }
-    }
+    
 
     public void CreateNewUserAccount(string username, string password)
     {
-        CreateNewDB();
+       
         string DBname = "AvatarProject";
         string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
