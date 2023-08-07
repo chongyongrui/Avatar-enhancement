@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4192,8 +4192,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -9848,6 +9848,18 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7005424904446395868, guid: 8aac044ac49efca4ba03622776c8d3d5, type: 3}
+      propertyPath: ShoulderOffset.z
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 7005424904446395868, guid: 8aac044ac49efca4ba03622776c8d3d5, type: 3}
+      propertyPath: CameraCollisionFilter.m_Bits
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 7005424905732844640, guid: 8aac044ac49efca4ba03622776c8d3d5, type: 3}
+      propertyPath: m_Lens.FieldOfView
+      value: 78
+      objectReference: {fileID: 0}
     - target: {fileID: 7005424905732844642, guid: 8aac044ac49efca4ba03622776c8d3d5, type: 3}
       propertyPath: m_Name
       value: FirstPersonCamera
