@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Net;
 using UnityEngine.UI;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 
@@ -28,9 +29,13 @@ public class SQLConnection : MonoBehaviour
     public string userConString;
     void Start()
     {
-        //create the table
+        //get IP address of computer
 
+        string host = Dns.GetHostName();
 
+        // Getting ip address using host name
+        IPHostEntry ip = Dns.GetHostEntry(host);
+        Debug.Log("IP address of this machine is: " + ip.AddressList[0].ToString());
 
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;";
@@ -38,6 +43,7 @@ public class SQLConnection : MonoBehaviour
         adminConString = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
         SqlConnection con = new SqlConnection(adminConString);
         try {
+            CreateNewDB();
             con.Open();
             Debug.Log("SQL server connection successful!");
             SQLServerConnected = true;
@@ -168,11 +174,51 @@ public class SQLConnection : MonoBehaviour
         }
         
     }
+    public void CreateNewDB()
+    {
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(connstring))
+            {
 
+                connection.Open();
+
+
+                using (var command = connection.CreateCommand())
+                {
+                    /*
+                     *  IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'DataBase')
+                        BEGIN
+                             CREATE DATABASE [DataBase]
+
+
+                            END
+
+                     * 
+                     */
+
+                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
+                        "BEGIN  CREATE DATABASE AvatarProject  END";
+
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL server) Error creating AvatarProject DB");
+
+        }
+    }
 
     public void AddWeapon(int playerID, int weaponid, int quantity)
     {
-        string connstring = "Data Source=10.255.253.29;Initial Catalog=AvatarProject;User ID=SuperAdmin;Password=SuperAdmin;"; 
+        string connstring = "Data Source=10.255.253.29;Initial Catalog=master;User ID=SuperAdmin;Password=SuperAdmin;"; 
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         //string connstring = "Server=DESKTOP-2P23NMB;database=AvatarProject;Trusted_Connection=True;";
 
