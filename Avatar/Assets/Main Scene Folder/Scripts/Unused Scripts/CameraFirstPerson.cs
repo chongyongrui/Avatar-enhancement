@@ -7,13 +7,15 @@ using System.Net;
 using System;
 
 public class CameraFirstPerson : MonoBehaviour
-{[SerializeField] private float sensitivity = 50f;
+{
+    [SerializeField] private float sensitivity = 50f;
     
     
     private float xRotation = 0f;
     private float yRotation = 0f;
-     
-
+    public float defaultFOV = 56f;
+    public float zoomedFOV = 30f;
+    public bool isZoomed = false;
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -21,7 +23,12 @@ public class CameraFirstPerson : MonoBehaviour
 
     void Update()
     {
-        
+
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            isZoomed = !isZoomed;
+        }
+
         float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
 
@@ -33,6 +40,16 @@ public class CameraFirstPerson : MonoBehaviour
 
         transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
         //playerBody.Rotate(Vector3.up * mouseX);
+        Camera cam = this.GetComponent<Camera>();
+        if (isZoomed)
+        {
+            cam.fieldOfView = zoomedFOV;
+        }
+        else
+        {
+            cam.fieldOfView = defaultFOV;
+        }
+
     }
 
 
