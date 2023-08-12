@@ -6213,6 +6213,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 198234346748616026, guid: ad2ab49d0a2a17148bd51c93d977bdbc, type: 3}
+      propertyPath: stopAction
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 198234346748616026, guid: ad2ab49d0a2a17148bd51c93d977bdbc, type: 3}
       propertyPath: lengthInSec
       value: 0.05
       objectReference: {fileID: 0}
@@ -6463,7 +6467,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1073446199}
-  m_LocalRotation: {x: 0, y: 0.023559738, z: 0, w: 0.9997224}
+  m_LocalRotation: {x: 0.052410766, y: 0.02169778, z: -0.001139032, w: 0.99838924}
   m_LocalPosition: {x: 53.636, y: 1.94, z: 6.201}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -6472,7 +6476,7 @@ Transform:
   - {fileID: 1391894851}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 2.7, z: 0}
+  m_LocalEulerAnglesHint: {x: 6.01, y: 2.49, z: 0}
 --- !u!114 &1073446203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7431,6 +7435,13 @@ MonoBehaviour:
   muzzleFlash: {fileID: 480532006}
   impactEffect: {fileID: 1025285306637258, guid: 0afc70312b9bc0943bb0b56badb46887, type: 3}
   impactForce: 30
+  soundEffect: {fileID: 8300000, guid: c72921a1785b6254bb7365cb8264f278, type: 3}
+  addBulletSpread: 1
+  bulletSpreadVariance: {x: 0.035, y: 0.04, z: 0.035}
+  shootingSystem: {fileID: 480532006}
+  bulletSpawnPoint: {fileID: 480532004}
+  impactParticleSystem: {fileID: 198220379293217532, guid: 0afc70312b9bc0943bb0b56badb46887, type: 3}
+  bulletTrial: {fileID: 3540680946444809505, guid: a9c63e010b3f95c4a813a71a2b26d864, type: 3}
 --- !u!1 &2023408559
 GameObject:
   m_ObjectHideFlags: 0
