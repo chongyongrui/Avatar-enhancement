@@ -5,6 +5,7 @@ using Cinemachine;
 using UnityEngine.Rendering;
 using System.Net;
 using System;
+using Unity.VisualScripting;
 
 public class CameraFirstPerson : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class CameraFirstPerson : MonoBehaviour
     public float defaultFOV = 56f;
     public float zoomedFOV = 30f;
     public bool isZoomed = false;
+    [SerializeField] float movementSpeed = 2f;
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -23,6 +25,16 @@ public class CameraFirstPerson : MonoBehaviour
 
     void Update()
     {
+
+        if (Input.GetKey(KeyCode.W))
+        {
+            transform.position = transform.position + transform.forward * Time.deltaTime * movementSpeed;
+        }
+        else if (Input.GetKey(KeyCode.S)) 
+        {
+            transform.position = transform.position - transform.forward * Time.deltaTime * movementSpeed;
+        }
+
 
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
