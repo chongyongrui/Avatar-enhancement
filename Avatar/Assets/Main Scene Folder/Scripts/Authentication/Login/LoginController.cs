@@ -18,6 +18,7 @@ using TMPro;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
+using System.Data.SqlClient;
 
 public class LoginController : MonoBehaviour
 {
@@ -218,10 +219,20 @@ public class LoginController : MonoBehaviour
             verifiedUsername = name;
             verifiedPassword = password;
 
+            bool isAuthenticated = AuthenticateWithSQLServer(verifiedUsername,verifiedPassword);
+
             // Load Scene for choosing host/client
-            Loader.Load(Loader.Scene.Main);
-            StartAcaPyInstanceAsync(arguments);
-            request.Dispose();
+            if (isAuthenticated)
+            {
+                Loader.Load(Loader.Scene.Main);
+                StartAcaPyInstanceAsync(arguments);
+                request.Dispose();
+            }
+            else
+            {
+                UnityEngine.Debug.Log("Error logging in!");
+            }
+            
 
         }
         else
@@ -230,12 +241,74 @@ public class LoginController : MonoBehaviour
         }
     }
 
+
+
+
+    public bool AuthenticateWithSQLServer( string username, string password)
+    {
+        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        SqlConnection con = new SqlConnection(adminConString);
+        bool dataFound = false;
+
+        try
+        {
+             using (SqlConnection connection = new SqlConnection(adminConString))
+            {
+
+                connection.Open();
+             
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM userdata WHERE username_hash = " + username.GetHashCode() + ";";
+
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader["username_hash"] == null)
+                            {
+                                UnityEngine.Debug.Log("(SQL server) no such user exists, no data found");
+                                dataFound = false;
+                                UnityEngine.Debug.Log("User does not exist!");
+                            }
+                            else if (reader["password_hash"].ToString() == password.GetHashCode().ToString())
+                            {
+                               return true;
+                            }
+                            else
+                            {
+                                dataFound = false;
+                                UnityEngine.Debug.Log("Wrong password");
+                            }
+                        }
+                        reader.Close();
+                    }
+
+                    
+                    
+                }
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error validating password!");
+            
+        }
+        return false;
+    }
+
     /// <summary>
     /// Start Docker-Compose file and create a seperate terminal to log output from the containers
     /// </summary>
     /// <param name="composeFilePath"></param>
     /// <param name="arguments"></param>
     /// <returns></returns>
+    /// 
+
+
     public async Task RunDockerComposeAsync(string composeFilePath, Dictionary<string, string> arguments)
     {
         Process process = new Process();
@@ -336,9 +409,10 @@ public class LoginController : MonoBehaviour
     /// </summary>
     /// <param name="arguments"></param>
     /// <returns></returns>
-    private async void StartAcaPyInstanceAsync(Dictionary<string, string> arguments)
+    public async void StartAcaPyInstanceAsync(Dictionary<string, string> arguments)
     {
-        string composeFilePath = "../../Assets/Main Scene Folder/Scripts/Wallet/";
+        //string composeFilePath = "../../Assets/Main Scene Folder/Scripts/Wallet/";
+        string composeFilePath = "../../Avatar/Assets/Main Scene Folder/Scripts/Wallet/";
         arguments.Add("ACAPY_ENDPOINT_PORT", "8001");
         arguments.Add("ACAPY_ADMIN_PORT", "11001");
         arguments.Add("CONTROLLER_PORT", "3001");

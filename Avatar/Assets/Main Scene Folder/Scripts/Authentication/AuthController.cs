@@ -19,6 +19,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data.SqlClient;
 using System.Net;
+using Debug = UnityEngine.Debug;
+using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 
 [System.Serializable]
 public class JsonData
@@ -208,6 +210,7 @@ public class AuthController : NetworkBehaviour
             //create new SQL server login for the new user
             registeredUsername = name;
             registeredPassword = password;
+            SQLAddNewUserDetail(name, password);
 
             isNewUser = true;
 
@@ -235,5 +238,166 @@ public class AuthController : NetworkBehaviour
     }
 
     
+    // add the new users details into the userdetails db in master using SQL SA account
+    private void SQLAddNewUserDetail(string username, string password)
+    {
+        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        SqlConnection con = new SqlConnection(adminConString);
+        try
+        {
+            CreateNewDB();
+            con.Open();
+            Debug.Log("SQL server connection successful!");
+            
+            CreateTables(adminConString);
 
+           
+            CreateNewUserAccount(AuthController.instance.registeredUsername, AuthController.instance.registeredPassword);
+            UpdateUserInfoTable(username, password) ;
+            con.Close();
+
+        }catch (Exception ex)
+        {
+            Debug.Log("Error adding new user info to SQL server");
+        }
+    }
+
+    public void UpdateUserInfoTable(string username, string password)
+    {
+        int usernameHash = username.GetHashCode();
+        int passwordHash = password.GetHashCode();
+        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(adminConString))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+
+                    
+                    command.CommandText = "INSERT INTO userdata (username_hash,password_hash) VALUES (" + usernameHash + "," + passwordHash + ");";
+                    command.ExecuteNonQuery();
+                    Debug.Log("(SQL server) user added with id: " + usernameHash + " with password = " + passwordHash);
+                }
+
+                connection.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL Server) Error adding userdata into DB");
+        }   
+
+    }
+
+    public void CreateNewDB()
+    {
+        string connstring = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(connstring))
+            {
+
+                connection.Open();
+
+
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
+                        "BEGIN  CREATE DATABASE AvatarProject  END";
+
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL server) Error creating AvatarProject DB");
+
+        }
+    }
+
+    public void CreateTables(string connstring)
+    {
+        try
+        {
+            //create the db connection
+            using (SqlConnection connection = new SqlConnection(connstring))
+            {
+
+                connection.Open();
+                //set up objeect called command to allow db control
+                using (var command = connection.CreateCommand())
+                {
+
+                    //sql statements to execute
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'userdata')BEGIN  CREATE TABLE userdata ( username_hash INT, password_hash INT )END;";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'weapons')BEGIN  CREATE TABLE weapons ( playerid INT, weaponid INT, quantity INT) END;";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'playerlocation')BEGIN  CREATE TABLE playerlocation ( playerid INT, x INT, y INT, z INT) END;";
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL Server) Error creating new database. Get admin to create database!");
+        }
+
+    }
+
+
+    public void CreateNewUserAccount(string username, string password)
+    {
+
+        string DBname = "AvatarProject";
+        string connstring = "Data Source=" + IPAddress + " ;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(connstring))
+            {
+
+                connection.Open();
+
+
+                using (var command = connection.CreateCommand())
+                {
+                    /*
+                     * IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ' username ' AND type = 'S') BEGIN
+                         CREATE LOGIN   username  WITH PASSWORD ='password' , CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF; 
+                        USE  AvatarProject; CREATE USER  username  FOR LOGIN  username ; 
+                        USE  AvatarProject ; GRANT SELECT, INSERT, UPDATE, DELETE TO  username  END;
+
+                     * 
+                     */
+
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ' " + username + " ' AND type = 'S') " +
+                        "BEGIN CREATE LOGIN   " + username + " WITH PASSWORD = '" + password + "' ," +
+                        " CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF   USE AvatarProject; CREATE USER " + username + " FOR LOGIN " + username + " ;" +
+                        " USE AvatarProject; GRANT SELECT, INSERT, UPDATE, DELETE TO " + username + "  END; ";
+
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL server) Error creating new account:  " + e);
+        }
+
+    }
 }
