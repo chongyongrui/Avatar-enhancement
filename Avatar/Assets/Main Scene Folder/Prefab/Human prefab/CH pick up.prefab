@@ -1157,7 +1157,7 @@ MonoBehaviour:
   aimTrigger: {fileID: 5657885543610946343}
   pickingupPlaceholder: {fileID: 0}
   weaponPlaceholder: {fileID: 3821555268861744110}
-  AK47prefab: {fileID: 5082648477674571087, guid: 43771f61db870f14d8f031c6e2fb0395, type: 3}
+  AK47prefab: {fileID: 5082648477674571087, guid: 5094a7bf081b33e45a1a9a3e7adf325e, type: 3}
   delayBeforeSpawn: 1.8
   rb: {fileID: 5075346856353519385}
   shoulder: {fileID: 4900686166078443486}
@@ -1277,7 +1277,7 @@ MonoBehaviour:
   aimCam: {fileID: 0}
   newDynamiteObj: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
   newSmokeGrenadeObj: {fileID: 113076777504956686, guid: 63f22b57e3d9138478f409ca5e8fa6f7, type: 3}
-  newAk47Obj: {fileID: 5082648477674571087, guid: 5094a7bf081b33e45a1a9a3e7adf325e, type: 3}
+  newAk47Obj: {fileID: 8533659323394300343, guid: ecb35b5db372f864fa34b8780e260cce, type: 3}
   newGrenadeObj: {fileID: 5349320068034011564, guid: 862c2899134a4d349938e7d4b8091e42, type: 3}
   playerID: 0
   currItem: {fileID: 0}
