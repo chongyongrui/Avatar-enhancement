@@ -74,7 +74,86 @@ public class LoginController : MonoBehaviour
         IPAddress = IPAddressInputField.text;
 
         //Add check that name is not already on the blockchain
-        StartCoroutine(HandleLoginQueryResult(name, password, ledgerUrl)); 
+        StartCoroutine(HandleLoginQueryResult(name, password, ledgerUrl, true)); 
+    }
+
+    public async void AccessAdminPanel()
+    {
+
+        //Get name and password from input fields
+        string name = nameInputField.text;
+        string password = passwordInputField.text;
+        IPAddress = IPAddressInputField.text;
+
+        //Add check that name is not already on the blockchain
+        StartCoroutine(HandleLoginQueryResult(name, password, ledgerUrl, false));
+    }
+
+    public void CreateNewDB()
+    {
+        string connstring = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(connstring))
+            {
+
+                connection.Open();
+
+
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
+                        "BEGIN  CREATE DATABASE AvatarProject  END";
+
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL server) Error creating AvatarProject DB");
+
+        }
+    }
+
+    public void CreateTables()
+    {
+        string connstring = "Data Source=" + IPAddress + ";Initial Catalog= AvatarProject;User ID=sa;Password=D5taCard;";
+        try
+        {
+            //create the db connection
+            using (SqlConnection connection = new SqlConnection(connstring))
+            {
+
+                connection.Open();
+                //set up objeect called command to allow db control
+                using (var command = connection.CreateCommand())
+                {
+
+                    //sql statements to execute
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'userdata')BEGIN  CREATE TABLE userdata ( username_hash INT, password_hash INT )END;";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'weapons')BEGIN  CREATE TABLE weapons ( playerid INT, weaponid INT, quantity INT) END;";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'playerlocation')BEGIN  CREATE TABLE playerlocation ( playerid INT, x INT, y INT, z INT) END;";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'IssuedCredentials')BEGIN  CREATE TABLE IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT) END;";
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error creating new database. Get admin to create database!");
+        }
+
     }
 
     /// <summary>
@@ -84,7 +163,7 @@ public class LoginController : MonoBehaviour
     /// <param name="password"></param>
     /// <param name="ledgerUrl"></param>
     /// <returns>Redirects user to main game page</returns>
-    private IEnumerator HandleLoginQueryResult(string username, string password, string ledgerUrl)
+    private IEnumerator HandleLoginQueryResult(string username, string password, string ledgerUrl, bool loadMainScene)
     {
         yield return StartCoroutine(CheckIfUserExists(username, ledgerUrl, (userExists) =>
         {
@@ -118,7 +197,7 @@ public class LoginController : MonoBehaviour
 
                 // Debug.Log(url);
                 // Send the registration data to ACA-Py agent via HTTP request
-                StartCoroutine(SendLoginRequest(url, jsonData, password, username));
+                StartCoroutine(SendLoginRequest(url, jsonData, password, username, loadMainScene));
             }
             else
             {  
@@ -181,7 +260,7 @@ public class LoginController : MonoBehaviour
     /// <param name="password"></param>
     /// <param name="name"></param>
     /// <returns>Redirects players to main game page</returns>
-    IEnumerator SendLoginRequest(string url, string jsonData, string password, string name)
+    IEnumerator SendLoginRequest(string url, string jsonData, string password, string name, bool loadMainScene)
     {
         var request = new UnityWebRequest(url, "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
@@ -224,7 +303,15 @@ public class LoginController : MonoBehaviour
             // Load Scene for choosing host/client
             if (isAuthenticated)
             {
-                Loader.Load(Loader.Scene.Main);
+                if (loadMainScene)
+                {
+                    Loader.Load(Loader.Scene.Main);
+                }
+                else
+                {
+                    SceneManager.LoadSceneAsync("Admin Panel");
+                }
+                
                 StartAcaPyInstanceAsync(arguments);
                 request.Dispose();
             }

@@ -33,7 +33,7 @@ public class DisplayBuildLog : MonoBehaviour
 
     void OnGUI()
     {
-        GUILayout.BeginArea(new Rect(Screen.width - 920, 0, 400, Screen.height));
+        GUILayout.BeginArea(new Rect(Screen.width - 920, 300, 400, Screen.height));
         GUILayout.Label("\n" + string.Join("\n", myLogQueue.ToArray()));
         GUILayout.EndArea();
     }

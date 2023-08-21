@@ -60,11 +60,11 @@ public class SQLConnection : MonoBehaviour
             SqlConnection con = new SqlConnection(adminConString);
             try
             {
-                AuthController.instance.CreateNewDB();
+                LoginController.Instance.CreateNewDB();
                 con.Open();
                 Debug.Log("SQL server connection successful!");
                 SQLServerConnected = true;
-                AuthController.instance.CreateTables(adminConString);
+                LoginController.Instance.CreateTables();
 
                 if (AuthController.instance!= null && AuthController.instance.isNewUser)
                 {

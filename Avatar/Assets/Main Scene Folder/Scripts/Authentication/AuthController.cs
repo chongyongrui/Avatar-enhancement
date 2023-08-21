@@ -74,6 +74,8 @@ public class AuthController : NetworkBehaviour
         StartCoroutine(HandleQueryResult(name, password, role, ledgerUrl));
     }
 
+
+
     /// <summary>
     /// Coroutine to check if player is registered on the blockchain
     /// </summary>
@@ -158,6 +160,7 @@ public class AuthController : NetworkBehaviour
                 registrationData.Add("seed", seed);
                 registrationData.Add("role", role);
                 registrationData.Add("alias", nameInputField.text);
+                
 
                 string jsonData = JsonConvert.SerializeObject(registrationData);
 
@@ -245,11 +248,11 @@ public class AuthController : NetworkBehaviour
         SqlConnection con = new SqlConnection(adminConString);
         try
         {
-            CreateNewDB();
+            LoginController.Instance.CreateNewDB();
             con.Open();
             Debug.Log("SQL server connection successful!");
-            
-            CreateTables(adminConString);
+
+            LoginController.Instance.CreateTables();
 
            
             CreateNewUserAccount(AuthController.instance.registeredUsername, AuthController.instance.registeredPassword);
@@ -291,69 +294,7 @@ public class AuthController : NetworkBehaviour
 
     }
 
-    public void CreateNewDB()
-    {
-        string connstring = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
-        try
-        {
-            using (SqlConnection connection = new SqlConnection(connstring))
-            {
-
-                connection.Open();
-
-
-                using (var command = connection.CreateCommand())
-                {
-
-                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
-                        "BEGIN  CREATE DATABASE AvatarProject  END";
-
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-
-
-            }
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.Log("(SQL server) Error creating AvatarProject DB");
-
-        }
-    }
-
-    public void CreateTables(string connstring)
-    {
-        try
-        {
-            //create the db connection
-            using (SqlConnection connection = new SqlConnection(connstring))
-            {
-
-                connection.Open();
-                //set up objeect called command to allow db control
-                using (var command = connection.CreateCommand())
-                {
-
-                    //sql statements to execute
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'userdata')BEGIN  CREATE TABLE userdata ( username_hash INT, password_hash INT )END;";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'weapons')BEGIN  CREATE TABLE weapons ( playerid INT, weaponid INT, quantity INT) END;";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'playerlocation')BEGIN  CREATE TABLE playerlocation ( playerid INT, x INT, y INT, z INT) END;";
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.Log("(SQL Server) Error creating new database. Get admin to create database!");
-        }
-
-    }
+    
 
 
     public void CreateNewUserAccount(string username, string password)
