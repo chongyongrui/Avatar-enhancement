@@ -20,8 +20,8 @@ public class CredentialIssuer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        IPAddress = LoginController.Instance.IPAddress;
-        issuer = LoginController.Instance.verifiedUsername;
+        IPAddress = LoginController.instance.IPAddress;
+        issuer = LoginController.instance.verifiedUsername;
         issuerName.text = issuer;
     }
 
@@ -65,8 +65,8 @@ public class CredentialIssuer : MonoBehaviour
             {
 
                 connection.Open();
-                LoginController.Instance.CreateNewDB();
-                LoginController.Instance.CreateTables();
+                LoginController.instance.CreateNewDB();
+                LoginController.instance.CreateTables();
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry + ");";

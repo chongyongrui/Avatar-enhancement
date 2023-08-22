@@ -57,12 +57,12 @@ public class ChatManager : NetworkBehaviour
             if (chatStatus)
             {
                 interactingPlayerController.enabled = false;
-                Debug.Log("Set false");
+               // Debug.Log("Set false");
             }
             else
             {
                 interactingPlayerController.enabled = true;
-                Debug.Log("set true");
+               // Debug.Log("set true");
             }
         }
 
