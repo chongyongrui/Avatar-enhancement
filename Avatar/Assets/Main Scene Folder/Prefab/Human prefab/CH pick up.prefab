@@ -950,6 +950,7 @@ MonoBehaviour:
     m_Bits: 513
   bloodGush: {fileID: 4900686166078442631}
   bloodGushOrigin: {fileID: 4900686166078443334}
+  chatholder: {fileID: 0}
   maxCameraDistance: 4
   CinemachineCameraTarget: {fileID: 4900686166078442720}
   TopClamp: 70
@@ -1107,6 +1108,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
 --- !u!114 &4900686166078443134
@@ -1157,7 +1161,7 @@ MonoBehaviour:
   aimTrigger: {fileID: 5657885543610946343}
   pickingupPlaceholder: {fileID: 0}
   weaponPlaceholder: {fileID: 3821555268861744110}
-  AK47prefab: {fileID: 5082648477674571087, guid: 5094a7bf081b33e45a1a9a3e7adf325e, type: 3}
+  AK47prefab: {fileID: 5082648477674571087, guid: 43771f61db870f14d8f031c6e2fb0395, type: 3}
   delayBeforeSpawn: 1.8
   rb: {fileID: 5075346856353519385}
   shoulder: {fileID: 4900686166078443486}
