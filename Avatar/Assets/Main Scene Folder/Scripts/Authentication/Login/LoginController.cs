@@ -92,6 +92,10 @@ public class LoginController : MonoBehaviour
         
     }
 
+    public void OnDestroy()
+    {
+        UnityEngine.Debug.Log( "(ATTENTION) logincontroller destroyed!");
+    }
 
     public async void AccessAdminPanel()
     {
@@ -252,9 +256,8 @@ public class LoginController : MonoBehaviour
                         }
                     }
                     else {
-                        //UnityEngine.Debug.Log("Alias is null");
-                        popupWindow.SetActive(true);
-                        windowMessage.text = "Wrong Username/Password!";
+                        UnityEngine.Debug.Log("Alias is null");
+                        
                     }
                 }
             }

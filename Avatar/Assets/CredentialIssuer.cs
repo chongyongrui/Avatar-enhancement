@@ -109,7 +109,7 @@ public class CredentialIssuer : MonoBehaviour
                     string responseBody = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(responseBody);
                     popupWindow.SetActive(true);
-                    windowMessage.text = "Credential Generation Success!"; 
+                    windowMessage.text = "Credential Generation Success! \n Credential ID = " + credentialID; 
                     
                     AddCredentialToServer(issuer, credentialID, userID, expiry);
             }
