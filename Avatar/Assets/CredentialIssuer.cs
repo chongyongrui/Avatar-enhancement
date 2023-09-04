@@ -32,8 +32,8 @@ public class CredentialIssuer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        IPAddress = LoginController.instance.IPAddress;
-        issuer = LoginController.instance.verifiedUsername;
+        IPAddress = userdatapersist.Instance.IPAdd;
+        issuer = userdatapersist.Instance.verifiedUser;
         issuerName.text = issuer;
     }
 

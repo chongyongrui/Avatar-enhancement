@@ -19,7 +19,7 @@ public class NetworkStatusIconScript : MonoBehaviour
     public void Update()
     {
         connectedIPAddress = SQLConnection.instance.IPAddress;
-        IPTextField.text = "Server IP: " + connectedIPAddress;
+        IPTextField.text = "Server IP: " + connectedIPAddress + "Player ID: " + userdatapersist.Instance.verifiedUser.GetHashCode();
         RawImage image = this.GetComponent<RawImage>();
         if (SQLConnection.instance.SQLServerConnected)
         {
