@@ -14,7 +14,7 @@ public class HostButtonController : MonoBehaviour
     void Update()
     {
         Image image = this.GetComponent<Image>();
-        if (LoginController.instance.isHost)
+        if (userdatapersist.Instance.isHost)
         {
             image.color = Color.green;
         }
@@ -26,6 +26,6 @@ public class HostButtonController : MonoBehaviour
 
     public void Toggle()
     {
-        LoginController.instance.isHost = !LoginController.instance.isHost; 
+        userdatapersist.Instance.isHost = !userdatapersist.Instance.isHost; 
     }
 }

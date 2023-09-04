@@ -344,7 +344,7 @@ public class LoginController : MonoBehaviour
                     SceneManager.LoadSceneAsync("Admin Panel");
                 }
                 //should only be run if they are the host
-                if (isHost)
+                if (userdatapersist.Instance.isHost)
                 {
                     StartAcaPyInstanceAsync(arguments);
                 }
