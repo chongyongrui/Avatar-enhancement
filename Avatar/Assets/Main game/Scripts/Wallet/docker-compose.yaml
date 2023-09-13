@@ -36,6 +36,11 @@ services:
         --auto-accept-invites \
         --auto-accept-requests \
         --auto-ping-connection \
+        --auto-respond-messages \
+        --auto-respond-credential-proposal \
+        --auto-respond-credential-offer \
+        --auto-respond-credential-request \
+        --auto-verify-presentation \
         -e ${ACAPY_ENDPOINT_URL} \
         -it http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
         -ot http \
@@ -47,7 +52,6 @@ services:
         --genesis-url ${LEDGER_URL}/genesis \
         --tails-server-base-url ${TAILS_SERVER_URL} \
         --label ${LABEL} \
-        --auto-accept-invites \
         --admin-insecure-mode \
         --log-level info",
     ]
