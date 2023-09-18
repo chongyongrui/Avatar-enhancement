@@ -1689,7 +1689,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Issue Credentials '
+  m_text: Generate Access Token
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1c00e500dbd68f94fb2232a273d0bbb9, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 1c00e500dbd68f94fb2232a273d0bbb9, type: 2}

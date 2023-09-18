@@ -52,7 +52,7 @@ public class LoginController : MonoBehaviour
         try
         {
             string hostName = Dns.GetHostName();
-            IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
+            IPAddress = "192.168.0.102";
             IPAddressInputField.text = AuthController.instance.IPAddress;
             nameInputField.text = AuthController.instance.registeredUsername;  
         }

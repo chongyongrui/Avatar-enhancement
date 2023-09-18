@@ -67,15 +67,19 @@ public class CredentialIssuer : MonoBehaviour
 
         if (validInput)
         {
+            string expiryString = expiryDate.ToString();
+            if (expiryString.Length < 8) { // DD is single digit
+                expiryString = "0" + expiryString;
+            }
             int CredentialID = (userID + issuer + expiryInputField.text).GetHashCode();
-            sendReq(userID, CredentialID, userID, expiryDate);
+            sendReq(userID, CredentialID, userID, expiryDate, expiryString);
         }
         
         
     }
 
 
-    public async void sendReq(string issuer, int credentialID, string userID, int expiry)
+    public async void sendReq(string issuer, int credentialID, string userID, int expiry, string expiryString)
     {
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
@@ -88,7 +92,7 @@ public class CredentialIssuer : MonoBehaviour
             // Prepare the JSON payload
             string jsonPayload = $@"{{
                 ""attributes"": [
-                    ""{expiry.ToString()}"",
+                    ""{expiryString}"",
                     ""{userID.GetHashCode()}""                
                 ],
                 ""schema_name"": ""{credentialID.ToString()}"",
