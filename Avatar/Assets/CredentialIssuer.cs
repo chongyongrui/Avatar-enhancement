@@ -72,7 +72,7 @@ public class CredentialIssuer : MonoBehaviour
                 expiryString = "0" + expiryString;
             }
             int CredentialID = (userID + issuer + expiryInputField.text).GetHashCode();
-            sendReq(userID, CredentialID, userID, expiryDate, expiryString);
+            sendReq(issuer, CredentialID, userID, expiryDate, expiryString);
         }
         
         
@@ -92,8 +92,7 @@ public class CredentialIssuer : MonoBehaviour
             // Prepare the JSON payload
             string jsonPayload = $@"{{
                 ""attributes"": [
-                    ""{expiryString}"",
-                    ""{userID.GetHashCode()}""                
+                    ""{userID.GetHashCode()}.{expiryString}""                
                 ],
                 ""schema_name"": ""{credentialID.ToString()}"",
                 ""schema_version"": ""1.0""
@@ -142,7 +141,7 @@ public class CredentialIssuer : MonoBehaviour
                
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry + ");";
+                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry  +", 0 )";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) credential added with id: " + credentialID + " by user " + issuer);
                 }
@@ -153,7 +152,7 @@ public class CredentialIssuer : MonoBehaviour
         }
         catch (Exception e)
         {
-            UnityEngine.Debug.Log("(SQL Server) Error inserting credential!");
+            UnityEngine.Debug.Log("(SQL Server) Error inserting credential!  " + e);
 
         }
         return false;

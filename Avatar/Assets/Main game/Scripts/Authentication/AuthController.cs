@@ -22,6 +22,7 @@ using System.Net;
 using Debug = UnityEngine.Debug;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 using System.Globalization;
+using Unity.VisualScripting;
 
 [System.Serializable]
 public class JsonData
@@ -50,11 +51,11 @@ public class AuthController : NetworkBehaviour
     public string IPAddress;
     public bool isNewUser = false;
 
-    private string ledgerUrl ;
+    private string ledgerUrl;
     private string registrationEndpoint = "/register";
 
     private static readonly HttpClient client = new HttpClient();
-    
+
     private void Awake()
     {
         instance = this;
@@ -68,7 +69,8 @@ public class AuthController : NetworkBehaviour
     /// Starts registration workflow
     /// </summary>
     /// <returns></returns>
-    public async void Register(){
+    public async void Register()
+    {
         if (DockerStatusIcon.instance.SQLServerConnection == false)
         {
             popupWindow.SetActive(true);
@@ -85,6 +87,7 @@ public class AuthController : NetworkBehaviour
             IPAddress = IPAddressInputField.text;
             if (credentialInputField.text == "D5taCard" || VerifyCredentialwithID(credential, ID, name, ledgerUrl))
             {
+
                 Debug.Log("credential is valid!");
                 StartCoroutine(HandleQueryResult(name, password, role, ledgerUrl));
             }
@@ -94,9 +97,9 @@ public class AuthController : NetworkBehaviour
                 windowMessage.text = "Failed to Verify Credential!";
             }
         }
-       
-        
-        
+
+
+
     }
 
     public bool VerifyCredentialwithID(string credential, string userID, string username, string ledgerUrl)
@@ -113,43 +116,61 @@ public class AuthController : NetworkBehaviour
 
                 foreach (var transaction in transactions)
                 {
-                    
+
                     var responseData = transaction["txn"]["data"]["data"];
                     var credName = responseData["name"];
                     JArray items = (JArray)responseData["attr_names"];
                     int length = items.Count;
-                    string expirydate ;
-                    string hashID;
-                    
+                    string TokenID;
+                    string hashID = "";
+                    string expirydate = "01011111";
+
                     string hashedInputID = userID.GetHashCode().ToString();
-                    if (length == 2)
+                    if (length == 1)
                     {
-                         expirydate = Convert.ToString(responseData["attr_names"][0]);
-                         hashID = Convert.ToString(responseData["attr_names"][1]);
-                        
+
+                        TokenID = Convert.ToString(responseData["attr_names"][0]);
+                        string[] values = TokenID.Split('.');
+                        if (values.Length == 2)
+                        {
+                            hashID = values[0];
+                            expirydate = values[1];
+                        }
+
+
+
                         Debug.Log("credential name is " + credName + " expiry date of " + expirydate + " with hashed userid of " + hashID);
 
                         // check if credential ID is valid and user ID matches
-                            if (credName != null && string.Compare(credName.ToString(), credential) == 0 )
-                            {
+                        if (credName != null && string.Compare(credName.ToString(), credential) == 0)
+                        {
                             Debug.Log("credential names match");
-                                if (string.Compare(hashID, hashedInputID) == 0)
-                                {
+                            if (string.Compare(hashID, hashedInputID) == 0)
+                            {
                                 Debug.Log("userID hashes match");
-                                    DateTime expiryDate = DateTime.ParseExact(expirydate, "ddmmyyyy", CultureInfo.InvariantCulture);
-                                    DateTime dateNow = DateTime.Now;
+                                DateTime expiryDate = DateTime.ParseExact(expirydate, "ddmmyyyy", CultureInfo.InvariantCulture);
+                                DateTime dateNow = DateTime.Now;
 
-                                    if (expiryDate >= dateNow) //has not expired
-                                    {
+                                if (expiryDate >= dateNow) //has not expired
+                                {
                                     Debug.Log("Credential has not expired");
-                                    return true;
+
+                                    //check if credential has been used before via SQL server 
+                                    if (AuthenticateTokenWithSQLServer(credential) == true)
+                                    {
+                                        Debug.Log("Credential has not been used");
+                                        //activate the token in sql server
+                                        ActivateTokenSQLServer(credential);
+                                        return true;
                                     }
+
                                 }
-                                
-                            
                             }
 
-                    }     
+
+                        }
+
+                    }
                 }
             }
             else
@@ -174,37 +195,40 @@ public class AuthController : NetworkBehaviour
     /// <param name="ledgerUrl"></param>
     /// <param name="callback"></param>
     /// <returns></returns>
-    public IEnumerator CheckIfDuplicateUserExists(string username, string ledgerUrl, Action<bool> callback){
+    public IEnumerator CheckIfDuplicateUserExists(string username, string ledgerUrl, Action<bool> callback)
+    {
         try
         {
             string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=1"; // Specify the transaction type as "1" for NYM transactions
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-            
+
             if (response.IsSuccessStatusCode)
             {
                 string responseBody = response.Content.ReadAsStringAsync().Result;
                 var transactions = JToken.Parse(responseBody)["results"];
-                
+
                 foreach (var transaction in transactions)
                 {
                     var responseData = transaction["txn"]["data"];
                     var alias = responseData["alias"];
-                    if(alias !=  null){
+                    if (alias != null)
+                    {
                         if (string.Compare(alias.ToString(), username) == 0)
                         {
                             callback(true);
                             yield break;
                         }
                     }
-                    else {
+                    else
+                    {
                         UnityEngine.Debug.Log("Alias is null");
-                        
+
                     }
                 }
             }
             else
             {
-                displayErrorText("Error retrieving transactions!");               
+                displayErrorText("Error retrieving transactions!");
             }
         }
         catch (Exception ex)
@@ -231,7 +255,7 @@ public class AuthController : NetworkBehaviour
                 displayErrorText("Username already exists!! Please try a different username");
             }
             else
-            {  
+            {
                 //format string to have no whitespace and to be all lowercase
                 string seed = username;
                 string seedFormatted = seed.Replace(" ", "");
@@ -239,8 +263,8 @@ public class AuthController : NetworkBehaviour
 
                 //Format name into wallet seed which is 32 characters
                 int numZero = 32 - seed.Length - 1;
-                
-                for (int i = 0; i < numZero; i++) 
+
+                for (int i = 0; i < numZero; i++)
                 {
                     seed = seed + "0";
                 }
@@ -251,7 +275,7 @@ public class AuthController : NetworkBehaviour
                 registrationData.Add("seed", seed);
                 registrationData.Add("role", role);
                 registrationData.Add("alias", nameInputField.text);
-                
+
 
                 string jsonData = JsonConvert.SerializeObject(registrationData);
 
@@ -281,21 +305,22 @@ public class AuthController : NetworkBehaviour
         request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        
+
 
         // yield return request.SendWebRequest();
         UnityWebRequestAsyncOperation httpRequest = request.SendWebRequest();
-        while(!httpRequest.isDone){
+        while (!httpRequest.isDone)
+        {
             // Load Scene for choosing host/client
             yield return null;
         }
-        
+
         if (httpRequest.webRequest.result == UnityWebRequest.Result.Success)
         {
-            successfulRegistrationWindow = parentPopupWindow.transform.GetChild(7).gameObject;                
+            successfulRegistrationWindow = parentPopupWindow.transform.GetChild(7).gameObject;
             TMP_Text successText = successfulRegistrationWindow.transform.GetChild(1).GetComponent<TMP_Text>();
             successText.text = "Registration successful!";
-            
+
             successfulRegistrationWindow.SetActive(true);
             // Debug.Log(request.downloadHandler.text);
             var response = JsonUtility.FromJson<JsonData>(httpRequest.webRequest.downloadHandler.text);
@@ -324,14 +349,15 @@ public class AuthController : NetworkBehaviour
     /// Helper function for displaying error messages
     /// </summary>
     /// <param name="error"></param>
-    private void displayErrorText(string error){
-        errorWindow = parentPopupWindow.transform.GetChild(6).gameObject;                
+    private void displayErrorText(string error)
+    {
+        errorWindow = parentPopupWindow.transform.GetChild(6).gameObject;
         TMP_Text errorText = errorWindow.transform.GetChild(1).GetComponent<TMP_Text>();
         errorText.text = error;
         errorWindow.SetActive(true);
     }
 
-    
+
     // add the new users details into the userdetails db in master using SQL SA account
     private void SQLAddNewUserDetail(string username, string password)
     {
@@ -345,12 +371,13 @@ public class AuthController : NetworkBehaviour
 
             LoginController.instance.CreateTables();
 
-           
+
             LoginController.instance.CreateNewUserAccount(AuthController.instance.registeredUsername, AuthController.instance.registeredPassword);
-            UpdateUserInfoTable(username, password) ;
+            UpdateUserInfoTable(username, password);
             con.Close();
 
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             Debug.Log("Error adding new user info to SQL server");
         }
@@ -369,7 +396,7 @@ public class AuthController : NetworkBehaviour
                 using (var command = connection.CreateCommand())
                 {
 
-                    
+
                     command.CommandText = "INSERT INTO userdata (username_hash,password_hash) VALUES (" + usernameHash + "," + passwordHash + ");";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) user added with id: " + usernameHash + " with password = " + passwordHash);
@@ -381,12 +408,115 @@ public class AuthController : NetworkBehaviour
         catch (Exception e)
         {
             Debug.Log("(SQL Server) Error adding userdata into DB");
-        }   
+        }
 
     }
 
-    
+
+    public bool AuthenticateTokenWithSQLServer(string credentialID)
+    {
+        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        SqlConnection con = new SqlConnection(adminConString);
+        bool dataFound = false;
+        Debug.Log("Authenticating token with SQL server...");
+
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(adminConString))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM IssuedCredentials WHERE CredentialID = " + credentialID + ";";
+
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+
+                            Debug.Log("reder reads " + (reader["Activated"]));
+                            if (reader["CredentialID"] == null)
+                            {
+                                UnityEngine.Debug.Log("(SQL server) no such credential exists, no data found");
+                                
+                                UnityEngine.Debug.Log("credential does not exist!");
+                            }
+                            else if (reader["Activated"].ToString() == "False")
+                            {
+                                UnityEngine.Debug.Log("(SQL server) credential is unused");
+                                return true;
+                            }
+                            else
+                            {
+                                popupWindow.SetActive(true);
+                                windowMessage.text = "Error activating token!";
+                                popupWindow.SetActive(true);
+                                windowMessage.text = "Access token has already been used!";
+                            }
+                        }
+                        reader.Close();
+                    }
 
 
-    
+
+                }
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error validating token!");
+            popupWindow.SetActive(true);
+            windowMessage.text = "Error Validating token!";
+
+        }
+        return false;
+    }
+
+
+    public bool ActivateTokenSQLServer(string credentialID)
+    {
+        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        SqlConnection con = new SqlConnection(adminConString);
+        Debug.Log("Activating token on SQL server...");
+        try
+        {
+            using (SqlConnection connection = new SqlConnection(adminConString))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "UPDATE IssuedCredentials SET Activated = REPLACE(Activated, '0' , '1') WHERE CredentialID LIKE '" + credentialID + "' ";
+                    command.ExecuteNonQuery();
+                    Debug.Log("(SQL server) Activated Token");
+
+
+
+
+                }
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error activating token!");
+            popupWindow.SetActive(true);
+            windowMessage.text = "Error activating token!";
+
+        }
+        return false;
+
+    }
+
+
+
+
 }

@@ -5114,7 +5114,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Invitation Credential Code
+  m_text: Invitation Access Code
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7d2d9963859e2e53bb9c992143f10176, type: 2}
   m_sharedMaterial: {fileID: 1091089673121338030, guid: 7d2d9963859e2e53bb9c992143f10176, type: 2}

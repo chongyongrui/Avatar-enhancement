@@ -52,7 +52,7 @@ public class LoginController : MonoBehaviour
         try
         {
             string hostName = Dns.GetHostName();
-            IPAddress = "192.168.0.102";
+            IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
             IPAddressInputField.text = AuthController.instance.IPAddress;
             nameInputField.text = AuthController.instance.registeredUsername;  
         }
@@ -163,7 +163,7 @@ public class LoginController : MonoBehaviour
                     command.ExecuteNonQuery();
                     command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'playerlocation')BEGIN  CREATE TABLE playerlocation ( playerid INT, x INT, y INT, z INT) END;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'IssuedCredentials')BEGIN  CREATE TABLE IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT) END;";
+                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'IssuedCredentials')BEGIN  CREATE TABLE IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) END;";
                     command.ExecuteNonQuery();
                 }
 
