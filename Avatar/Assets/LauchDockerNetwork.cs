@@ -1,16 +1,69 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class LauchDockerNetwork : MonoBehaviour
 {
     public void runDocker()
     {
-        Dictionary<string, string> arguments = new Dictionary<string, string>();
-        if (userdatapersist.Instance.isHost)
-        {
-            LoginController.instance.StartAcaPyInstanceAsync(arguments);
-        }
+
+
+        StartSQLDockerInstanceAsync();
         
+        
+    }
+
+    public async void StartSQLDockerInstanceAsync()
+    {
+    
+        string composeFilePath = "../../Assets/Main game/Database Scripts/";
+       
+        UnityEngine.Debug.Log("Starting SQL Server Docker instance now");
+        await RunDockerComposeAsync(composeFilePath);
+        UnityEngine.Debug.Log("Docker Compose completed.");
+        // RunScriptInDirectory(directoryPath, scriptCommand, arguments);
+    }
+
+    public async Task RunDockerComposeAsync(string composeFilePath)
+    {
+        Process process = new Process();
+
+        try
+        {
+            string composeFile = Path.GetDirectoryName(composeFilePath);
+            string currentScriptPath = Assembly.GetExecutingAssembly().Location; // Get the current script file path
+            string currentScriptDirectory = Path.GetDirectoryName(currentScriptPath); // Get the directory path of the current script
+            string composeFileFullPath = Path.Combine(currentScriptDirectory, composeFile); // Combine the current script directory with the relative compose file path
+
+            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo.WorkingDirectory = composeFileFullPath; // Set the working directory to the current script directory
+            process.StartInfo.Arguments = $"/k docker-compose up"; // Specify the compose file and command
+            UnityEngine.Debug.Log("Directory of process.StartInfo.Arguments: " + process.StartInfo.Arguments);
+
+
+            process.StartInfo.UseShellExecute = true;
+
+            process.EnableRaisingEvents = true;
+            process.Start();
+
+            bool processStarted = await Task.Run(() => process.WaitForExit(Timeout.Infinite));
+            UnityEngine.Debug.Log("Process started: " + processStarted);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error running docker-compose: {ex.Message}");
+        }
+        finally
+        {
+            process.Close();
+            // process.Dispose();
+        }
     }
 }

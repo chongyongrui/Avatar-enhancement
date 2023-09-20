@@ -440,7 +440,7 @@ public class AuthController : NetworkBehaviour
                             if (reader["CredentialID"] == null)
                             {
                                 UnityEngine.Debug.Log("(SQL server) no such credential exists, no data found");
-                                
+
                                 UnityEngine.Debug.Log("credential does not exist!");
                             }
                             else if (reader["Activated"].ToString() == "False")

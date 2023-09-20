@@ -16,7 +16,7 @@ public class SSHScript : MonoBehaviour
         string gitCommand = "./run user3";
         gitCommand = gitCommand.Replace("\"", "\"\"");
 
-        SshClient sshclient = new SshClient("192.168.0.102", "admin", "694218");
+        SshClient sshclient = new SshClient("10.255.252.138", "sshuser", "D5taCard");
 
         try
         {
@@ -32,7 +32,17 @@ public class SSHScript : MonoBehaviour
                 Console.WriteLine("Connected to Host!");
             }
 
-            SshCommand sc = sshclient.CreateCommand("cd Desktop");
+            SshCommand sc = sshclient.CreateCommand("cd /");
+            sc.Execute();
+            sc = sshclient.CreateCommand("cd D ");
+            sc.Execute();
+            sc = sshclient.CreateCommand("cd network\\ images/");
+            sc.Execute();
+            sc = sshclient.CreateCommand("cd modified\\ aca-py/ ");
+            sc.Execute();
+            sc = sshclient.CreateCommand("cd demo");
+            sc.Execute();
+            sc = sshclient.CreateCommand("./run user3");
             sc.Execute();
             string answer = sc.Result;
         }

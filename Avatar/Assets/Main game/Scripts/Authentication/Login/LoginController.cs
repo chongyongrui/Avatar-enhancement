@@ -24,7 +24,7 @@ public class LoginController : MonoBehaviour
 {
     [SerializeField] private TMP_InputField IPAddressInputField;
     [SerializeField] private TMP_InputField passwordInputField;
-    [SerializeField] private TMP_InputField nameInputField; 
+    [SerializeField] private TMP_InputField nameInputField;
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
     public bool isHost;
@@ -38,8 +38,8 @@ public class LoginController : MonoBehaviour
     public string verifiedUsername;
     public string verifiedPassword;
     public string IPAddress;
-    
-  
+
+
 
 
 
@@ -54,7 +54,7 @@ public class LoginController : MonoBehaviour
             string hostName = Dns.GetHostName();
             IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
             IPAddressInputField.text = AuthController.instance.IPAddress;
-            nameInputField.text = AuthController.instance.registeredUsername;  
+            nameInputField.text = AuthController.instance.registeredUsername;
         }
         catch (Exception ex)
         {
@@ -72,7 +72,8 @@ public class LoginController : MonoBehaviour
     /// Starts coroutine to check if player is registered on the blockchain
     /// </summary>
     /// <returns></returns>
-    public async void Login(){
+    public async void Login()
+    {
 
         if (DockerStatusIcon.instance.SQLServerConnection == false)
         {
@@ -85,17 +86,17 @@ public class LoginController : MonoBehaviour
             string nameInput = nameInputField.text;
             string passwordInput = passwordInputField.text;
             IPAddress = IPAddressInputField.text;
-            
 
-    //Add check that name is not already on the blockchain
+
+            //Add check that name is not already on the blockchain
             StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, true));
         }
-        
+
     }
 
     public void OnDestroy()
     {
-        UnityEngine.Debug.Log( "(ATTENTION) logincontroller destroyed!");
+        UnityEngine.Debug.Log("(ATTENTION) logincontroller destroyed!");
     }
 
     public async void AccessAdminPanel()
@@ -190,15 +191,15 @@ public class LoginController : MonoBehaviour
         {
             if (userExists)
             {
-                
+
                 string seed = username;
                 string seedFormatted = seed.Replace(" ", "");
                 seed = seedFormatted.ToLower();
 
                 //Format name into wallet seed which is 32 characters
                 int numZero = 32 - seed.Length - 1;
-                
-                for (int i = 0; i < numZero; i++) 
+
+                for (int i = 0; i < numZero; i++)
                 {
                     seed = seed + "0";
                 }
@@ -221,7 +222,7 @@ public class LoginController : MonoBehaviour
                 StartCoroutine(SendLoginRequest(url, jsonData, password, username, loadMainScene));
             }
             else
-            {  
+            {
                 displayErrorText("Please register an account first!");
             }
         }));
@@ -234,31 +235,34 @@ public class LoginController : MonoBehaviour
     /// <param name="ledgerUrl"></param>
     /// <param name="callback"></param>
     /// <returns>True if player is registered on distributed ledger</returns>
-    public IEnumerator CheckIfUserExists(string username, string ledgerUrl, Action<bool> callback){
+    public IEnumerator CheckIfUserExists(string username, string ledgerUrl, Action<bool> callback)
+    {
         try
         {
             string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=1"; // Specify the transaction type as "1" for NYM transactions
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-            
+
             if (response.IsSuccessStatusCode)
             {
                 string responseBody = response.Content.ReadAsStringAsync().Result;
                 var transactions = JToken.Parse(responseBody)["results"];
-                
+
                 foreach (var transaction in transactions)
                 {
                     var responseData = transaction["txn"]["data"];
                     var alias = responseData["alias"];
-                    if(alias !=  null){
+                    if (alias != null)
+                    {
                         if (string.Compare(alias.ToString(), username) == 0)
                         {
                             callback(true);
                             yield break;
                         }
                     }
-                    else {
+                    else
+                    {
                         UnityEngine.Debug.Log("Alias is null");
-                        
+
                     }
                 }
             }
@@ -290,21 +294,22 @@ public class LoginController : MonoBehaviour
         request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        
+
 
         // yield return request.SendWebRequest();
         UnityWebRequestAsyncOperation httpRequest = request.SendWebRequest();
-        while(!httpRequest.isDone){
+        while (!httpRequest.isDone)
+        {
             yield return null;
         }
-        
+
         // yield return request.SendWebRequest();
         if (httpRequest.webRequest.result == UnityWebRequest.Result.Success)
         {
             UnityEngine.Debug.Log("Registration successful!");
             // Debug.Log(request.downloadHandler.text);
             var response = JsonUtility.FromJson<JsonData>(httpRequest.webRequest.downloadHandler.text);
-            
+
             //add arguments
             Dictionary<string, string> arguments = new Dictionary<string, string>();
             arguments.Add("DID", response.did);
@@ -316,9 +321,9 @@ public class LoginController : MonoBehaviour
             UnityEngine.Debug.Log("DID: " + arguments["DID"]);
             UnityEngine.Debug.Log("Verkey: " + arguments["VERKEY"]);
 
-            
 
-            bool isAuthenticated = AuthenticateWithSQLServer(name,password);
+
+            bool isAuthenticated = AuthenticateWithSQLServer(name, password);
 
             // Load Scene for choosing host/client
             if (isAuthenticated)
@@ -336,7 +341,7 @@ public class LoginController : MonoBehaviour
                 if (loadMainScene)
                 {
                     //configure the SQL server account as the user
-                    
+
                     Loader.Load(Loader.Scene.Main);
                 }
                 else
@@ -348,7 +353,7 @@ public class LoginController : MonoBehaviour
                 {
                     StartAcaPyInstanceAsync(arguments);
                 }
-               
+
                 request.Dispose();
             }
             else
@@ -356,7 +361,7 @@ public class LoginController : MonoBehaviour
                 popupWindow.SetActive(true);
                 windowMessage.text = "Error logging in!";
             }
-            
+
 
         }
         else
@@ -368,7 +373,7 @@ public class LoginController : MonoBehaviour
 
 
 
-    public bool AuthenticateWithSQLServer( string username, string password)
+    public bool AuthenticateWithSQLServer(string username, string password)
     {
         string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
         SqlConnection con = new SqlConnection(adminConString);
@@ -378,11 +383,11 @@ public class LoginController : MonoBehaviour
 
         try
         {
-             using (SqlConnection connection = new SqlConnection(adminConString))
+            using (SqlConnection connection = new SqlConnection(adminConString))
             {
 
                 connection.Open();
-             
+
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "SELECT * FROM userdata WHERE username_hash = " + username.GetHashCode() + ";";
@@ -399,7 +404,7 @@ public class LoginController : MonoBehaviour
                             }
                             else if (reader["password_hash"].ToString() == password.GetHashCode().ToString())
                             {
-                               return true;
+                                return true;
                             }
                             else
                             {
@@ -411,8 +416,8 @@ public class LoginController : MonoBehaviour
                         reader.Close();
                     }
 
-                    
-                    
+
+
                 }
                 connection.Close();
 
@@ -448,7 +453,7 @@ public class LoginController : MonoBehaviour
             string currentScriptPath = Assembly.GetExecutingAssembly().Location; // Get the current script file path
             string currentScriptDirectory = Path.GetDirectoryName(currentScriptPath); // Get the directory path of the current script
             string composeFileFullPath = Path.Combine(currentScriptDirectory, composeFile); // Combine the current script directory with the relative compose file path
-            
+
             UnityEngine.Debug.Log("Overriding env file");
             //.env file path
             string envFullPath = Path.Combine(composeFileFullPath, ".env");
@@ -479,7 +484,7 @@ public class LoginController : MonoBehaviour
         finally
         {
             process.Close();
-           // process.Dispose();
+            // process.Dispose();
         }
     }
 
@@ -499,7 +504,7 @@ public class LoginController : MonoBehaviour
         }
     }
 
-    
+
     /// <summary>
     /// Function to load the contents of the .env file into a dictionary
     /// </summary>
@@ -560,8 +565,9 @@ public class LoginController : MonoBehaviour
     /// Helper function for displaying error messages
     /// </summary>
     /// <param name="error"></param>
-    private void displayErrorText(string error){
-        errorWindow = parentPopupWindow.transform.GetChild(0).gameObject;                
+    private void displayErrorText(string error)
+    {
+        errorWindow = parentPopupWindow.transform.GetChild(0).gameObject;
         TMP_Text errorText = errorWindow.transform.GetChild(1).GetComponent<TMP_Text>();
         errorText.text = error;
         errorWindow.SetActive(true);
@@ -570,7 +576,8 @@ public class LoginController : MonoBehaviour
     /// <summary>
     /// Function that redirects users to registration pages
     /// </summary>
-    public void RedirectToRegistration(){
+    public void RedirectToRegistration()
+    {
         Loader.Load(Loader.Scene.Registration);
     }
 

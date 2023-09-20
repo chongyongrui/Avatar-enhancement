@@ -20,7 +20,7 @@ using System.Globalization;
 public class CredentialIssuer : MonoBehaviour
 {
 
-    
+
     [SerializeField] private TMP_InputField userIDInputField;
     [SerializeField] private TMP_InputField expiryInputField;
     [SerializeField] private TMP_Text issuerName;
@@ -40,16 +40,16 @@ public class CredentialIssuer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     public async void GenerateCredential()
     {
-       
+
         //Get ID and expiry from input fields
         string userID = userIDInputField.text;
         int expiryDate = -1;
-        
+
         //check if date in the valid format
         try
         {
@@ -68,14 +68,15 @@ public class CredentialIssuer : MonoBehaviour
         if (validInput)
         {
             string expiryString = expiryDate.ToString();
-            if (expiryString.Length < 8) { // DD is single digit
+            if (expiryString.Length < 8)
+            { // DD is single digit
                 expiryString = "0" + expiryString;
             }
             int CredentialID = (userID + issuer + expiryInputField.text).GetHashCode();
             sendReq(issuer, CredentialID, userID, expiryDate, expiryString);
         }
-        
-        
+
+
     }
 
 
@@ -83,11 +84,11 @@ public class CredentialIssuer : MonoBehaviour
     {
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
-        string url = "http://" + IPAddress+ ":11001/schemas?create_transaction_for_endorser=false";
+        string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
 
         using (HttpClient httpClient = new HttpClient())
-            {
-            
+        {
+
 
             // Prepare the JSON payload
             string jsonPayload = $@"{{
@@ -100,32 +101,32 @@ public class CredentialIssuer : MonoBehaviour
 
             // Set headers
             httpClient.DefaultRequestHeaders.Accept.Clear();
-                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-                // Create the request content
-                StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+            // Create the request content
+            StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                // Send the POST request
-                HttpResponseMessage response = await httpClient.PostAsync(url, content);
+            // Send the POST request
+            HttpResponseMessage response = await httpClient.PostAsync(url, content);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseBody);
-                    popupWindow.SetActive(true);
-                    windowMessage.text = "Credential Generation Success! \n Credential ID = " + credentialID; 
-                    
-                    AddCredentialToServer(issuer, credentialID, userID, expiry);
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(responseBody);
+                popupWindow.SetActive(true);
+                windowMessage.text = "Credential Generation Success! \n Credential ID = " + credentialID;
+
+                AddCredentialToServer(issuer, credentialID, userID, expiry);
             }
-                else
-                {
-                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-                }
+            else
+            {
+                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
             }
-        
+        }
+
     }
 
-    public bool AddCredentialToServer(string issuer, int credentialID,string userID, int expiry)
+    public bool AddCredentialToServer(string issuer, int credentialID, string userID, int expiry)
     {
         string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
         SqlConnection con = new SqlConnection(adminConString);
@@ -138,10 +139,10 @@ public class CredentialIssuer : MonoBehaviour
             {
 
                 connection.Open();
-               
+
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry  +", 0 )";
+                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry + ", 0 )";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) credential added with id: " + credentialID + " by user " + issuer);
                 }
@@ -159,5 +160,5 @@ public class CredentialIssuer : MonoBehaviour
     }
 
 
-   
+
 }

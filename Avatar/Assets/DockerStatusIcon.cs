@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Net;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +11,8 @@ using UnityEngine.UI;
 public class DockerStatusIcon : MonoBehaviour
 {
     public bool SQLServerConnection = false;
-    public static DockerStatusIcon instance; 
+    public static DockerStatusIcon instance;
+    [SerializeField] private TMP_InputField IPAddressInputField;
 
 
     private void Awake()
@@ -25,32 +27,35 @@ public class DockerStatusIcon : MonoBehaviour
         if (SQLServerConnection)
         {
             image.color = Color.green;
+            CancelInvoke();
         }
         else
         {
             image.color = Color.red;
-
-
-            string hostName = Dns.GetHostName();
-            string IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
-            string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
-                SqlConnection con = new SqlConnection(adminConString);
-                try
-                { 
-                    con.Open();
-                    Debug.Log("SQL server connection successful!");
-                    con.Close();
-                    SQLServerConnection = true;
-                }
-                catch (Exception e)
-                {
-                    Debug.Log("ERROR SQL server connection unsuccessful!");
-                SQLServerConnection = false;
-                }
-
-                
+            InvokeRepeating("TestSQLConnection", 0f, 3f);
 
         }
+    }
+
+    public void TestSQLConnection()
+    {
+        string hostName = Dns.GetHostName();
+        string IPAddress = IPAddressInputField.text;
+        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        SqlConnection con = new SqlConnection(adminConString);
+        try
+        {
+            con.Open();
+            Debug.Log("SQL server connection successful!");
+            con.Close();
+            SQLServerConnection = true;
+        }
+        catch (Exception e)
+        {
+            Debug.Log("ERROR SQL server connection unsuccessful!");
+            SQLServerConnection = false;
+        }
+
     }
 }
  
