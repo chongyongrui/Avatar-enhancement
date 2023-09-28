@@ -5340,7 +5340,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1757572366}
         m_TargetAssemblyTypeName: LoginController, Assembly-CSharp
-        m_MethodName: AccessAdminPanel
+        m_MethodName: AccessMessagingPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

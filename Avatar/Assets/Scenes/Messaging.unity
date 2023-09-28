@@ -473,7 +473,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 153079918}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 153079920}
+        m_TargetAssemblyTypeName: DHMessager, Assembly-CSharp
+        m_MethodName: EncryptAndSend
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &153079918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -524,6 +536,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b63838f00f16cf14598a07d58491da17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  username: 
+  ReceiverNameInputField: {fileID: 851916444}
+  MessageString: {fileID: 1034442218}
+  ReceiverName: 
+  IPAddress: 
+  ledgerUrl: 
+  popupWindow: {fileID: 1710346676}
+  windowMessage: {fileID: 395323388}
 --- !u!1 &304087104
 GameObject:
   m_ObjectHideFlags: 0

@@ -89,7 +89,7 @@ public class LoginController : MonoBehaviour
 
 
             //Add check that name is not already on the blockchain
-            StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, true));
+            StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 0));
         }
 
     }
@@ -108,7 +108,19 @@ public class LoginController : MonoBehaviour
         IPAddress = IPAddressInputField.text;
 
         //Add check that name is not already on the blockchain
-        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, false));
+        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 1));
+    }
+
+    public async void AccessMessagingPanel()
+    {
+
+        //Get name and password from input fields
+        string nameInput = nameInputField.text;
+        string passwordInput = passwordInputField.text;
+        IPAddress = IPAddressInputField.text;
+
+        //Add check that name is not already on the blockchain
+        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 2));
     }
 
     public void CreateNewDB()
@@ -185,7 +197,7 @@ public class LoginController : MonoBehaviour
     /// <param name="password"></param>
     /// <param name="ledgerUrl"></param>
     /// <returns>Redirects user to main game page</returns>
-    private IEnumerator HandleLoginQueryResult(string username, string password, string ledgerUrl, bool loadMainScene)
+    private IEnumerator HandleLoginQueryResult(string username, string password, string ledgerUrl, int sceneNumber)
     {
         yield return StartCoroutine(CheckIfUserExists(username, ledgerUrl, (userExists) =>
         {
@@ -219,7 +231,7 @@ public class LoginController : MonoBehaviour
 
                 // Debug.Log(url);
                 // Send the registration data to ACA-Py agent via HTTP request
-                StartCoroutine(SendLoginRequest(url, jsonData, password, username, loadMainScene));
+                StartCoroutine(SendLoginRequest(url, jsonData, password, username, sceneNumber));
             }
             else
             {
@@ -286,7 +298,7 @@ public class LoginController : MonoBehaviour
     /// <param name="password"></param>
     /// <param name="name"></param>
     /// <returns>Redirects players to main game page</returns>
-    IEnumerator SendLoginRequest(string url, string jsonData, string password, string name, bool loadMainScene)
+    IEnumerator SendLoginRequest(string url, string jsonData, string password, string name, int sceneNumber)
     {
         var request = new UnityWebRequest(url, "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
@@ -338,15 +350,19 @@ public class LoginController : MonoBehaviour
 
 
 
-                if (loadMainScene)
+                if (sceneNumber == 0)
                 {
                     //configure the SQL server account as the user
 
                     Loader.Load(Loader.Scene.Main);
                 }
-                else
+                else if (sceneNumber == 1) 
                 {
                     SceneManager.LoadSceneAsync("Admin Panel");
+                }
+                else if (sceneNumber == 2)
+                {
+                    SceneManager.LoadSceneAsync("Messaging");
                 }
                 //should only be run if they are the host
                 if (userdatapersist.Instance.isHost)

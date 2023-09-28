@@ -5,13 +5,11 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using static DHMessager;
 using TMPro;
 using System.Net.Http;
 using System.Net;
 using Newtonsoft.Json.Linq;
-using System.Globalization;
-using UnityEditor.PackageManager;
+using static UnityEngine.UI.Image;
 
 public class DHMessager : MonoBehaviour
 {
@@ -44,100 +42,131 @@ public class DHMessager : MonoBehaviour
         }
 
 
-
-        using (ECDiffieHellmanCng user = new ECDiffieHellmanCng())
-        {
-            user.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
-            user.HashAlgorithm = CngAlgorithm.Sha256;
-            userPublicKey = user.PublicKey.ToByteArray();
-            //todo post the public key to the ledger as string
-            string schemaName = username + ".publickey";
-            var str = System.Text.Encoding.UTF8.GetString(userPublicKey);
-            sharePublicKey(schemaName,str);
-        }
-
-
     }
 
-    private void GetMyMessages()
+    public void EncryptAndSend()
+    {
+        string message = MessageString.text;
+        string hashedReceiverUserName = ReceiverNameInputField.text.ToString();
+        using (Aes myAes = Aes.Create())
+        {
+
+            // Encrypt the string to an array of bytes.
+            byte[] encrypted = EncryptStringToBytes_Aes(message, myAes.Key, myAes.IV);
+            string encryptedString = Convert.ToBase64String(encrypted);
+            Debug.Log("receiver user is " + hashedReceiverUserName + " and the encryted message is " + encryptedString);
+            postMessageToLedger(encryptedString, hashedReceiverUserName);
+            // Decrypt the bytes to a string.
+            //string roundtrip = DecryptStringFromBytes_Aes(encrypted, myAes.Key, myAes.IV);
+
+            //Display the original data and the decrypted data.
+            Console.WriteLine("Original:   {0}", message);
+            //Console.WriteLine("Round Trip: {0}", roundtrip);
+        }
+        
+    }
+
+    static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
+    {
+        // Check arguments.
+        if (plainText == null || plainText.Length <= 0)
+            throw new ArgumentNullException("plainText");
+        if (Key == null || Key.Length <= 0)
+            throw new ArgumentNullException("Key");
+        if (IV == null || IV.Length <= 0)
+            throw new ArgumentNullException("IV");
+        byte[] encrypted;
+
+        // Create an Aes object
+        // with the specified key and IV.
+        using (Aes aesAlg = Aes.Create())
+        {
+            aesAlg.Key = Key;
+            aesAlg.IV = IV;
+
+            // Create an encryptor to perform the stream transform.
+            ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+            // Create the streams used for encryption.
+            using (MemoryStream msEncrypt = new MemoryStream())
+            {
+                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                {
+                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                    {
+                        //Write all data to the stream.
+                        swEncrypt.Write(plainText);
+                    }
+                    encrypted = msEncrypt.ToArray();
+                }
+            }
+        }
+
+        // Return the encrypted bytes from the memory stream.
+        return encrypted;
+    }
+
+    static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
+    {
+        // Check arguments.
+        if (cipherText == null || cipherText.Length <= 0)
+            throw new ArgumentNullException("cipherText");
+        if (Key == null || Key.Length <= 0)
+            throw new ArgumentNullException("Key");
+        if (IV == null || IV.Length <= 0)
+            throw new ArgumentNullException("IV");
+
+        // Declare the string used to hold
+        // the decrypted text.
+        string plaintext = null;
+
+        // Create an Aes object
+        // with the specified key and IV.
+        using (Aes aesAlg = Aes.Create())
+        {
+            aesAlg.Key = Key;
+            aesAlg.IV = IV;
+
+            // Create a decryptor to perform the stream transform.
+            ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+
+            // Create the streams used for decryption.
+            using (MemoryStream msDecrypt = new MemoryStream(cipherText))
+            {
+                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                {
+                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    {
+
+                        // Read the decrypted bytes from the decrypting stream
+                        // and place them in a string.
+                        plaintext = srDecrypt.ReadToEnd();
+                    }
+                }
+            }
+        }
+
+        return plaintext;
+    }
+
+
+
+
+private void GetMyMessages()
     {
         //todo check for messages every x seconds
         List<string> messages = new List<string>();
         messages = GetMessages(username, ledgerUrl);
-        bobKey = DeriveKeyMaterial(CngKey.Import(Alice.alicePublicKey, CngKeyBlobFormat.EccPublicBlob));
+        //bobKey = DeriveKeyMaterial(CngKey.Import(Alice.alicePublicKey, CngKeyBlobFormat.EccPublicBlob));
         foreach (string message in messages)
         {
-            ReceiveMessage();
+         //   ReceiveMessage();
         }
 
     }
 
 
-    public void SendMessage(ECDiffieHellmanCng user)
-    {
-
-        //todo get bobs public key from ledger/from text input
-        ReceiverName = ReceiverNameInputField.text;
-        string myMessage = MessageString.text;
-        string receiverKeyString = GetPublicKey(ReceiverName, ledgerUrl);
-        byte[] receiverByteArray = Encoding.UTF8.GetBytes(receiverKeyString); ;
-        CngKey receiverKey = CngKey.Import(receiverByteArray, CngKeyBlobFormat.EccPublicBlob);
-        byte[] myKey = user.DeriveKeyMaterial(receiverKey);
-        byte[] encryptedMessage = null;
-        byte[] iv = null;
-        Send(myKey, myMessage, out encryptedMessage, out iv, ReceiverName);
-        //bob.Receive(encryptedMessage, iv);
-
-    }
-
-    private void Send(byte[] key, string secretMessage, out byte[] encryptedMessage, out byte[] iv, string ReceiverName)
-    {
-        using (Aes aes = new AesCryptoServiceProvider())
-        {
-            aes.Key = key;
-            iv = aes.IV;
-
-            // Encrypt the message
-            using (MemoryStream ciphertext = new MemoryStream())
-            using (CryptoStream cs = new CryptoStream(ciphertext, aes.CreateEncryptor(), CryptoStreamMode.Write))
-            {
-                byte[] plaintextMessage = Encoding.UTF8.GetBytes(secretMessage);
-                cs.Write(plaintextMessage, 0, plaintextMessage.Length);
-                cs.Close();
-                encryptedMessage = ciphertext.ToArray();
-            }
-
-            //todo post the ciphertext to blockchain ledger
-            ReceiverName = ReceiverName + ".Message";
-            string encryptedMessageString = Encoding.UTF8.GetString(encryptedMessage);
-            postMessageToLedger(ReceiverName, encryptedMessageString);
-        }
-    }
-
-    public void ReceiveMessage(byte[] mykey, byte[] iv)
-    {
-
-        byte[] encryptedMessage = null; 
-
-        //get encryptedMessage from ledger
-
-        using (Aes aes = new AesCryptoServiceProvider())
-        {
-            aes.Key = mykey;
-            aes.IV = iv;
-            // Decrypt the message
-            using (MemoryStream plaintext = new MemoryStream())
-            {
-                using (CryptoStream cs = new CryptoStream(plaintext, aes.CreateDecryptor(), CryptoStreamMode.Write))
-                {
-                    cs.Write(encryptedMessage, 0, encryptedMessage.Length);
-                    cs.Close();
-                    string message = Encoding.UTF8.GetString(plaintext.ToArray());
-                    Console.WriteLine("FOUND MESSAGE:  " + message);
-                }
-            }
-        }
-    }
+    
 
     public async void sharePublicKey(string schemaName, string attribute)
     {
@@ -199,7 +228,7 @@ public class DHMessager : MonoBehaviour
                     ""{attribute}""                
                 ],
                 ""schema_name"": ""{schemaName}"",
-                ""schema_version"": ""3.0""
+                ""schema_version"": ""2.0""
             }}";
 
             // Set headers
@@ -335,98 +364,5 @@ public class DHMessager : MonoBehaviour
 
         
         return messages;
-    }
-
-
-
-
-
-
-
-
-
-    /// <summary>
-    /// ////////////////////////////////////////////////////////////////////////////////////////////////
-    /// </summary>
-
-
-
-    class Alice
-    {
-        public static byte[] alicePublicKey;
-
-        public static void Main(string[] args)
-        {
-            using (ECDiffieHellmanCng alice = new ECDiffieHellmanCng())
-            {
-
-                alice.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
-                alice.HashAlgorithm = CngAlgorithm.Sha256;
-                alicePublicKey = alice.PublicKey.ToByteArray();
-                Bob bob = new Bob();
-                CngKey bobKey = CngKey.Import(bob.bobPublicKey, CngKeyBlobFormat.EccPublicBlob);
-                byte[] aliceKey = alice.DeriveKeyMaterial(bobKey);
-                byte[] encryptedMessage = null;
-                byte[] iv = null;
-                Send(aliceKey, "Secret message", out encryptedMessage, out iv);
-                bob.Receive(encryptedMessage, iv);
-            }
-        }
-
-        private static void Send(byte[] key, string secretMessage, out byte[] encryptedMessage, out byte[] iv)
-        {
-            using (Aes aes = new AesCryptoServiceProvider())
-            {
-                aes.Key = key;
-                iv = aes.IV;
-
-                // Encrypt the message
-                using (MemoryStream ciphertext = new MemoryStream())
-                using (CryptoStream cs = new CryptoStream(ciphertext, aes.CreateEncryptor(), CryptoStreamMode.Write))
-                {
-                    byte[] plaintextMessage = Encoding.UTF8.GetBytes(secretMessage);
-                    cs.Write(plaintextMessage, 0, plaintextMessage.Length);
-                    cs.Close();
-                    encryptedMessage = ciphertext.ToArray();
-                }
-            }
-        }
-    }
-    public class Bob
-    {
-        public byte[] bobPublicKey;
-        private byte[] bobKey;
-        public Bob()
-        {
-            using (ECDiffieHellmanCng bob = new ECDiffieHellmanCng())
-            {
-
-                bob.KeyDerivationFunction = ECDiffieHellmanKeyDerivationFunction.Hash;
-                bob.HashAlgorithm = CngAlgorithm.Sha256;
-                bobPublicKey = bob.PublicKey.ToByteArray();
-                bobKey = bob.DeriveKeyMaterial(CngKey.Import(Alice.alicePublicKey, CngKeyBlobFormat.EccPublicBlob));
-            }
-        }
-
-        public void Receive(byte[] encryptedMessage, byte[] iv)
-        {
-
-            using (Aes aes = new AesCryptoServiceProvider())
-            {
-                aes.Key = bobKey;
-                aes.IV = iv;
-                // Decrypt the message
-                using (MemoryStream plaintext = new MemoryStream())
-                {
-                    using (CryptoStream cs = new CryptoStream(plaintext, aes.CreateDecryptor(), CryptoStreamMode.Write))
-                    {
-                        cs.Write(encryptedMessage, 0, encryptedMessage.Length);
-                        cs.Close();
-                        string message = Encoding.UTF8.GetString(plaintext.ToArray());
-                        Console.WriteLine(message);
-                    }
-                }
-            }
-        }
     }
 }
