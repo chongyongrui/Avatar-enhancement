@@ -85,7 +85,7 @@ public class AuthController : NetworkBehaviour
             string ID = IDInputField.text;
             string credential = credentialInputField.text;
             IPAddress = IPAddressInputField.text;
-            if (credentialInputField.text == "D5taCard" || VerifyCredentialwithID(credential, ID, name, ledgerUrl))
+            if (credentialInputField.text == "genesis" || VerifyCredentialwithID(credential, ID, name, ledgerUrl))
             {
 
                 Debug.Log("credential is valid!");
