@@ -475,7 +475,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 153079920}
-        m_TargetAssemblyTypeName: DHMessager, Assembly-CSharp
+        m_TargetAssemblyTypeName: AESMessager, Assembly-CSharp
         m_MethodName: EncryptAndSend
         m_Mode: 1
         m_Arguments:
@@ -533,7 +533,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 153079915}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b63838f00f16cf14598a07d58491da17, type: 3}
+  m_Script: {fileID: 11500000, guid: 646dc20f5da175f458c58917afd73394, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   username: 

@@ -157,59 +157,7 @@ public class DHMessager : MonoBehaviour
         throw new NullReferenceException("The key pair provided is not a valid DH keypair.");
     }
 
-    public BigInteger ComputeSharedSecret(string A, AsymmetricKeyParameter bPrivateKey, DHParameters internalParameters)
-    {
-        var importedKey = new DHPublicKeyParameters(new BigInteger(A), internalParameters);
-        var internalKeyAgree = AgreementUtilities.GetBasicAgreement("DH");
-        internalKeyAgree.Init(bPrivateKey);
-        return internalKeyAgree.CalculateAgreement(importedKey);
-    }
 
-
-
-    public void TestGet()
-    {
-        DHParameters foundDHParams = GetDHParams(username, ledgerUrl);
-        MTIA0Agreement(foundDHParams, username);
-
-    }
-
-    public BigInteger[] MTIA0Agreement(DHParameters dhParam1, string myusername)
-    {
-        AsymmetricCipherKeyPair dhStaticKeyPairPartyA = generateDHKeyPair(dhParam1);
-        AsymmetricCipherKeyPair dhStaticKeyPairPartyB = generateDHKeyPair(dhParam1);
-
-
-        // Party A Generates an ephemeral key pair sending it to Party B
-        DHAgreement keyAgreementPartyA = new DHAgreement();
-        keyAgreementPartyA.Init((DHPrivateKeyParameters)dhStaticKeyPairPartyA.Private);
-        BigInteger dhEphemeralPublicKeyA = keyAgreementPartyA.CalculateMessage();
-        string stringDHEphemeralPublicKeyA = dhEphemeralPublicKeyA.ToString();
-        //SHARE THE PUBLIC KEY (static and empheral keys)
-
-        string stringDHStaticKeyPairPartyA = PublicKeyToString(dhStaticKeyPairPartyA.Public);
-        Debug.Log("person A's public key is " + stringDHStaticKeyPairPartyA);
-        PostStaticPublicKey(stringDHStaticKeyPairPartyA, myusername + "testing45");  //post public static key
-        PostEphemeralPublicKey(stringDHEphemeralPublicKeyA, myusername + "testing45");  //post emphemeralkey
-
-
-        // Party B Generates an ephemeral key pair sending it to Party A
-        DHAgreement keyAgreementPartyB = new DHAgreement();
-        keyAgreementPartyB.Init((DHPrivateKeyParameters)dhStaticKeyPairPartyB.Private);
-        BigInteger dhEphemeralPublicKeyB = keyAgreementPartyB.CalculateMessage();
-
-
-        //GET THE PUBLIC KEY FROM B
-        BigInteger secretPartyA = keyAgreementPartyA.CalculateAgreement(
-        (DHPublicKeyParameters)dhStaticKeyPairPartyB.Public, dhEphemeralPublicKeyB);
-
-
-        //SHARE THE RESULTS TO COMPARE
-        BigInteger secretPartyB = keyAgreementPartyB.CalculateAgreement(
-        (DHPublicKeyParameters)dhStaticKeyPairPartyA.Public, dhEphemeralPublicKeyA);
-
-        return new BigInteger[] { secretPartyA, secretPartyB };
-    }
 
     public static string PublicKeyToString(AsymmetricKeyParameter publicKey)
     {
@@ -245,73 +193,7 @@ public class DHMessager : MonoBehaviour
         }
     }
 
-    public async void PostEphemeralPublicKey(string input, string schemaName)
-    {
-
-        //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
-        string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
-
-
-
-        List<string> result = new List<string>();
-
-        for (int i = 0; i < input.Length; i += 250)
-        {
-            int length = Math.Min(250, input.Length - i);
-            result.Add(input.Substring(i, length));
-        }
-
-        if (result.Count == 4)
-        {
-            Debug.Log("Count is 4, " + result[0] + "and " + result[1] + "and " + result[2] + "and " + result[3] + "end ");
-            using (HttpClient httpClient = new HttpClient())
-            {
-
-                // Prepare the JSON payload
-                string jsonPayload = $@"{{
-                ""attributes"": [
-                    ""1.{result[0]}"",      
-                    ""2.{result[1]}"",
-                    ""3.{result[2]}"",
-                    ""4.{result[3]}""
-                ],
-                ""schema_name"": ""{schemaName}"",
-                ""schema_version"": ""2.3""
-            }}";
-
-                // Set headers
-                httpClient.DefaultRequestHeaders.Accept.Clear();
-                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-                // Create the request content
-                StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-                // Send the POST request
-                HttpResponseMessage response = await httpClient.PostAsync(url, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseBody);
-                    popupWindow.SetActive(true);
-                    windowMessage.text = "Posted to ledger!";
-
-
-                }
-                else
-                {
-                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-                }
-            }
-        }
-        else
-        {
-            popupWindow.SetActive(true);
-            windowMessage.text = "Key is wrong size!";
-        }
-
-
-    }
+    
 
     public async void PostStaticPublicKey(string input, string schemaName)
     {
@@ -472,66 +354,7 @@ public class DHMessager : MonoBehaviour
 
     }
 
-    public string GetEmpheralKeyString(string username, string ledgerUrl)
-    {
-
-        try
-        {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
-            HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-
-            if (response.IsSuccessStatusCode)
-            {
-                string responseBody = response.Content.ReadAsStringAsync().Result;
-                var transactions = JToken.Parse(responseBody)["results"];
-
-                foreach (var transaction in transactions)
-                {
-
-                    var responseData = transaction["txn"]["data"]["data"];
-                    var type = responseData["version"];
-                    var credName = responseData["name"];
-                    var attributes = responseData["attr_names"];
-
-                    if (type.ToString() == "2.3" && credName.ToString() == username)
-                    {
-
-
-                        string[] stringsToSort = { attributes[0].ToString(), attributes[1].ToString(), attributes[2].ToString(), attributes[3].ToString() };
-
-                        // Sort the strings by their first character
-                        var sortedStrings = stringsToSort.OrderBy(str => str[0]);
-                        string foundKey = "";
-                        foreach (var str in sortedStrings)
-                        {
-                            string cutString = str.Substring(2);
-                            foundKey += cutString;
-                        }
-
-                        Debug.Log("Found A's empheral key = " + foundKey);
-                        //Convert to key type
-
-                        return foundKey;
-                    }
-                }
-
-            }
-            else
-            {
-                Debug.Log("Error retrieving transactions!");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.Log(ex.Message);
-            popupWindow.SetActive(true);
-            windowMessage.text = "Error parsing transactions!";
-        }
-
-        return null;
-
-    }
-
+    
     public string GetStaticKeyString(string username, string ledgerUrl)
     {
 
@@ -587,25 +410,6 @@ public class DHMessager : MonoBehaviour
 
         return null;
 
-    }
-
-    private static string GetMatchedCharacters(string input, string pattern)
-    {
-        Match match = Regex.Match(input, pattern);
-        if (match.Success)
-        {
-            return match.Groups[1].Value;
-        }
-        return "";
-    }
-    private static string[] GetMatchedNumbers(MatchCollection matches)
-    {
-        string[] numbers = new string[matches.Count];
-        for (int i = 0; i < matches.Count; i++)
-        {
-            numbers[i] = matches[i].Groups[1].Value;
-        }
-        return numbers;
     }
 
 
@@ -709,13 +513,6 @@ public class DHMessager : MonoBehaviour
         }
 
 
-    }
-
-    public static DHParameters generateDHParameters(int size)
-    {
-        DHParametersGenerator pGen = new DHParametersGenerator();
-        pGen.Init(size, 10, new SecureRandom());
-        return pGen.GenerateParameters();
     }
 
 
