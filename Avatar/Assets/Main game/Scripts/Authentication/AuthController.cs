@@ -119,6 +119,7 @@ public class AuthController : NetworkBehaviour
 
                     var responseData = transaction["txn"]["data"]["data"];
                     var credName = responseData["name"];
+                    Debug.Log("found credential name is : " + credName + " and the version is  " + responseData["version"]);
                     JArray items = (JArray)responseData["attr_names"];
                     int length = items.Count;
                     string TokenID;
@@ -126,7 +127,7 @@ public class AuthController : NetworkBehaviour
                     string expirydate = "01011111";
 
                     string hashedInputID = userID.GetHashCode().ToString();
-                    if (length == 1)
+                    if (length == 1 && Convert.ToString(responseData["version"]) == "1.0")
                     {
 
                         TokenID = Convert.ToString(responseData["attr_names"][0]);
