@@ -11,11 +11,12 @@ using UnityEngine.Windows;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Data.SqlClient;
+
 using System.Net.Http;
 using System.Text;
 using I18N.Common;
 using System.Globalization;
+
 
 public class CredentialIssuer : MonoBehaviour
 {

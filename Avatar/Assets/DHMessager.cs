@@ -26,6 +26,7 @@ using Org.BouncyCastle.Asn1;
 using UnityEngine.Windows;
 using System.Linq;
 using Org.BouncyCastle.Utilities.IO.Pem;
+using UnityEditor.Timeline.Actions;
 
 public class DHMessager : MonoBehaviour
 {
@@ -34,12 +35,15 @@ public class DHMessager : MonoBehaviour
     public string username;
     public static byte[] userPublicKey;
     [SerializeField] public TMP_InputField ReceiverNameInputField;
-    [SerializeField] public TMP_InputField MessageString;
+    //[SerializeField] public TMP_InputField MessageString;
     public string ReceiverName;
     public string IPAddress;
     public string ledgerUrl;
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
+    [SerializeField] TMP_Text receivedInvites;
+    [SerializeField] TMP_Text acceptedInvites;
+    [SerializeField] TMP_Text connections;
     private static readonly HttpClient client = new HttpClient();
     public static byte[] alicePublicKey;
     public string message;
@@ -48,6 +52,7 @@ public class DHMessager : MonoBehaviour
     private AsymmetricCipherKeyPair keyPair;
     public static AsymmetricCipherKeyPair A;
     public static DHParameters dHParameters;
+
 
     private void Start()
     {
@@ -63,13 +68,13 @@ public class DHMessager : MonoBehaviour
             Debug.Log("Unable to get username from Login page.");
         }
 
-
+        UpdateInvtersInvitees();
     }
 
 
     public void EncryptAndSend()
     {
-        message = MessageString.text;
+        //message = MessageString.text;
         hashedReceiverUserName = ReceiverNameInputField.text.ToString();
         string encryptedString;
 
@@ -83,7 +88,7 @@ public class DHMessager : MonoBehaviour
         var generator = new DHParametersGenerator();
         generator.Init(512, 10, new SecureRandom());
         DHParameters param = generator.GenerateParameters();
-        PostDHParametersAsString(param, hashedReceiverUserName + "params");
+        PostDHParametersAsString(param, hashedReceiverUserName + "-" + username +  ".params");
         // Generate key pair for Party A
         var keyGen1 = GeneratorUtilities.GetKeyPairGenerator("DH");
         var kgp1 = new DHKeyGenerationParameters(new SecureRandom(), param);
@@ -91,20 +96,78 @@ public class DHMessager : MonoBehaviour
         A = keyGen1.GenerateKeyPair();
         string stringDHStaticKeyPairPartyA = GetPublicKey(A);
         Debug.Log("person A's public key is " + stringDHStaticKeyPairPartyA);
-        PostStaticPublicKey(stringDHStaticKeyPairPartyA, hashedReceiverUserName + "A");  //post public static key
+        PostStaticPublicKey(stringDHStaticKeyPairPartyA, hashedReceiverUserName + "-" + username + ".A");  //post public static key
+        UpdateInvtersInvitees();
+    }
+
+    public void UpdateInvtersInvitees()
+    {
+        List<string> inviters = GetDHInvites(username, ledgerUrl);
+        List<string> acceptedInvitees = GetDHAcceptedInvites(username, ledgerUrl);
+        List<string> sentInvites = GetDHSentInvites(username,ledgerUrl);
+       
+        string receivedInvitations = "Received Invitations: \n\n";
+        int i = 1;
+        if (inviters.Count != 0)
+        {
+            foreach (string inviter in inviters)
+            {
+                receivedInvitations = receivedInvitations + i + ". " + inviter + " \n" ;
+                i++;
+            }
+        } else
+        {
+            receivedInvitations = receivedInvitations + "no invites found \n";
+        }
+        receivedInvites.text = receivedInvitations;
+
+        string acceptedInviteesResult = "Accepted Invitees: \n\n";
+        i = 1;
+        if (acceptedInvitees.Count != 0)
+        {
+            foreach (string invitee in acceptedInvitees)
+            {
+                acceptedInviteesResult = acceptedInviteesResult + i + ". " + invitee + " \n";
+                i++;
+            }
+        }
+        else
+        {
+            acceptedInviteesResult = acceptedInviteesResult + "no invitees found \n\n";
+        }
+        acceptedInvites.text = acceptedInviteesResult;
+
+        string sentInvitesResult = "Connections: \n\n";
+        i = 1;
+        if (sentInvites.Count != 0)
+        {
+            foreach (string invite in sentInvites)
+            {
+                sentInvitesResult = sentInvitesResult + i + ". (pending)  " + invite + " \n";
+                i++;
+            }
+
+            Debug.Log("sentinvitesss " + sentInvitesResult);
+
+        }
+        else
+        {
+            sentInvitesResult = sentInvitesResult + "no connections found \n\n";
+        }
+        connections.text = sentInvitesResult;
 
     }
 
     public void BGetParamsAndCalcSecret()
     {
-        hashedReceiverUserName = ReceiverNameInputField.text.ToString();
-        DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "params", ledgerUrl);
+        string hashedInviterUserName = ReceiverNameInputField.text.ToString();
+        DHParameters foundDHParams = GetDHParams(username + "-" + hashedInviterUserName + ".params", ledgerUrl);
         var keyGen2 = GeneratorUtilities.GetKeyPairGenerator("DH");
         var kgp2 = new DHKeyGenerationParameters(new SecureRandom(), foundDHParams);
         keyGen2.Init(kgp2);
         AsymmetricCipherKeyPair B = keyGen2.GenerateKeyPair();
 
-        string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "A", ledgerUrl);
+        string StaticKeyString = GetStaticKeyString(username + "-" + hashedInviterUserName + ".A", ledgerUrl);
         Debug.Log("Found StaticKeyString of A by B is " + StaticKeyString);
 
         // B calc
@@ -113,26 +176,26 @@ public class DHMessager : MonoBehaviour
         internalKeyAgreeB.Init(B.Private);
         string stringDHStaticKeyPairPartyB = GetPublicKey(B);
         Debug.Log("person B's public key is " + stringDHStaticKeyPairPartyB);
-        PostStaticPublicKey(stringDHStaticKeyPairPartyB, hashedReceiverUserName + "B");  //post public static key
+        PostStaticPublicKey(stringDHStaticKeyPairPartyB, username + "-" + hashedInviterUserName + ".B");  //post public static key
         BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
         Debug.Log("B ans is " + Bans.ToString());
-
-
+        //add to local wallet
+        UpdateInvtersInvitees();
 
     }
 
     public void ACalculateSecret()
     {
         hashedReceiverUserName = ReceiverNameInputField.text.ToString();
-        DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "params", ledgerUrl);
-        string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "B", ledgerUrl);
+        DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "-" + username + ".params", ledgerUrl);
+        string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "-" + username + ".B", ledgerUrl);
         Debug.Log("Found StaticKeyString of B by A is " + StaticKeyString);
         var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
         var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
         internalKeyAgreeA.Init(A.Private);
         BigInteger Aans = internalKeyAgreeA.CalculateAgreement(importedKeyA);
         Debug.Log("A ans is " + Aans.ToString());
-
+        UpdateInvtersInvitees();
     }
 
     // This returns A
@@ -225,7 +288,7 @@ public class DHMessager : MonoBehaviour
                    
                 ],
                 ""schema_name"": ""{schemaName}"",
-                ""schema_version"": ""2.2""
+                ""schema_version"": ""3.2""
             }}";
 
                 // Set headers
@@ -308,6 +371,172 @@ public class DHMessager : MonoBehaviour
     }
 
 
+    public List<string> GetDHInvites(string username, string ledgerUrl)
+    {
+        List<string> foundInviters = new List<string>();
+        try
+        {
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var transactions = JToken.Parse(responseBody)["results"];
+
+                foreach (var transaction in transactions)
+                {
+
+                    var responseData = transaction["txn"]["data"]["data"];
+                    var type = responseData["version"];
+                    var credName = responseData["name"];
+                    var attributes = responseData["attr_names"];
+
+                    if (type.ToString() == "3.1" ) // found a DH paramter that is to connect to you
+                    {
+                        string target = credName.ToString();
+                        string[] words = target.Split("-");
+                        string sender = words[1].Split(".")[0];
+                        string stage = words[1].Split(".")[1];
+                        string receiver = words[0];
+                        Debug.Log("finding accepted invites sender and receiver of params is " + sender + " to " + receiver + "in state " + stage);
+                        if (receiver == username)
+                        {
+                            string[] vals = words[1].Split(".");
+                            foundInviters.Add(vals[0]);
+                        }
+                        
+                    }
+                }
+
+            }
+            else
+            {
+                Debug.Log("Error retrieving transactions!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Log(ex.Message);
+            popupWindow.SetActive(true);
+            windowMessage.text = "Error parsing transactions!";
+        }
+
+        return foundInviters;
+
+    }
+
+
+    public List<string> GetDHAcceptedInvites(string username, string ledgerUrl)
+    {
+        List<string> foundAcceptedInvitees = new List<string>();
+        try
+        {
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var transactions = JToken.Parse(responseBody)["results"];
+
+                foreach (var transaction in transactions)
+                {
+
+                    var responseData = transaction["txn"]["data"]["data"];
+                    var type = responseData["version"];
+                    var credName = responseData["name"];
+                    var attributes = responseData["attr_names"];
+
+                    if (type.ToString() == "3.2") // found a DH paramter that is to connect to you
+                    {
+
+                        string target = credName.ToString();
+                        string[] words = target.Split("-");
+                        string sender = words[1].Split(".")[0];
+                        string stage = words[1].Split(".")[1];
+                        string receiver = words[0];
+                        Debug.Log("finding accepted invites sender and receiver of params is " + sender + " to " + receiver + "in state " + stage);
+                        if (sender == username && stage == "B")
+                        {
+                            foundAcceptedInvitees.Add(receiver);
+                        }
+
+                    }
+                }
+
+            }
+            else
+            {
+                Debug.Log("Error retrieving transactions!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Log(ex.Message);
+            popupWindow.SetActive(true);
+            windowMessage.text = "Error parsing transactions!";
+        }
+
+        return foundAcceptedInvitees;
+
+    }
+
+    public List<string> GetDHSentInvites(string username, string ledgerUrl)
+    {
+        List<string> sentInvitees = new List<string>();
+        try
+        {
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var transactions = JToken.Parse(responseBody)["results"];
+
+                foreach (var transaction in transactions)
+                {
+
+                    var responseData = transaction["txn"]["data"]["data"];
+                    var type = responseData["version"];
+                    var credName = responseData["name"];
+                    var attributes = responseData["attr_names"];
+
+                    if (type.ToString() == "3.1") // found a DH paramter that is to connect to you
+                    {
+                        string target = credName.ToString();
+                        string[] words = target.Split("-");
+                        string sender = words[1].Split(".")[0];
+                        string receiver = words[0];
+                        Debug.Log("finding sent invites sender and receiver of params is " + sender + " to " + receiver);
+                        if (sender == username)
+                        {
+                            sentInvitees.Add(receiver);
+                        }
+
+                    }
+                }
+
+            }
+            else
+            {
+                Debug.Log("Error retrieving transactions!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.Log(ex.Message);
+            popupWindow.SetActive(true);
+            windowMessage.text = "Error parsing transactions!";
+        }
+
+        
+
+        return sentInvitees;
+
+    }
+
     public DHParameters GetDHParams(string username, string ledgerUrl)
     {
 
@@ -329,7 +558,7 @@ public class DHMessager : MonoBehaviour
                     var credName = responseData["name"];
                     var attributes = responseData["attr_names"];
 
-                    if (type.ToString() == "2.1" && credName.ToString() == username) // found a DH paramter that is to connect to you
+                    if (type.ToString() == "3.1" && credName.ToString() == username) // found a DH paramter that is to connect to you
                     {
                         Debug.Log("The found attributes are " + attributes.ToString());
                         DHParameters foundDHParams = ExtractDHParameters(attributes.ToString());
@@ -354,7 +583,7 @@ public class DHMessager : MonoBehaviour
 
     }
 
-    
+
     public string GetStaticKeyString(string username, string ledgerUrl)
     {
 
@@ -376,7 +605,7 @@ public class DHMessager : MonoBehaviour
                     var credName = responseData["name"];
                     var attributes = responseData["attr_names"];
 
-                    if (type.ToString() == "2.2" && credName.ToString() == username)
+                    if (type.ToString() == "3.2" && credName.ToString() == username)
                     {
                         Debug.Log("The found static attributes 1 are " + attributes[0].ToString());
                         string[] stringsToSort = { attributes[0].ToString() };
@@ -484,7 +713,7 @@ public class DHMessager : MonoBehaviour
                     ""L:{dhParams.L}""
                 ],
                 ""schema_name"": ""{schemaName}"",
-                ""schema_version"": ""2.1""
+                ""schema_version"": ""3.1""
             }}";
 
             // Set headers
