@@ -17,7 +17,8 @@ using TMPro;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
-using System.Data.SqlClient;
+using Npgsql;
+using Debug = UnityEngine.Debug;
 
 public class LoginController : MonoBehaviour
 {
@@ -62,7 +63,8 @@ public class LoginController : MonoBehaviour
             IPAddressInputField.text = IPAddress;
         }
 
-        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(transform.gameObject);
+        
         ledgerUrl = "http://" + IPAddress + ":9000";
 
     }
@@ -124,10 +126,10 @@ public class LoginController : MonoBehaviour
 
     public void CreateNewDB()
     {
-        string connstring = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        string connstring = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         try
         {
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
             {
 
                 connection.Open();
@@ -136,8 +138,7 @@ public class LoginController : MonoBehaviour
                 using (var command = connection.CreateCommand())
                 {
 
-                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
-                        "BEGIN  CREATE DATABASE AvatarProject  END";
+                    command.CommandText = "CREATE DATABASE IF NOT EXISTS AvatarProject";
 
                     command.ExecuteNonQuery();
                 }
@@ -156,11 +157,11 @@ public class LoginController : MonoBehaviour
 
     public void CreateTables()
     {
-        string connstring = "Data Source=" + IPAddress + ";Initial Catalog= AvatarProject;User ID=sa;Password=D5taCard;";
+        string connstring = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         try
         {
             //create the db connection
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
             {
 
                 connection.Open();
@@ -169,13 +170,13 @@ public class LoginController : MonoBehaviour
                 {
 
                     //sql statements to execute
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'userdata')BEGIN  CREATE TABLE userdata ( username_hash INT, password_hash INT )END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata (\r\n    username_hash INT,\r\n    password_hash INT\r\n);\r\n";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'weapons')BEGIN  CREATE TABLE weapons ( playerid INT, weaponid INT, quantity INT) END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  weapons ( playerid INT, weaponid INT, quantity INT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'playerlocation')BEGIN  CREATE TABLE playerlocation ( playerid INT, x INT, y INT, z INT) END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS playerlocation ( playerid INT, x INT, y INT, z INT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'IssuedCredentials')BEGIN  CREATE TABLE IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
                     command.ExecuteNonQuery();
                 }
 
@@ -390,15 +391,15 @@ public class LoginController : MonoBehaviour
 
     public bool AuthenticateWithSQLServer(string username, string password)
     {
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
         bool dataFound = false;
-        CreateNewDB();
+        //CreateNewDB();
         CreateTables();
 
         try
         {
-            using (SqlConnection connection = new SqlConnection(adminConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
             {
 
                 connection.Open();
@@ -490,7 +491,7 @@ public class LoginController : MonoBehaviour
 
             bool processStarted = await Task.Run(() => process.WaitForExit(Timeout.Infinite));
             UnityEngine.Debug.Log("Process started: " + processStarted);
-
+            
         }
         catch (Exception ex)
         {
@@ -574,6 +575,10 @@ public class LoginController : MonoBehaviour
         await RunDockerComposeAsync(composeFilePath, arguments);
         UnityEngine.Debug.Log("Docker Compose completed.");
         // RunScriptInDirectory(directoryPath, scriptCommand, arguments);
+
+
+        //create wallet database on local sql wallet db
+        
     }
 
     /// <summary>
@@ -596,48 +601,5 @@ public class LoginController : MonoBehaviour
         Loader.Load(Loader.Scene.Registration);
     }
 
-    public void CreateNewUserAccount(string username, string password)
-    {
-
-        string DBname = "AvatarProject";
-        string connstring = "Data Source=" + IPAddress + " ;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
-        try
-        {
-            using (SqlConnection connection = new SqlConnection(connstring))
-            {
-
-                connection.Open();
-
-
-                using (var command = connection.CreateCommand())
-                {
-                    /*
-                     * IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ' username ' AND type = 'S') BEGIN
-                         CREATE LOGIN   username  WITH PASSWORD ='password' , CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF; 
-                        USE  AvatarProject; CREATE USER  username  FOR LOGIN  username ; 
-                        USE  AvatarProject ; GRANT SELECT, INSERT, UPDATE, DELETE TO  username  END;
-
-                     * 
-                     */
-
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ' " + username + " ' AND type = 'S') " +
-                        "BEGIN CREATE LOGIN   " + username + " WITH PASSWORD = '" + password + "' ," +
-                        " CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF   USE AvatarProject; CREATE USER " + username + " FOR LOGIN " + username + " ;" +
-                        " USE AvatarProject; GRANT SELECT, INSERT, UPDATE, DELETE TO " + username + "  END; ";
-
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-
-
-            }
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.Log("(SQL server) Error creating new account:  " + e);
-        }
-
-    }
+   
 }

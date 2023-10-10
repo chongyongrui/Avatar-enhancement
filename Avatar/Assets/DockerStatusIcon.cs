@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Data.SqlClient;
+using Npgsql;
 
 
 
@@ -43,8 +44,9 @@ public class DockerStatusIcon : MonoBehaviour
     {
         string hostName = Dns.GetHostName();
         string IPAddress = IPAddressInputField.text;
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
+        //string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        Npgsql.NpgsqlConnection con = new Npgsql.NpgsqlConnection(adminConString);
         try
         {
             con.Open();

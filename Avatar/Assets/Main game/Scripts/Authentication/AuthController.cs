@@ -21,7 +21,8 @@ using System.Net;
 using Debug = UnityEngine.Debug;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 using System.Globalization;
-using System.Data.SqlClient;
+
+using Npgsql;
 using Unity.VisualScripting;
 
 [System.Serializable]
@@ -361,18 +362,18 @@ public class AuthController : NetworkBehaviour
     // add the new users details into the userdetails db in master using SQL SA account
     private void SQLAddNewUserDetail(string username, string password)
     {
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
         try
         {
-            LoginController.instance.CreateNewDB();
+            //LoginController.instance.CreateNewDB();
             con.Open();
             Debug.Log("SQL server connection successful!");
 
             LoginController.instance.CreateTables();
 
 
-            LoginController.instance.CreateNewUserAccount(AuthController.instance.registeredUsername, AuthController.instance.registeredPassword);
+            
             UpdateUserInfoTable(username, password);
             con.Close();
 
@@ -387,10 +388,10 @@ public class AuthController : NetworkBehaviour
     {
         int usernameHash = username.GetHashCode();
         int passwordHash = password.GetHashCode();
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         try
         {
-            using (SqlConnection connection = new SqlConnection(adminConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
@@ -415,14 +416,14 @@ public class AuthController : NetworkBehaviour
 
     public bool AuthenticateTokenWithSQLServer(string credentialID)
     {
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
         bool dataFound = false;
         Debug.Log("Authenticating token with SQL server...");
 
         try
         {
-            using (SqlConnection connection = new SqlConnection(adminConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
             {
 
                 connection.Open();
@@ -480,19 +481,19 @@ public class AuthController : NetworkBehaviour
 
     public bool ActivateTokenSQLServer(string credentialID)
     {
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
         Debug.Log("Activating token on SQL server...");
         try
         {
-            using (SqlConnection connection = new SqlConnection(adminConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
             {
 
                 connection.Open();
 
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "UPDATE IssuedCredentials SET Activated = REPLACE(Activated, '0' , '1') WHERE CredentialID LIKE '" + credentialID + "' ";
+                    command.CommandText = "UPDATE issuedcredentials SET activated = CAST(1 AS bit) WHERE credentialid = " + credentialID + ";";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) Activated Token");
 

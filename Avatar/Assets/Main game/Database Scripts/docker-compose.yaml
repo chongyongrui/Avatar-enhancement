@@ -1,11 +1,14 @@
 version: "3.2"
 services:
 
-  sql-server-db:
-    container_name: sql-server-db
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    ports:
-      - "1433:1433"
+  postgresql-main-server-db:
+    image: postgres:latest
+    hostname: postgresql-main-server-db
     environment:
-      SA_PASSWORD: "D5taCard"
-      ACCEPT_EULA: "Y"
+      POSTGRES_USER: sysadmin
+      POSTGRES_PASSWORD: D5taCard
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d/
+      - ./.postgres:/var/lib/postgresqlmainserver

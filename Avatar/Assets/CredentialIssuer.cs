@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Npgsql;
 using System.Net;
 using TMPro;
 using UnityEngine;
@@ -129,21 +129,21 @@ public class CredentialIssuer : MonoBehaviour
 
     public bool AddCredentialToServer(string issuer, int credentialID, string userID, int expiry)
     {
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
-        LoginController.instance.CreateNewDB();
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
+        //LoginController.instance.CreateNewDB();
         LoginController.instance.CreateTables();
 
         try
         {
-            using (SqlConnection connection = new SqlConnection(adminConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
             {
 
                 connection.Open();
 
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry + ", 0 )";
+                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry + ", CAST(0 AS bit) )";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) credential added with id: " + credentialID + " by user " + issuer);
                 }

@@ -27,6 +27,8 @@ using UnityEngine.Windows;
 using System.Linq;
 using Org.BouncyCastle.Utilities.IO.Pem;
 using UnityEditor.Timeline.Actions;
+using Npgsql;
+using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 
 public class DHMessager : MonoBehaviour
 {
@@ -85,6 +87,10 @@ public class DHMessager : MonoBehaviour
     public void AShareParams()
     {
         hashedReceiverUserName = ReceiverNameInputField.text.ToString();
+
+        // to-do: check if such a connection is pending or not
+
+
         var generator = new DHParametersGenerator();
         generator.Init(512, 10, new SecureRandom());
         DHParameters param = generator.GenerateParameters();
@@ -179,8 +185,11 @@ public class DHMessager : MonoBehaviour
         PostStaticPublicKey(stringDHStaticKeyPairPartyB, username + "-" + hashedInviterUserName + ".B");  //post public static key
         BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
         Debug.Log("B ans is " + Bans.ToString());
-        //add to local wallet
         UpdateInvtersInvitees();
+
+        //add to local wallet
+        AddAESKeyToWallet(hashedInviterUserName, Bans);
+
 
     }
 
@@ -196,6 +205,41 @@ public class DHMessager : MonoBehaviour
         BigInteger Aans = internalKeyAgreeA.CalculateAgreement(importedKeyA);
         Debug.Log("A ans is " + Aans.ToString());
         UpdateInvtersInvitees();
+
+        //add to local wallet 
+        AddAESKeyToWallet(hashedReceiverUserName, Aans);
+    }
+
+    public void AddAESKeyToWallet(string connectionName, BigInteger keyVal)
+    {
+        string username = userdatapersist.Instance.verifiedUser;
+        string password = userdatapersist.Instance.verifiedPassword;
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            {
+
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "INSERT into AES_Keys VALUES (" + connectionName+ "," + keyVal +");";
+                    command.ExecuteNonQuery();
+                    Debug.Log("(SQL server) AESKey added with id: " + connectionName + " with key val  " + keyVal);
+                }
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL Server) Error adding key " + e);
+        }
+
+
+
+
+
     }
 
     // This returns A
