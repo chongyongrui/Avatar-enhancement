@@ -42,6 +42,7 @@ public class AuthController : NetworkBehaviour
     [SerializeField] private TMP_InputField IDInputField;
     [SerializeField] private TMP_Dropdown dropDown;
     [SerializeField] GameObject popupWindow;
+    public GameObject registrationStatus;
     [SerializeField] TMP_Text windowMessage;
     public GameObject parentPopupWindow;
     private GameObject errorWindow;
@@ -75,6 +76,7 @@ public class AuthController : NetworkBehaviour
         if (DockerStatusIcon.instance.SQLServerConnection == false)
         {
             popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
             windowMessage.text = "Not connected to SQL Server!";
         }
         else
@@ -95,6 +97,7 @@ public class AuthController : NetworkBehaviour
             else
             {
                 popupWindow.SetActive(true);
+                registrationStatus.SetActive(true);
                 windowMessage.text = "Failed to Verify Credential!";
             }
         }
@@ -185,6 +188,7 @@ public class AuthController : NetworkBehaviour
         }
 
         popupWindow.SetActive(true);
+        registrationStatus.SetActive(true);
         windowMessage.text = "Credential is not valid!";
         return false;
     }
@@ -323,6 +327,7 @@ public class AuthController : NetworkBehaviour
             successText.text = "Registration successful!";
 
             successfulRegistrationWindow.SetActive(true);
+            
             // Debug.Log(request.downloadHandler.text);
             var response = JsonUtility.FromJson<JsonData>(httpRequest.webRequest.downloadHandler.text);
 
@@ -356,6 +361,7 @@ public class AuthController : NetworkBehaviour
         TMP_Text errorText = errorWindow.transform.GetChild(1).GetComponent<TMP_Text>();
         errorText.text = error;
         errorWindow.SetActive(true);
+       
     }
 
 
@@ -452,8 +458,10 @@ public class AuthController : NetworkBehaviour
                             else
                             {
                                 popupWindow.SetActive(true);
+                                registrationStatus.SetActive(true);
                                 windowMessage.text = "Error activating token!";
                                 popupWindow.SetActive(true);
+                                registrationStatus.SetActive(true);
                                 windowMessage.text = "Access token has already been used!";
                             }
                         }
@@ -472,6 +480,7 @@ public class AuthController : NetworkBehaviour
         {
             UnityEngine.Debug.Log("(SQL Server) Error validating token!");
             popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
             windowMessage.text = "Error Validating token!";
 
         }
@@ -510,6 +519,7 @@ public class AuthController : NetworkBehaviour
         {
             UnityEngine.Debug.Log("(SQL Server) Error activating token!");
             popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
             windowMessage.text = "Error activating token!";
 
         }

@@ -1182,7 +1182,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &312157611
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1261,7 +1261,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &329595191
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3060,7 +3060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &889399494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3081,7 +3081,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 889399493}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 566.455, y: 267.13852, z: -3.3834467}
+  m_LocalPosition: {x: 740, y: 340, z: -3.3834467}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3103,7 +3103,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &957894777
 Transform:
   m_ObjectHideFlags: 0
@@ -4692,6 +4692,7 @@ MonoBehaviour:
   windowMessage: {fileID: 0}
   isHost: 0
   parentPopupWindow: {fileID: 0}
+  registrationStatus: {fileID: 0}
   verifiedUsername: 
   verifiedPassword: 
   IPAddress: 
@@ -5020,6 +5021,7 @@ MonoBehaviour:
   windowMessage: {fileID: 976470294}
   isHost: 0
   parentPopupWindow: {fileID: 957894776}
+  registrationStatus: {fileID: 0}
   verifiedUsername: 
   verifiedPassword: 
   IPAddress: 
@@ -5291,6 +5293,7 @@ MonoBehaviour:
   windowMessage: {fileID: 0}
   isHost: 0
   parentPopupWindow: {fileID: 957894776}
+  registrationStatus: {fileID: 0}
   verifiedUsername: 
   verifiedPassword: 
   IPAddress: 
@@ -5891,6 +5894,7 @@ MonoBehaviour:
   windowMessage: {fileID: 0}
   isHost: 0
   parentPopupWindow: {fileID: 957894776}
+  registrationStatus: {fileID: 0}
   verifiedUsername: 
   verifiedPassword: 
   IPAddress: 

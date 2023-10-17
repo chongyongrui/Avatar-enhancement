@@ -29,6 +29,7 @@ public class LoginController : MonoBehaviour
     [SerializeField] TMP_Text windowMessage;
     public bool isHost;
     public GameObject parentPopupWindow;
+    public GameObject registrationStatus;
     private GameObject errorWindow;
     private GameObject successfulLoginWindow;
     private string ledgerUrl;
@@ -79,6 +80,7 @@ public class LoginController : MonoBehaviour
         if (DockerStatusIcon.instance.SQLServerConnection == false)
         {
             popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
             windowMessage.text = "Not connected to SQL Server!";
         }
         else
@@ -591,6 +593,7 @@ public class LoginController : MonoBehaviour
         TMP_Text errorText = errorWindow.transform.GetChild(1).GetComponent<TMP_Text>();
         errorText.text = error;
         errorWindow.SetActive(true);
+        registrationStatus.SetActive(true);
     }
 
     /// <summary>

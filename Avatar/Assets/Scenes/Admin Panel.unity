@@ -374,7 +374,7 @@ MonoBehaviour:
   userIDInputField: {fileID: 350976852}
   expiryInputField: {fileID: 1176689171}
   issuerName: {fileID: 732981025}
-  popupWindow: {fileID: 1710346676}
+  popupWindow: {fileID: 615780632}
   windowMessage: {fileID: 395323388}
 --- !u!1 &350976848
 GameObject:
@@ -1018,7 +1018,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &615780633
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2697,7 +2697,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1710346677
 Transform:
   m_ObjectHideFlags: 0
