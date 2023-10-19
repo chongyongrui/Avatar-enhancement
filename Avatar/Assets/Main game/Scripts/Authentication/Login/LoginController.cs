@@ -77,23 +77,25 @@ public class LoginController : MonoBehaviour
     public async void Login()
     {
 
-        if (DockerStatusIcon.instance.SQLServerConnection == false)
-        {
-            popupWindow.SetActive(true);
-            registrationStatus.SetActive(true);
-            windowMessage.text = "Not connected to SQL Server!";
-        }
-        else
+        
+            
+        try 
         {
             //Get name and password from input fields
             string nameInput = nameInputField.text;
             string passwordInput = passwordInputField.text;
             IPAddress = IPAddressInputField.text;
-
+            ledgerUrl = "http://" + IPAddress + ":9000";
 
             //Add check that name is not already on the blockchain
             StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 0));
+        }catch (Exception e)
+        {
+            popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
+            windowMessage.text = "Connection failed: " + e;
         }
+
 
     }
 
@@ -109,7 +111,7 @@ public class LoginController : MonoBehaviour
         string nameInput = nameInputField.text;
         string passwordInput = passwordInputField.text;
         IPAddress = IPAddressInputField.text;
-
+        ledgerUrl = "http://" + IPAddress + ":9000";
         //Add check that name is not already on the blockchain
         StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 1));
     }
@@ -121,7 +123,7 @@ public class LoginController : MonoBehaviour
         string nameInput = nameInputField.text;
         string passwordInput = passwordInputField.text;
         IPAddress = IPAddressInputField.text;
-
+        ledgerUrl = "http://" + IPAddress + ":9000";
         //Add check that name is not already on the blockchain
         StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 2));
     }
@@ -349,7 +351,7 @@ public class LoginController : MonoBehaviour
                 userdatapersist.Instance.verifiedPassword = verifiedPassword;
                 userdatapersist.Instance.verifiedUser = verifiedUsername;
                 userdatapersist.Instance.IPAdd = IPAddress;
-
+                StartAcaPyInstanceAsync(arguments);
 
 
                 if (sceneNumber == 0)
@@ -367,10 +369,9 @@ public class LoginController : MonoBehaviour
                     SceneManager.LoadSceneAsync("Messaging");
                 }
                 //should only be run if they are the host
-                if (userdatapersist.Instance.isHost)
-                {
-                    StartAcaPyInstanceAsync(arguments);
-                }
+                
+                    
+                
 
                 request.Dispose();
             }
