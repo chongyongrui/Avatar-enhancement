@@ -570,7 +570,7 @@ public class LoginController : MonoBehaviour
         arguments.Add("ACAPY_ADMIN_PORT", "11001");
         arguments.Add("CONTROLLER_PORT", "3001");
         arguments.Add("ACAPY_ENDPOINT_URL", "http://localhost:8002/");
-        arguments.Add("LEDGER_URL", "http://host.docker.internal:9000");
+        arguments.Add("LEDGER_URL", "http://" + IPAddress + ":9000");
         arguments.Add("TAILS_SERVER_URL", "http://tails-server:6543");
         // string[] additionalArgs = { $"--WALLET_KEY={arguments["WALLET_KEY"]}", $"--LABEL={arguments["WALLET_NAME"]}", $"--WALLET_NAME={arguments["WALLET_NAME"]}", $"--AGENT_WALLET_SEED={arguments["SEED"]}", $"--ACAPY_ENDPOINT_PORT={arguments["ACAPY_ENDPOINT_PORT"]}", $"--ACAPY_ADMIN_PORT={arguments["ACAPY_ADMIN_PORT"]}", $"--CONTROLLER_PORT={arguments["CONTROLLER_PORT"]}" };
 
