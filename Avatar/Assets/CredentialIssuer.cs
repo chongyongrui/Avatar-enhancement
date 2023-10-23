@@ -42,124 +42,42 @@ public class CredentialIssuer : MonoBehaviour
         ledgerUrl = "http://" + IPAddress + ":9000";
         issuer = userdatapersist.Instance.verifiedUser;
         issuerName.text = issuer;
-
-        if (userdatapersist.Instance.verifiedUser == "admin")
-        {
-            adminRequests.SetActive(true);
-            GetRequests();
-            //InvokeRepeating("GetRequests", 10.0f, 5.0f);
-        }
     }
 
 
 
-    public void GetRequests()
+    
+
+    
+
+
+    public bool CheckAdminConnection()
     {
-        string ledgerUrl = "http://" + IPAddress + ":9000";
-        List<Tuple<string, string>> requests = new List<Tuple<string, string>>();
-        /*try
-        {*/
-        string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
-        HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-
-        if (response.IsSuccessStatusCode)
-        {
-            string responseBody = response.Content.ReadAsStringAsync().Result;
-            var transactions = JToken.Parse(responseBody)["results"];
-
-            foreach (var transaction in transactions)
-            {
-
-                var responseData = transaction["txn"]["data"]["data"];
-                var type = responseData["version"];
-                var credName = responseData["name"];
-                var attributes = responseData["attr_names"];
-                var data = transaction["reqSignature"]["values"][0];
-                JObject jsonObject = JObject.Parse(data.ToString());
-
-
-                string senderDID = (string)jsonObject["from"];
-                
-                string senderAlias = GetAlias(senderDID.ToString());
-                Debug.Log("sender DID is " + senderDID + "of name " + senderAlias + " with a schema version of " + type.ToString());
-                string key = senderAlias + type.ToString();
-                if (CheckSQLAlreadyAccepted(senderAlias, type.ToString()) == false)
-                {
-                    if (type.ToString() == "2.1") // found a DH paramter that is to connect to you
-                    {
-                        string ans = senderAlias + " requests for car access";
-                        Tuple<string, string> val = new Tuple<string, string>(senderAlias, ans);
-                        Debug.Log(ans);
-                        requests.Add(val);
-                    }
-                    else if (type.ToString() == "2.2")
-                    {
-                        string ans = senderAlias + " requests for dynamite access";
-                        Tuple<string, string> val = new Tuple<string, string>(senderAlias, ans);
-                        Debug.Log(ans);
-                        requests.Add(val);
-                    }
-                }
-
-            }
-
-            string pendingRequests = null;
-            int i = 1;
-            foreach (Tuple<string,string> tuple in requests)
-            {
-                pendingRequests = pendingRequests + i +". " + tuple.Item2 + "\n" ; 
-            }
-            if (requests == null)
-            {
-                pendingRequests = "None found";
-            }
-            requets.text = pendingRequests;
-        }
-        else
-        {
-            Debug.Log("Error retrieving transactions!");
-        }
-
-
-        /*}
-        catch (Exception ex)
-        {
-            Debug.Log(ex.Message);
-            popupWindow.SetActive(true);
-            windowMessage.text = "Error parsing transactions!";
-        }*/
-
-    }
-
-    public bool CheckSQLAlreadyAccepted(string user, string type)
-    {
-
+        string username = userdatapersist.Instance.verifiedUser;
+        string password = userdatapersist.Instance.verifiedPassword;
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT * FROM IssuedKeys WHERE receiver_hash = '" + user + "'AND key_type = '" + type + "' ;";
+                    command.CommandText = "select * from aes_keys where receiver_hash = 'admin';";
                     using (System.Data.IDataReader reader = command.ExecuteReader())
                     {
-                        while (reader.Read())
-                        {
-                            if (reader["key_val"] == null)
-                            {
-                                Debug.Log("(SQL server) no prior private key data found");
-                                return false;
-                            }
-                            else
-                            {
-                                return true;
-                            }
-                        }
-                        reader.Close();
-                    }
-                    connection.Close();
 
+                        if (reader.Read() == false)
+                        {
+                            connection.Close();
+
+                            return false;
+                        }
+                        connection.Close();
+                        return true;
+                        
+                        
+                    }
+                    
                 }
             }
         }
@@ -168,45 +86,11 @@ public class CredentialIssuer : MonoBehaviour
             Debug.Log("(SQL Server) Error getting private key " + e);
         }
 
-        return true;
+        return false;
 
     }
 
-    public string GetAlias(string DID)
-    {
-        string ans = null;
-        string ledgerUrl = "http://" + IPAddress + ":9000";
-
-
-        string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=1"; // Specify the transaction type as "101" for schemas
-        HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-
-        if (response.IsSuccessStatusCode)
-        {
-            string responseBody = response.Content.ReadAsStringAsync().Result;
-            var transactions = JToken.Parse(responseBody)["results"];
-
-            foreach (var transaction in transactions)
-            {
-
-                var responseData = transaction["txn"]["data"];
-                var foundDID = responseData["dest"];
-                var foundAlias = responseData["alias"];
-
-                if (DID == foundDID.ToString()) // found a DH paramter that is to connect to you
-                {
-                    return foundAlias.ToString();
-                }
-            }
-
-        }
-        else
-        {
-            Debug.Log("Error retrieving transactions!");
-        }
-
-        return ans;
-    }
+    
 
 
     public async void RequestCredential()
@@ -231,27 +115,35 @@ public class CredentialIssuer : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Expiry Date is in the wrong format!";
         }
-
-        if (validInput && type != "ACCOUNT")
+        if (CheckAdminConnection() == true )
         {
-            string expiryString = expiryDate.ToString();
-            if (expiryString.Length < 8)
-            { // DD is single digit
-                expiryString = "0" + expiryString;
+            if (validInput && type != "ACCOUNT")
+            {
+                string expiryString = expiryDate.ToString();
+                if (expiryString.Length < 8)
+                {
+                    expiryString = "0" + expiryString;
+                }
+                int CredentialID = (userID + issuer + expiryInputField.text).GetHashCode();
+                sendReq(issuer, CredentialID, userID, expiryDate, expiryString, type);
             }
-            int CredentialID = (userID + issuer + expiryInputField.text).GetHashCode();
-            sendReq(issuer, CredentialID, userID, expiryDate, expiryString, type);
-        }
-        else if (validInput && type == "ACCOUNT")
-        {
-            popupWindow.SetActive(true);
-            windowMessage.text = "Type should not be \"Account\"";
+            else if (validInput && type == "ACCOUNT")
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Type should not be \"Account\"";
+            }
+            else
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Invalid input";
+            }
         }
         else
         {
             popupWindow.SetActive(true);
-            windowMessage.text = "Invalid input";
+            windowMessage.text = "Create connection with admin before requesting!";
         }
+        
 
 
     }
@@ -367,9 +259,18 @@ public class CredentialIssuer : MonoBehaviour
                     string responseBody = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(responseBody);
                     popupWindow.SetActive(true);
-                    windowMessage.text = "Credential Generation Success! \n Credential ID = " + credentialID;
+                    if (schemaVer1 == 1)
+                    {
+                        windowMessage.text = "Credential Generation Success! \n Credential ID = " + credentialID;
+                        AddCredentialToServer(issuer, credentialID, userID, expiry);
+                    }
+                    else
+                    {
+                        windowMessage.text = "Request Success!" + credentialID;
+                    }
+                    
 
-                    AddCredentialToServer(issuer, credentialID, userID, expiry);
+                    
                 }
                 else
                 {

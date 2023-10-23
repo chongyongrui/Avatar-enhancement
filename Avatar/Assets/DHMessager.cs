@@ -878,12 +878,13 @@ public class DHMessager : MonoBehaviour
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
         string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
-
-        using (HttpClient httpClient = new HttpClient())
+        try
         {
+            using (HttpClient httpClient = new HttpClient())
+            {
 
-            // Prepare the JSON payload
-            string jsonPayload = $@"{{
+                // Prepare the JSON payload
+                string jsonPayload = $@"{{
                 ""attributes"": [
                     ""P:{dhParams.P}"", 
                     ""G:{dhParams.G}"",
@@ -896,30 +897,32 @@ public class DHMessager : MonoBehaviour
                 ""schema_version"": ""3.1""
             }}";
 
-            // Set headers
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                // Set headers
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-            // Create the request content
-            StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                // Create the request content
+                StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-            // Send the POST request
-            HttpResponseMessage response = await httpClient.PostAsync(url, content);
+                // Send the POST request
+                HttpResponseMessage response = await httpClient.PostAsync(url, content);
 
-            if (response.IsSuccessStatusCode)
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseBody);
-                popupWindow.SetActive(true);
-                windowMessage.text = "Posted DH parameters to ledger!";
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(responseBody);
+                    popupWindow.SetActive(true);
+                    windowMessage.text = "Posted DH parameters to ledger!";
 
 
+                }
+                else
+                {
+                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                }
             }
-            else
-            {
-                Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-            }
-        }
+        }catch (Exception ex) { }
+        
 
 
     }

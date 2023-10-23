@@ -73,13 +73,7 @@ public class AuthController : NetworkBehaviour
     /// <returns></returns>
     public async void Register()
     {
-        if (DockerStatusIcon.instance.SQLServerConnection == false)
-        {
-            popupWindow.SetActive(true);
-            registrationStatus.SetActive(true);
-            windowMessage.text = "Not connected to SQL Server!";
-        }
-        else
+        try
         {
             //Get name and password from input fields
             string name = nameInputField.text;
@@ -88,9 +82,9 @@ public class AuthController : NetworkBehaviour
             string ID = IDInputField.text;
             string credential = credentialInputField.text;
             IPAddress = IPAddressInputField.text;
+            ledgerUrl = "http://" + IPAddress + ":9000";
             if (credentialInputField.text == "genesis" || VerifyCredentialwithID(credential, ID, name, ledgerUrl))
             {
-
                 Debug.Log("credential is valid!");
                 StartCoroutine(HandleQueryResult(name, password, role, ledgerUrl));
             }
@@ -100,6 +94,11 @@ public class AuthController : NetworkBehaviour
                 registrationStatus.SetActive(true);
                 windowMessage.text = "Failed to Verify Credential!";
             }
+        }catch(Exception e)
+        {
+            popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
+            windowMessage.text = "Error with exception! " + e;
         }
 
 

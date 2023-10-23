@@ -77,23 +77,25 @@ public class LoginController : MonoBehaviour
     public async void Login()
     {
 
-        if (DockerStatusIcon.instance.SQLServerConnection == false)
-        {
-            popupWindow.SetActive(true);
-            registrationStatus.SetActive(true);
-            windowMessage.text = "Not connected to SQL Server!";
-        }
-        else
+        
+            
+        try 
         {
             //Get name and password from input fields
             string nameInput = nameInputField.text;
             string passwordInput = passwordInputField.text;
             IPAddress = IPAddressInputField.text;
-
+            ledgerUrl = "http://" + IPAddress + ":9000";
 
             //Add check that name is not already on the blockchain
             StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 0));
+        }catch (Exception e)
+        {
+            popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
+            windowMessage.text = "Connection failed: " + e;
         }
+
 
     }
 
@@ -109,7 +111,7 @@ public class LoginController : MonoBehaviour
         string nameInput = nameInputField.text;
         string passwordInput = passwordInputField.text;
         IPAddress = IPAddressInputField.text;
-
+        ledgerUrl = "http://" + IPAddress + ":9000";
         //Add check that name is not already on the blockchain
         StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 1));
     }
@@ -121,7 +123,7 @@ public class LoginController : MonoBehaviour
         string nameInput = nameInputField.text;
         string passwordInput = passwordInputField.text;
         IPAddress = IPAddressInputField.text;
-
+        ledgerUrl = "http://" + IPAddress + ":9000";
         //Add check that name is not already on the blockchain
         StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 2));
     }
@@ -351,7 +353,7 @@ public class LoginController : MonoBehaviour
                 userdatapersist.Instance.verifiedPassword = verifiedPassword;
                 userdatapersist.Instance.verifiedUser = verifiedUsername;
                 userdatapersist.Instance.IPAdd = IPAddress;
-
+                StartAcaPyInstanceAsync(arguments);
 
 
                 if (sceneNumber == 0)
@@ -369,10 +371,9 @@ public class LoginController : MonoBehaviour
                     SceneManager.LoadSceneAsync("Messaging");
                 }
                 //should only be run if they are the host
-                if (userdatapersist.Instance.isHost)
-                {
-                    StartAcaPyInstanceAsync(arguments);
-                }
+                
+                    
+                
 
                 request.Dispose();
             }
@@ -571,7 +572,7 @@ public class LoginController : MonoBehaviour
         arguments.Add("ACAPY_ADMIN_PORT", "11001");
         arguments.Add("CONTROLLER_PORT", "3001");
         arguments.Add("ACAPY_ENDPOINT_URL", "http://localhost:8002/");
-        arguments.Add("LEDGER_URL", "http://host.docker.internal:9000");
+        arguments.Add("LEDGER_URL", "http://" + IPAddress + ":9000");
         arguments.Add("TAILS_SERVER_URL", "http://tails-server:6543");
         // string[] additionalArgs = { $"--WALLET_KEY={arguments["WALLET_KEY"]}", $"--LABEL={arguments["WALLET_NAME"]}", $"--WALLET_NAME={arguments["WALLET_NAME"]}", $"--AGENT_WALLET_SEED={arguments["SEED"]}", $"--ACAPY_ENDPOINT_PORT={arguments["ACAPY_ENDPOINT_PORT"]}", $"--ACAPY_ADMIN_PORT={arguments["ACAPY_ADMIN_PORT"]}", $"--CONTROLLER_PORT={arguments["CONTROLLER_PORT"]}" };
 
