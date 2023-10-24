@@ -128,7 +128,7 @@ public class SQLConnection : MonoBehaviour
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS DH_Private_Keys (receiver_hash varchar(20), key_val varchar(300));";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS Other_Keys ( receiver_hash varchar(20),  key_val varchar(300));";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS other_keys ( key_type varchar(20),  key_val varchar(300));";
                     command.ExecuteNonQuery();
                     command.CommandText = "GRANT ALL ON AES_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
                     command.ExecuteNonQuery();

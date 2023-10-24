@@ -17,7 +17,10 @@ using System.Text;
 using I18N.Common;
 using System.Globalization;
 using UnityEditor.PackageManager;
-
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
+using System.IO;
 
 public class CredentialIssuer : MonoBehaviour
 {
@@ -27,7 +30,8 @@ public class CredentialIssuer : MonoBehaviour
     [SerializeField] private TMP_InputField expiryInputField;
     [SerializeField] private TMP_Text issuerName;
     [SerializeField] private GameObject adminRequests;
-    [SerializeField] private TMP_Text requets;
+    [SerializeField] private GameObject keyPanel;
+    [SerializeField] private TMP_Text keyText;
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
     [SerializeField] private TMP_Dropdown dropDown;
@@ -42,14 +46,207 @@ public class CredentialIssuer : MonoBehaviour
         ledgerUrl = "http://" + IPAddress + ":9000";
         issuer = userdatapersist.Instance.verifiedUser;
         issuerName.text = issuer;
+        if (userdatapersist.Instance.verifiedUser != "admin")
+        {
+            keyPanel.SetActive(true);
+
+        }
     }
 
+    public async void GetCredDef(string receiverID, string type)
+    {
+        //Get ledger params
+        //string attributes = GetAttributes(tranactionID);
+        string attributes = (receiverID + type).GetHashCode().ToString();
+        Debug.Log("receiverID is " + receiverID);
+        Debug.Log("attributes is " + attributes);
+
+        string value = null;
+
+        string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=102"; // Specify the transaction type as "102" for cred def
+        HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
 
-    
 
-    
+        if (response.IsSuccessStatusCode)
+        {
+            string responseBody = response.Content.ReadAsStringAsync().Result;
+            var transactions = JToken.Parse(responseBody)["results"];
+            bool found = false;
+            foreach (var transaction in transactions)
+            {
+                //Debug.Log(transaction.ToString());
+                if (transaction["txn"]["data"]["data"]["primary"]["r"] != null)
+                {
+                    var responseData = transaction["txn"]["data"]["data"]["primary"]["r"];
 
+
+                    if (responseData[attributes] != null)
+                    {
+                        found = true;
+                        string val = responseData[attributes].ToString();
+                        Debug.Log("Generating Key");
+                        GenerateKey(val, type);
+                    }
+                }
+
+            }
+
+            if (found == false)
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Unable to find issued cred_def \n";
+            }
+
+        }
+
+        else
+        {
+            Debug.Log("Error retrieving transactions!");
+        }
+    }
+
+    public void GetKeys()
+    {
+        string receiverID = userIDInputField.text;
+        GetCredDef(receiverID, "2.1");
+        GetCredDef(receiverID, "2.2");
+        string myKeys = GetSQLKeys();
+        keyText.text = myKeys;
+    }
+
+    public string GetSQLKeys()
+    {
+        string myKeys = null;
+        string username = userdatapersist.Instance.verifiedUser;
+        string password = userdatapersist.Instance.verifiedPassword;
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "SELECT * FROM other_keys;";
+                    int i = 1;
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string keyType = reader["key_type"].ToString();
+                            if (keyType == "2.1")
+                            {
+                                myKeys = myKeys + i + ". CAR\n"; 
+                            }else if (keyType == "2.2")
+                            {
+                                myKeys = myKeys + i + ". DYNAMITE\n";
+                            }
+                            i++;
+                            
+                        }
+                        reader.Close();
+                    }
+                }
+
+                connection.Close();
+
+                return myKeys;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL server) Error updating requests");
+        }
+        return null;
+    }
+
+    public void GenerateKey(string keyParams, string type)
+    {
+        //generate key using AES with ledger params and AES key
+        string AESKey = GetAESKey("admin");
+
+        byte[] keyBytes = System.Text.Encoding.UTF8.GetBytes(AESKey);
+        if (keyBytes.Length != 32)
+        {
+            // Pad or truncate the key to 32 bytes
+            Array.Resize(ref keyBytes, 32);
+        }
+
+        string AESIV = keyParams.Substring(0, 32);
+        string encyrptedString = keyParams.Substring(32, 32);
+        string invalidPattern = "[^0-9A-Fa-f]";
+        string newEncryptedString = Regex.Replace(encyrptedString, invalidPattern, "");
+        string newAESIV = Regex.Replace(AESIV, invalidPattern, "");
+
+        byte[] receivedEncryptedMessage = Enumerable.Range(0, newEncryptedString.Length)
+                .Where(x => x % 2 == 0)
+                .Select(x => Convert.ToByte(newEncryptedString.Substring(x, 2), 16))
+                .ToArray();
+
+        byte[] receivedAESIV = Enumerable.Range(0, newAESIV.Length)
+        .Where(x => x % 2 == 0)
+        .Select(x => Convert.ToByte(newAESIV.Substring(x, 2), 16))
+        .ToArray();
+        string encryptedKey = null;
+
+
+        try
+        {
+            using (Aes newAes = Aes.Create())
+            {
+                newAes.Key = keyBytes;
+                newAes.IV = receivedAESIV;
+                byte[] encrypted = EncryptStringToBytes_Aes(newEncryptedString, newAes.Key, newAes.IV);
+                encryptedKey = BitConverter.ToString(encrypted).Replace("-", string.Empty);
+                SQLAddKey(encryptedKey, type);
+                popupWindow.SetActive(true);
+                windowMessage.text = "Key Issue Success! \n";
+            }
+
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Failed at message encryption process" + e.Message);
+        }
+
+
+
+    }
+
+    public void SQLAddKey(string encryptedKey, string type)
+    {
+        string username = userdatapersist.Instance.verifiedUser;
+        string password = userdatapersist.Instance.verifiedPassword;
+        NpgsqlConnection con = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;");
+        //LoginController.instance.CreateNewDB();
+        LoginController.instance.CreateTables();
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "INSERT INTO other_keys (key_type,key_val) SELECT '" + type + "','" + encryptedKey + "' WHERE NOT EXISTS ( SELECT 1 FROM other_keys WHERE key_type = '" + type+ "');";
+                    command.ExecuteNonQuery();
+                    Debug.Log("(SQL server) key added with id: " + encryptedKey + " of type " + type);
+                }
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error inserting key!  " + e);
+
+        }
+    }
 
     public bool CheckAdminConnection()
     {
@@ -74,10 +271,10 @@ public class CredentialIssuer : MonoBehaviour
                         }
                         connection.Close();
                         return true;
-                        
-                        
+
+
                     }
-                    
+
                 }
             }
         }
@@ -90,7 +287,7 @@ public class CredentialIssuer : MonoBehaviour
 
     }
 
-    
+
 
 
     public async void RequestCredential()
@@ -115,7 +312,7 @@ public class CredentialIssuer : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Expiry Date is in the wrong format!";
         }
-        if (CheckAdminConnection() == true )
+        if (CheckAdminConnection() == true)
         {
             if (validInput && type != "ACCOUNT")
             {
@@ -143,10 +340,12 @@ public class CredentialIssuer : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Create connection with admin before requesting!";
         }
-        
+
 
 
     }
+
+
 
     public async void GenerateCredential()
     {
@@ -197,6 +396,92 @@ public class CredentialIssuer : MonoBehaviour
 
     }
 
+    static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
+    {
+        // Check arguments.
+        if (plainText == null || plainText.Length <= 0)
+            throw new ArgumentNullException("plainText");
+        if (Key == null || Key.Length <= 0)
+            throw new ArgumentNullException("Key");
+        if (IV == null || IV.Length <= 0)
+            throw new ArgumentNullException("IV");
+        byte[] encrypted;
+
+        // Create an Aes object
+        // with the specified key and IV.
+        using (Aes aesAlg = Aes.Create())
+        {
+            aesAlg.Key = Key;
+            aesAlg.IV = IV;
+
+            // Create an encryptor to perform the stream transform.
+            ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+
+            // Create the streams used for encryption.
+            using (MemoryStream msEncrypt = new MemoryStream())
+            {
+                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                {
+                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                    {
+                        //Write all data to the stream.
+                        swEncrypt.Write(plainText);
+                    }
+                    encrypted = msEncrypt.ToArray();
+                }
+            }
+        }
+
+        // Return the encrypted bytes from the memory stream.
+        return encrypted;
+    }
+
+
+
+
+    public string GetAESKey(string connectionName)
+    {
+        string username = userdatapersist.Instance.verifiedUser;
+        string password = userdatapersist.Instance.verifiedPassword;
+        string foundKey = null;
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM AES_Keys WHERE receiver_hash = '" + connectionName + "';";
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader["key_val"] == null)
+                            {
+                                Debug.Log("(SQL server) no prior private key data found");
+
+                            }
+                            else
+                            {
+                                foundKey = reader["key_val"].ToString();
+                            }
+                        }
+                        reader.Close();
+                    }
+                    connection.Close();
+
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL Server) Error getting private key " + e);
+        }
+
+        return foundKey;
+    }
+
+
 
 
 
@@ -207,11 +492,19 @@ public class CredentialIssuer : MonoBehaviour
         string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
         int schemaVer1 = 0;
         int schemaVer2 = 0;
+        string jsonPayload = null;
 
         if (type == "ACCOUNT")
         {
             schemaVer1 = 1;
             schemaVer2 = 0;
+            jsonPayload = $@"{{
+                ""attributes"": [
+                    ""{userID.GetHashCode()}.{expiryString}""                
+                ],
+                ""schema_name"": ""{credentialID.ToString()}"",
+                ""schema_version"": ""{schemaVer1}.{schemaVer2}""
+            }}";
         }
         else
         {
@@ -228,6 +521,13 @@ public class CredentialIssuer : MonoBehaviour
             {
                 schemaVer2 = 3;
             }
+            jsonPayload = $@"{{
+                ""attributes"": [
+                    ""{(userID + schemaVer1 + "." + schemaVer2).GetHashCode()}""                
+                ],
+                ""schema_name"": ""{credentialID.ToString()}"",
+                ""schema_version"": ""{schemaVer1}.{schemaVer2}""
+            }}";
         }
         try
         {
@@ -236,13 +536,7 @@ public class CredentialIssuer : MonoBehaviour
 
 
                 // Prepare the JSON payload
-                string jsonPayload = $@"{{
-                ""attributes"": [
-                    ""{userID.GetHashCode()}.{expiryString}""                
-                ],
-                ""schema_name"": ""{credentialID.ToString()}"",
-                ""schema_version"": ""{schemaVer1}.{schemaVer2}""
-            }}";
+
 
                 // Set headers
                 httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -268,9 +562,9 @@ public class CredentialIssuer : MonoBehaviour
                     {
                         windowMessage.text = "Request Success!" + credentialID;
                     }
-                    
 
-                    
+
+
                 }
                 else
                 {

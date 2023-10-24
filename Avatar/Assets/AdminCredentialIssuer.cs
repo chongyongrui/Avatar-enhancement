@@ -17,6 +17,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 using UnityEngine.Windows;
+using Input = UnityEngine.Input;
 
 public class AdminCredentialIssuer : MonoBehaviour
 {
@@ -25,12 +26,15 @@ public class AdminCredentialIssuer : MonoBehaviour
     [SerializeField] private TMP_InputField userIDInputField;
     [SerializeField] private TMP_InputField expiryInputField;
     [SerializeField] private TMP_Text issuerName;
-    [SerializeField] private GameObject userGenerate;
+    [SerializeField] private GameObject userRequest;
     [SerializeField] private GameObject adminGenerate;
+    [SerializeField] private GameObject adminReceiverFields;
+    [SerializeField] private TMP_InputField receiverNameInputField;
     [SerializeField] private TMP_Text requets;
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
     [SerializeField] private TMP_Dropdown dropDown;
+    [SerializeField] Camera  cam;
     private string IPAddress;
     private string issuer;
     bool validInput = false;
@@ -45,10 +49,12 @@ public class AdminCredentialIssuer : MonoBehaviour
 
         if (userdatapersist.Instance.verifiedUser != "admin")
         {
-            this.gameObject.SetActive(false);
-            userGenerate.SetActive(true);
+
+            userRequest.SetActive(true);
             adminGenerate.SetActive(false);
-            //InvokeRepeating("GetRequests", 10.0f, 5.0f);
+            adminReceiverFields.SetActive(false);
+            this.gameObject.SetActive(false);
+            InvokeRepeating("GetRequests", 10.0f, 5.0f);
         }
         GetRequests();
     }
@@ -56,7 +62,7 @@ public class AdminCredentialIssuer : MonoBehaviour
     public void GetRequests()
     {
         string ledgerUrl = "http://" + IPAddress + ":9000";
-        List<Tuple<string, string>> requests = new List<Tuple<string, string>>();
+        Dictionary<string, string> requests = new Dictionary<string, string>();
         /*try
         {*/
         string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
@@ -83,27 +89,28 @@ public class AdminCredentialIssuer : MonoBehaviour
                 if (CheckSQLAlreadyAccepted(senderAlias, type.ToString()) == false)
                 {
 
-                    if (type.ToString() == "2.1") // found a DH paramter that is to connect to you
+                    if (type.ToString() == "2.1" && !requests.ContainsKey(key)) // found a DH paramter that is to connect to you
                     {
                         string ans = senderAlias + " requests for car access";
-                        Tuple<string, string> val = new Tuple<string, string>(senderAlias, ans);
-                        requests.Add(val);
+                        requests.Add(key, ans);
                     }
-                    else if (type.ToString() == "2.2")
+                    else if (type.ToString() == "2.2" && !requests.ContainsKey(key))
                     {
                         string ans = senderAlias + " requests for dynamite access";
-                        Tuple<string, string> val = new Tuple<string, string>(senderAlias, ans);
-                        requests.Add(val);
+                        requests.Add(key, ans);
                     }
+                    
                 }
 
             }
 
+            requests = RemoveIssuedRequests(requests);
+
             string pendingRequests = null;
             int i = 1;
-            foreach (Tuple<string, string> tuple in requests)
+            foreach (var kvp in requests)
             {
-                pendingRequests = pendingRequests + i + ". " + tuple.Item2 + "\n";
+                pendingRequests = pendingRequests + i + ". " + kvp.Value + "\n";
                 i++;
             }
             if (requests == null)
@@ -117,6 +124,53 @@ public class AdminCredentialIssuer : MonoBehaviour
             Debug.Log("Error retrieving transactions!");
         }
 
+    }
+
+    
+
+    public Dictionary<string, string> RemoveIssuedRequests(Dictionary<string, string> requests)
+    {
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
+            {
+
+                connection.Open();
+                
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "SELECT * FROM issuedkeys;";
+
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Debug.Log("Player ID: " + reader["receiver_hash"] + " \tWeapon ID: " + reader["key_type"]);
+                            string target = reader["receiver_hash"].ToString() + reader["key_type"].ToString();
+                            if (requests.ContainsKey(target))
+                            {
+                                requests.Remove(target);
+                            }
+                        }
+                        reader.Close();
+                    }
+                }
+
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL server) Error updating requests"); 
+        }
+
+
+
+
+        return requests;
     }
 
     public bool CheckSQLAlreadyAccepted(string user, string type)
@@ -207,6 +261,7 @@ public class AdminCredentialIssuer : MonoBehaviour
 
         //Get ID and expiry from input fields
         string userID = userIDInputField.text;
+        string receiverName = receiverNameInputField.text;
         int expiryDate = -1;
         string type = dropDown.captionText.text;
 
@@ -215,7 +270,6 @@ public class AdminCredentialIssuer : MonoBehaviour
         {
             expiryDate = Int32.Parse(expiryInputField.text);
             DateTime date = DateTime.ParseExact(expiryInputField.text, "ddmmyyyy", CultureInfo.InvariantCulture);
-            Debug.Log("Input date is " + date);
             validInput = true;
         }
         catch (Exception)
@@ -230,7 +284,8 @@ public class AdminCredentialIssuer : MonoBehaviour
         if (validInput && type == "CAR")
         {
             //get transaction ID using userID
-            string transactionID = GetTransactionID(userID.GetHashCode().ToString(), "2.1");
+            string transactionID = GetTransactionID(userID, "2.1");
+            Debug.Log("Got transaction ID = " + transactionID);
             string expiryString = expiryDate.ToString();
             if (expiryString.Length < 8)
             { // DD is single digit
@@ -238,21 +293,41 @@ public class AdminCredentialIssuer : MonoBehaviour
             }
             if (transactionID != null)
             {
-                sendIssueReq(transactionID, type, userID);
+                Debug.Log("Sending Issue request...");
+                sendIssueReq(transactionID, "2.1", userID, receiverName);
             }
 
         }
-
+        else if (type == "DYNAMITE")
+        {
+            string transactionID = GetTransactionID(userID, "2.2");
+            string expiryString = expiryDate.ToString();
+            if (expiryString.Length < 8)
+            { // DD is single digit
+                expiryString = "0" + expiryString;
+            }
+            if (transactionID != null)
+            {
+                sendIssueReq(transactionID, "2.2", userID, receiverName);
+            }
+        }
+        else
+        {
+            popupWindow.SetActive(true);
+            windowMessage.text = "Invalid type!";
+        }
 
 
     }
 
     public string GetTransactionID(string userID, string target)
     {
+        string attribute = (userID + target).GetHashCode().ToString();
+        Debug.Log("looking for filter = " +  attribute);    
         string value = null;
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=" + userID + "&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query="+attribute+"&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -267,7 +342,7 @@ public class AdminCredentialIssuer : MonoBehaviour
                     var type = responseData["version"];
                     var transactionID = transaction["txnMetadata"]["txnId"];
 
-
+                    Debug.Log(type.ToString() + "found type");
                     if (type.ToString() == target) // found the correct request
                     {
                         value = transactionID.ToString();
@@ -336,10 +411,10 @@ public class AdminCredentialIssuer : MonoBehaviour
     public void test()
     {
         Debug.Log("Testing");
-        GetCredDef("lion", "CAR", "T14DiKBkDetsymjSP9MhU8:2:1795857939:2.1");
+        GetCredDef("9999", "2.1", "kopi");
     }
 
-    public async void sendIssueReq(string transactionID, string type, string userID)
+    public async void sendIssueReq(string transactionID, string type, string userID, string receiverName)
     {
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
@@ -376,29 +451,32 @@ public class AdminCredentialIssuer : MonoBehaviour
                     string responseBody = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(responseBody);
                     popupWindow.SetActive(true);
-                    windowMessage.text = "Issue Success! \n";
-                    GetCredDef(userID, type, transactionID);
+                    windowMessage.text = "Post Cred-def Success! \n";
+                    GetCredDef(userID, type, receiverName);
                 }
                 else
                 {
                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
                 }
+                
             }
         }
-        catch (Exception)
+        catch (Exception e)
         {
             popupWindow.SetActive(true);
-            windowMessage.text = "Error posting! Check if ACA-py has loaded!";
+            windowMessage.text = "Error posting! Check if ACA-py has loaded! " +e ;
         }
 
 
     }
 
-    public void GetCredDef(string receiver, string type, string tranactionID)
+    public async void GetCredDef(string receiverID, string type, string receiverName)
     {
         //Get ledger params
-        string attributes = GetAttributes(tranactionID);
-        Debug.Log("attributes are " + attributes);
+        //string attributes = GetAttributes(tranactionID);
+        string attributes = (receiverID + type).GetHashCode().ToString();
+        Debug.Log("receiverID is " + receiverID);
+        Debug.Log("attributes is " + attributes);
 
         string value = null;
 
@@ -411,10 +489,10 @@ public class AdminCredentialIssuer : MonoBehaviour
         {
             string responseBody = response.Content.ReadAsStringAsync().Result;
             var transactions = JToken.Parse(responseBody)["results"];
-
+            bool found = false;
             foreach (var transaction in transactions)
             {
-                Debug.Log(transaction.ToString());
+                //Debug.Log(transaction.ToString());
                 if (transaction["txn"]["data"]["data"]["primary"]["r"] != null)
                 {
                     var responseData = transaction["txn"]["data"]["data"]["primary"]["r"];
@@ -422,11 +500,19 @@ public class AdminCredentialIssuer : MonoBehaviour
 
                     if (responseData[attributes] != null)
                     {
+                        found = true;
                         string val = responseData[attributes].ToString();
-                        GenerateKey(val,receiver,type);
+                        Debug.Log("Generating Key");
+                        GenerateKey(val, receiverName, type);
                     }
                 }
 
+            }
+
+            if (found == false)
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Unable to find issued cred_def \n";
             }
 
         }
@@ -478,6 +564,8 @@ public class AdminCredentialIssuer : MonoBehaviour
                 byte[] encrypted = EncryptStringToBytes_Aes(newEncryptedString, newAes.Key, newAes.IV);
                 encryptedKey = BitConverter.ToString(encrypted).Replace("-", string.Empty);
                 SQLAddKey(encryptedKey, receiver, type);
+                popupWindow.SetActive(true);
+                windowMessage.text = "Key Issue Success! \n";
             }
             
         }

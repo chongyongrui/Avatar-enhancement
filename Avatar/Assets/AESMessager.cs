@@ -74,7 +74,7 @@ public class AESMessager : MonoBehaviour
             {
                 string responseBody = response.Content.ReadAsStringAsync().Result;
                 var transactions = JToken.Parse(responseBody)["results"];
-                
+                messages.Clear();
                 foreach (var transaction in transactions)
                 {
 
