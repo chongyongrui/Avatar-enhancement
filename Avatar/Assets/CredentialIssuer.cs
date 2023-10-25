@@ -21,6 +21,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public class CredentialIssuer : MonoBehaviour
 {
@@ -612,6 +613,11 @@ public class CredentialIssuer : MonoBehaviour
 
         }
         return false;
+    }
+
+    public void OpenMessagePanel()
+    {
+        SceneManager.LoadSceneAsync("Messaging");
     }
 
 

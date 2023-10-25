@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using Npgsql;
+using Org.BouncyCastle.Crypto.Generators;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +16,7 @@ public class PickableItemScript : MonoBehaviour
     GameObject objectToPickUp; // the gameobject onwhich you collided with
     GameObject collidedObject;
     public bool hasItem; // a bool to see if you have an item in your hand
+    public bool inCollision = false;
     public static PickableItemScript instance;
     [SerializeField] private Item dynamiteItem;
     [SerializeField] private Item smokeGrenadeItem;
@@ -58,8 +61,8 @@ public class PickableItemScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-        
+
+
         if (this.animator.GetCurrentAnimatorStateInfo(0).IsName("Pickup") || this.animator.GetCurrentAnimatorStateInfo(0).IsName("Throw"))
         {
             isPlayingAnimation = true;
@@ -69,9 +72,11 @@ public class PickableItemScript : MonoBehaviour
         {
             isPlayingAnimation = false;
         }
-        
+
         ActivatePlayerAction();
         UpdatePlayerHeldItem();
+
+
         if (collidedObject != null && collidedObject.tag == "MiniGameTrigger" && Input.GetKeyDown(KeyCode.Return))
         {
             SceneManager.LoadSceneAsync("Shooting Game");
@@ -84,12 +89,41 @@ public class PickableItemScript : MonoBehaviour
     {
         Transform currentHeldObject = FindWithTag(gameObject, "PickableObject");
         //Debug.Log("object to pick = " + objectToPickUp + " and the object held = " + currentHeldObject);
+        bool isUnlocked = false;
+        RestrictedItem restrictedItem = null;
+        try {  restrictedItem = objectToPickUp.GetComponent<RestrictedItem>(); }catch(System.Exception e) { }
+        
+        if (restrictedItem != null && inCollision)
+        {
+            bool isChecked = false;
+            if (restrictedItem.isRestricted && isChecked == false)
+            {
+                
+                //do a cross check of keys
+                string itemKey = restrictedItem.GetItemKey(userdatapersist.Instance.verifiedUser);
+                string userKey = GetMyItemKey(restrictedItem.itemCode);
+                if (itemKey == userKey && itemKey!=null)
+                {
+                    isUnlocked = true;
+                    Debug.Log("Credential passed");
+                }
+                else
+                {
+                    Debug.Log("Invalid Key");
+                }
+                isChecked= true;
+            }
+        }
+        else //not a restricted item
+        {
+            isUnlocked = true;
+        }
 
-        //pick the object
-        if (!isPlayingAnimation && canpickup == true 
-            && Input.GetKeyDown(KeyCode.F) 
-            && currentHeldObject != objectToPickUp
-            && !isHoldingInteractableObject()) // if you enter thecollider of the object and press F
+        if (!isPlayingAnimation && canpickup == true
+        && Input.GetKeyDown(KeyCode.F)
+        && currentHeldObject != objectToPickUp
+        && !isHoldingInteractableObject() 
+        && isUnlocked) // if you enter thecollider of the object and press F
 
         {
             PlayerInteractable.Instance.SetHasWeaponFalse();
@@ -98,7 +132,6 @@ public class PickableItemScript : MonoBehaviour
             animator.SetTrigger("Pickup");
             StartCoroutine(DelayedPickUp(objectToPickUp));
             hasItem = true;
-
         }
 
         //drop the object
@@ -135,11 +168,66 @@ public class PickableItemScript : MonoBehaviour
 
 
         }
+        
+    
+        //pick the object
+        
     }
 
-    private void UpdatePlayerHeldItem()
+    public string GetMyItemKey(string itemCode)
     {
-       
+        string foundKey = null;
+        string username = userdatapersist.Instance.verifiedUser;
+        string password = userdatapersist.Instance.verifiedPassword;
+        string IPAddress = userdatapersist.Instance.IPAdd;
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "select * from other_keys where key_type = '" + itemCode + "';";
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader["key_val"] == null)
+                            {
+                                Debug.Log("(SQL server) no prior private key data found");
+                                return null;
+                            }
+                            else
+                            {
+                                foundKey = reader["key_val"].ToString();
+                                return foundKey;
+                            }
+                        }
+                        reader.Close();
+                    }
+                    connection.Close();
+
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("(SQL Server) Error getting private key " + e);
+        }
+
+        return null; 
+
+    }
+
+
+
+
+
+
+
+private void UpdatePlayerHeldItem()
+    {
+
         if (InventoryManager.instance.GetSelectedItem(false) == null) // character has not selected anything
         {
             RemovePlayerHeldItem();
@@ -184,7 +272,7 @@ public class PickableItemScript : MonoBehaviour
 
         hasItem = false;
         currItem = null;
-        
+
     }
 
     private void DestroyHeldItem()
@@ -209,10 +297,10 @@ public class PickableItemScript : MonoBehaviour
     private void SpawnNewPlayerItem()
     {
         InventoryManager.instance.backpackScreen.SetActive(false);
-        Item item = InventoryManager.instance.GetSelectedItem(false); 
+        Item item = InventoryManager.instance.GetSelectedItem(false);
         try
         {
-            
+
             if (item != null && item.name == "Dynamite")
             {
                 //GameObject newObject = newDynamiteObj;
@@ -232,7 +320,7 @@ public class PickableItemScript : MonoBehaviour
 
             else if (item != null && item.name == "SmokeGrenade")
             {
-               // GameObject newObject = newSmokeGrenadeObj;
+                // GameObject newObject = newSmokeGrenadeObj;
                 //newObject = Instantiate(newSmokeGrenadeObj);
                 GameObject newObject = Instantiate(newSmokeGrenadeObj) as GameObject;
                 SpawnAndHold(newObject, GetTransform());
@@ -240,7 +328,7 @@ public class PickableItemScript : MonoBehaviour
             }
             else if (item != null && item.name == "AK47")
             {
-                
+
                 //GameObject newObject = Instantiate(newAk47Obj) as GameObject;
                 PlayerInteractable.Instance.TriggerPickupAnimation(transform.position, "AK47", false);
                 PlayerInteractable.Instance.hasWeapon = true;
@@ -249,13 +337,13 @@ public class PickableItemScript : MonoBehaviour
             hasItem = true;
             currItem = item;
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.Log(e);
         }
-        
 
-        
+
+
     }
 
     private Transform GetTransform()
@@ -276,7 +364,8 @@ public class PickableItemScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other) // to see when the player enters the collider
     {
-         Debug.Log("Collided with " + other.gameObject);
+        inCollision = true;
+        Debug.Log("Collided with " + other.gameObject);
         if (other.gameObject.tag == "PickableObject") //on the object you want to pick up set the tag to be anything, in this case "object"
         {
             Debug.Log("Picakable object found" + other);
@@ -287,13 +376,13 @@ public class PickableItemScript : MonoBehaviour
         collidedObject = other.gameObject;
 
         //open mini game scene
-        
+
     }
     private void OnTriggerExit(Collider other)
     {
         canpickup = false; //when you leave the collider set the canpickup bool to false
         collidedObject = null;
-
+        inCollision = false;
     }
 
 
@@ -340,12 +429,13 @@ public class PickableItemScript : MonoBehaviour
             {
                 InventoryManager.instance.AddItem(dynamiteItem, true, playerID);
                 currItem = dynamiteItem;
-            }else if (objectToPickUp.GetComponent<Grenade>().type == 1)
+            }
+            else if (objectToPickUp.GetComponent<Grenade>().type == 1)
             {
                 InventoryManager.instance.AddItem(grenadeItem, true, playerID);
                 currItem = grenadeItem;
             }
-            
+
         }
         else if (objectToPickUp.GetComponent<SmokeGrenade>())
         {
@@ -368,7 +458,7 @@ public class PickableItemScript : MonoBehaviour
         Quaternion myRotation = Quaternion.identity;
         myRotation.eulerAngles = new Vector3(-7.5f, 172, -260);
         objectToPickUp.transform.rotation = myRotation;
-        
+
 
     }
 

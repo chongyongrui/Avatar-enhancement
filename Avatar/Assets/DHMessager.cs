@@ -29,6 +29,7 @@ using Org.BouncyCastle.Utilities.IO.Pem;
 using Npgsql;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.SceneManagement;
 
 public class DHMessager : MonoBehaviour
 {
@@ -194,7 +195,7 @@ public class DHMessager : MonoBehaviour
 
     public void UpdateInvtersInvitees()
     {
-        
+        addressBook.Clear();
         GetEstablishedConnections(addressBook);  //value is 3
         GetDHAcceptedInvites(addressBook,username, ledgerUrl);  //value is 2
         GetDHSentInvites(addressBook,username, ledgerUrl);  //value is 0
@@ -932,7 +933,10 @@ public class DHMessager : MonoBehaviour
         ConnectionsPanel.SetActive(false);
         MessagesPanel.SetActive(true);
     }
-
+    public void OpenAdminScene()
+    {
+        SceneManager.LoadSceneAsync("Admin Panel");
+    }
 
 
 

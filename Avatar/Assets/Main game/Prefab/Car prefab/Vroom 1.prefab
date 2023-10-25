@@ -51,6 +51,7 @@ GameObject:
   - component: {fileID: 6398135642935424456}
   - component: {fileID: 554421034531054269}
   - component: {fileID: 6536505637208404466}
+  - component: {fileID: 7014002869115411072}
   m_Layer: 0
   m_Name: Vroom 1
   m_TagString: Car
@@ -180,6 +181,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 951099334
   AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
 --- !u!114 &6398135642935424456
@@ -206,8 +210,12 @@ MonoBehaviour:
   PositionThreshold: 0.001
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
   InLocalSpace: 0
   Interpolate: 1
+  SlerpPosition: 0
 --- !u!114 &554421034531054269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -237,6 +245,22 @@ MonoBehaviour:
   waypointThreshold: 1
   frontLeftCollider: {fileID: 2239677824950174677}
   rotationThreshold: 10
+  isLooping: 0
+--- !u!114 &7014002869115411072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 642287924342879162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30de374f084b1104c8f25fa4cce3b307, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemCode: 2.1
+  isRestricted: 1
+  itemKey: 0
 --- !u!1 &766808405809898022
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,8 +402,12 @@ MonoBehaviour:
   PositionThreshold: 0.001
   RotAngleThreshold: 0.01
   ScaleThreshold: 0.01
+  UseQuaternionSynchronization: 0
+  UseQuaternionCompression: 0
+  UseHalfFloatPrecision: 0
   InLocalSpace: 0
   Interpolate: 1
+  SlerpPosition: 0
 --- !u!1 &1025541434198643357
 GameObject:
   m_ObjectHideFlags: 0

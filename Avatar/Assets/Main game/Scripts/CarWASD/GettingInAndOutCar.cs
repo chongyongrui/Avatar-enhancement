@@ -56,9 +56,28 @@ public class GettingInAndOutCar : NetworkBehaviour
             {
                 if (Input.GetKeyDown(interactKey))
                 {
-                    playerCamera = GameObject.FindGameObjectWithTag("CarCamera").GetComponent<CinemachineVirtualCamera>();
-                    playerCamera.gameObject.SetActive(true);
-                    GetInCarServerRPC();
+                    //check if have the credentials
+
+                    RestrictedItem restrictedItem = null;
+                    try { restrictedItem = this.GetComponent<RestrictedItem>(); } catch (System.Exception e) { }
+                    if (restrictedItem != null)
+                    {
+                        string itemKey = restrictedItem.GetItemKey(userdatapersist.Instance.verifiedUser);
+                        string userKey = PickableItemScript.instance.GetMyItemKey(restrictedItem.itemCode);
+                        if (userKey != null && userKey==itemKey)
+                        {
+                            Debug.Log("Credential passed");
+                            playerCamera = GameObject.FindGameObjectWithTag("CarCamera").GetComponent<CinemachineVirtualCamera>();
+                            playerCamera.gameObject.SetActive(true);
+                            GetInCarServerRPC();
+
+                        }
+                        else
+                        {
+                            Debug.Log("Credential failed");
+                        }
+                    }
+                    
                 }
             }
         }

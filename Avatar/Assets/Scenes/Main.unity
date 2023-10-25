@@ -1348,7 +1348,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &310718997
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2155,7 +2155,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: ExplodableDynamite
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
 --- !u!1001 &536110613
@@ -2544,6 +2545,14 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 247744397}
     m_Modifications:
+    - target: {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+      propertyPath: toolTip
+      value: 
+      objectReference: {fileID: 310718996}
+    - target: {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+      propertyPath: toolTipText
+      value: 
+      objectReference: {fileID: 1106078886}
     - target: {fileID: 7110251769517227817, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -6001,7 +6010,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7110251769517384457, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
   m_PrefabInstance: {fileID: 511179994}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1569161892
+--- !u!114 &1569161899
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -6010,10 +6019,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1569161885}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c22be6c63140cb4da4bec59a3f9ce8a, type: 3}
+  m_Script: {fileID: 11500000, guid: 30de374f084b1104c8f25fa4cce3b307, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  message: secure item
+  itemCode: 
+  toolTip: {fileID: 310718996}
+  toolTipText: {fileID: 1106078886}
+  isRestricted: 1
+  itemKey: 0
 --- !u!1001 &1592588849
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6526,6 +6539,14 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 247744397}
     m_Modifications:
+    - target: {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+      propertyPath: toolTip
+      value: 
+      objectReference: {fileID: 310718996}
+    - target: {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+      propertyPath: toolTipText
+      value: 
+      objectReference: {fileID: 1106078886}
     - target: {fileID: 7110251769517227817, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
       propertyPath: m_RootOrder
       value: -1
@@ -12087,6 +12108,14 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 1718887417}
     m_Modifications:
+    - target: {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+      propertyPath: toolTip
+      value: 
+      objectReference: {fileID: 310718996}
+    - target: {fileID: 7027729589030388599, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
+      propertyPath: toolTipText
+      value: 
+      objectReference: {fileID: 1106078886}
     - target: {fileID: 7110251769517227817, guid: 334769f5344d9a546bb3e4e05a498e1d, type: 3}
       propertyPath: m_RootOrder
       value: -1

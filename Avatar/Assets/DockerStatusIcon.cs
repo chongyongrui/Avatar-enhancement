@@ -23,6 +23,7 @@ public class DockerStatusIcon : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this.gameObject);
         TestSQLConnection();
+        InvokeRepeating("TestSQLConnection", 3.0f, 2.0f);
     }
     // Update is called once per frame
     void Update()
@@ -43,24 +44,28 @@ public class DockerStatusIcon : MonoBehaviour
 
     public void TestSQLConnection()
     {
-        string hostName = Dns.GetHostName();
-        string IPAddress = IPAddressInputField.text;
-        if (IPAddress != "")
+        if (!SQLServerConnection)
         {
-            //string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
-            string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
-            Npgsql.NpgsqlConnection con = new Npgsql.NpgsqlConnection(adminConString);
-            try
+            string hostName = Dns.GetHostName();
+            string IPAddress = IPAddressInputField.text;
+            if (IPAddress != "")
             {
-                con.Open();
-                Debug.Log("SQL server connection successful!");
-                con.Close();
-                SQLServerConnection = true;
-            }
-            catch (Exception e)
-            {
-                Debug.Log("ERROR SQL server connection unsuccessful!");
-                SQLServerConnection = false;
+                //string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+                string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+                Npgsql.NpgsqlConnection con = new Npgsql.NpgsqlConnection(adminConString);
+                try
+                {
+                    con.Open();
+                    Debug.Log("SQL server connection successful!");
+                    con.Close();
+                    SQLServerConnection = true;
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("ERROR SQL server connection unsuccessful!");
+                    SQLServerConnection = false;
+                }
+
             }
 
         }
