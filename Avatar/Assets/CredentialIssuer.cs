@@ -93,10 +93,10 @@ public class CredentialIssuer : MonoBehaviour
 
             }
 
-            if (found == false)
+            if (found == true)
             {
                 popupWindow.SetActive(true);
-                windowMessage.text = "Unable to find issued cred_def \n";
+                windowMessage.text = "Received a credential \n";
             }
 
         }
@@ -561,7 +561,7 @@ public class CredentialIssuer : MonoBehaviour
                     }
                     else
                     {
-                        windowMessage.text = "Request Success!" + credentialID;
+                        windowMessage.text = "Request Success! \nTxn ID: " + credentialID;
                     }
 
 
@@ -598,7 +598,7 @@ public class CredentialIssuer : MonoBehaviour
 
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID + "'," + expiry + ", CAST(0 AS bit) )";
+                    command.CommandText = "INSERT INTO IssuedCredentials (CredentialID,Issuer,UserID,Expiry,Activated) VALUES (" + credentialID + ",'" + issuer + "','" + userID.GetHashCode() + "'," + expiry + ", CAST(0 AS bit) )";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) credential added with id: " + credentialID + " by user " + issuer);
                 }

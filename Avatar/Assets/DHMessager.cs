@@ -339,13 +339,19 @@ public class DHMessager : MonoBehaviour
 
         try
         {
+            string invalidPattern = "[^0-9A-Fa-f.-]";
             hashedReceiverUserName = ReceiverNameInputField.text.ToString();
             DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "-" + username + ".params", ledgerUrl);
             string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "-" + username + ".B", ledgerUrl);
+            StaticKeyString = Regex.Replace(StaticKeyString, invalidPattern, "");
             Debug.Log("Found StaticKeyString of B by A is " + StaticKeyString);
             var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
             var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
-            AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, GetDHPrivateKeySQL(hashedReceiverUserName));
+            string myPrivateKey = GetDHPrivateKeySQL(hashedReceiverUserName);
+            
+            myPrivateKey = Regex.Replace(myPrivateKey, invalidPattern, "");
+
+            AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, myPrivateKey);
             internalKeyAgreeA.Init(A.Private);
             BigInteger Aans = internalKeyAgreeA.CalculateAgreement(importedKeyA);
             Debug.Log("A ans is " + Aans.ToString());
