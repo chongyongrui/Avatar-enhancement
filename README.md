@@ -28,7 +28,7 @@ Special thanks to our advisors and mentors for their valuable guidance and suppo
 
 ## Installation
 
-**Refer to the User Guide [here](docs/UserGuide.md) for specific step-by-step instructions.**
+**Refer to the User Guide [here](docs/userguide.md) for specific step-by-step instructions.**
 
 
 ### Collaborator
