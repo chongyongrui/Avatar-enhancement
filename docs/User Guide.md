@@ -1,5 +1,5 @@
 # Avatar Project User Guide
-A web-version can be found at this link: (https://quill-carriage-fc8.notion.site/Avatar-Project-User-Guide-e447ae230f014a388db5f3e380e92dc8?pvs=4)
+A web-version can be found at this [link](https://quill-carriage-fc8.notion.site/Avatar-Project-User-Guide-e447ae230f014a388db5f3e380e92dc8?pvs=4)
 
 last update: 30/10/2023
 
