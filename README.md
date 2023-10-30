@@ -28,7 +28,7 @@ Special thanks to our advisors and mentors for their valuable guidance and suppo
 
 ## Installation
 
-**Refer to the User Guide [here](https://quill-carriage-fc8.notion.site/Avatar-Project-User-Guide-e447ae230f014a388db5f3e380e92dc8) for specific step-by-step instructions.**
+**Refer to the User Guide [here](docs/User Guide.md) for specific step-by-step instructions.**
 
 
 ### Collaborator
