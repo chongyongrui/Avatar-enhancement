@@ -36,6 +36,11 @@ services:
         --auto-accept-invites \
         --auto-accept-requests \
         --auto-ping-connection \
+        --auto-respond-messages \
+        --auto-respond-credential-proposal \
+        --auto-respond-credential-offer \
+        --auto-respond-credential-request \
+        --auto-verify-presentation \
         -e ${ACAPY_ENDPOINT_URL} \
         -it http '0.0.0.0' ${ACAPY_ENDPOINT_PORT} \
         -ot http \
@@ -47,29 +52,13 @@ services:
         --genesis-url ${LEDGER_URL}/genesis \
         --tails-server-base-url ${TAILS_SERVER_URL} \
         --label ${LABEL} \
-        --auto-accept-invites \
         --admin-insecure-mode \
         --log-level info",
     ]
     # --wallet-storage-config '{\"url\":\"db:5432\",\"max_connections\":5}'
     # --wallet-storage-creds '{\"account\":\"postgres\",\"password\":\"password\",\"admin_account\":\"postgres\",\"admin_password\":\"password\"}'
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
-    networks:
-      - von
-    environment:
-      SA_PASSWORD: D5taCard  # Set a strong password for the SA (System Administrator) account
-      ACCEPT_EULA: Y
-    ports:
-      - "1433:1433"
-    volumes:
-      - ./var/opt/mssql
-      - ./init:/docker-entrypoint-initdb.d
-      - ./init/init.sql:/docker-entrypoint-initdb.d/init.sql
+  
 
-     # - {host_data_path}:/var/opt/mssql  # Replace {host_data_path} with the path on the host machine to persist data
-     
   db:
     image: postgres:latest
     hostname: db

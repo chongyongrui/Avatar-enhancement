@@ -1,22 +1,29 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Net;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Data.SqlClient;
+using Npgsql;
+
+
 
 
 public class DockerStatusIcon : MonoBehaviour
 {
     public bool SQLServerConnection = false;
-    public static DockerStatusIcon instance; 
+    public static DockerStatusIcon instance;
+    [SerializeField] private TMP_InputField IPAddressInputField;
 
 
     private void Awake()
     {
         instance = this;
         DontDestroyOnLoad(this.gameObject);
+        TestSQLConnection();
+        InvokeRepeating("TestSQLConnection", 3.0f, 2.0f);
     }
     // Update is called once per frame
     void Update()
@@ -25,18 +32,29 @@ public class DockerStatusIcon : MonoBehaviour
         if (SQLServerConnection)
         {
             image.color = Color.green;
+            
         }
         else
         {
             image.color = Color.red;
+            
 
+        }
+    }
 
+    public void TestSQLConnection()
+    {
+        if (!SQLServerConnection)
+        {
             string hostName = Dns.GetHostName();
-            string IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
-            string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
-                SqlConnection con = new SqlConnection(adminConString);
+            string IPAddress = IPAddressInputField.text;
+            if (IPAddress != "")
+            {
+                //string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+                string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+                Npgsql.NpgsqlConnection con = new Npgsql.NpgsqlConnection(adminConString);
                 try
-                { 
+                {
                     con.Open();
                     Debug.Log("SQL server connection successful!");
                     con.Close();
@@ -45,12 +63,13 @@ public class DockerStatusIcon : MonoBehaviour
                 catch (Exception e)
                 {
                     Debug.Log("ERROR SQL server connection unsuccessful!");
-                SQLServerConnection = false;
+                    SQLServerConnection = false;
                 }
 
-                
+            }
 
         }
+
     }
 }
  

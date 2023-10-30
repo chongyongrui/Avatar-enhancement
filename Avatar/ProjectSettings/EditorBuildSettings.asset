@@ -20,7 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Login.unity
     guid: 93eb6f3245e0d074cb6dc63f30d9ce5d
-  - enabled: 1
+  - enabled: 0
     path: Assets/Main game/Chat system/Scenes/ChatScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 0
@@ -35,5 +35,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Admin Panel.unity
     guid: 3c2e06956598c684fa771fafeb747260
+  - enabled: 1
+    path: Assets/Scenes/Messaging.unity
+    guid: 71de4820ef6f57340b610017af27af64
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7, type: 2}

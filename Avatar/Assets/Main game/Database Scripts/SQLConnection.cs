@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
 using System.Net;
+using Npgsql;
 using UnityEngine.UI;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 using static UnityEngine.UIElements.UxmlAttributeDescription;
@@ -57,20 +57,37 @@ public class SQLConnection : MonoBehaviour
     {
         if (!initialConfigSuccess)
         {
-            adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject ;User ID=sa;Password=D5taCard;";
-            SqlConnection con = new SqlConnection(adminConString);
+            string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+            
             try
             {
-                LoginController.instance.CreateNewDB();
+                NpgsqlConnection con = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;");
+                //LoginController.instance.CreateNewDB();
                 con.Open();
                 Debug.Log("SQL server initial connection successful!");
-                SQLServerConnected = true;
+                
                 LoginController.instance.CreateTables();
 
                 
                 
                 ConfigureUserConnectionString(userdatapersist.Instance.verifiedUser, userdatapersist.Instance.verifiedPassword);
                
+
+                con.Close();
+
+
+                CreateWalletNewUserAccount(userdatapersist.Instance.verifiedUser, userdatapersist.Instance.verifiedPassword);
+                NpgsqlConnection con2 = new NpgsqlConnection("Server=" + IPAddress + ";Port=5432;User Id=" + userdatapersist.Instance.verifiedUser +"; Password=" + userdatapersist.Instance.verifiedPassword +" ; Database=" + userdatapersist.Instance.verifiedUser + "wallet; ");
+                //LoginController.instance.CreateNewDB();
+                con.Open();
+                Debug.Log("SQL wallet initial connection successful!");
+                SQLServerConnected = true;
+                CreateWalletTables();
+
+
+
+                ConfigureUserConnectionString(userdatapersist.Instance.verifiedUser, userdatapersist.Instance.verifiedPassword);
+
 
                 con.Close();
 
@@ -88,17 +105,98 @@ public class SQLConnection : MonoBehaviour
 
     public void ConfigureUserConnectionString(string username, string password)
     {
-        userConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=" + username + ";Password=" + password +";";
+        string userConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         Debug.Log("user con string is : " + userConString);
     }
 
+    public void CreateWalletTables()
+    {
+        string connstring = "Server = localhost; Port = 5432; User Id = postgres; Password = password; Database = " + userdatapersist.Instance.verifiedUser + "wallet; ";
+        try
+        {
+            //create the db connection
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
+            {
 
-  
+                connection.Open();
+                //set up objeect called command to allow db control
+                using (var command = connection.CreateCommand())
+                {
+
+                    //sql statements to execute
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS AES_Keys (receiver_hash varchar(20), key_val varchar(300));";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS DH_Private_Keys (receiver_hash varchar(20), key_val varchar(300));";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS other_keys ( key_type varchar(20),  key_val varchar(300));";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "GRANT ALL ON AES_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "GRANT ALL ON Other_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "GRANT ALL ON DH_Private_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
+                    command.ExecuteNonQuery();
+
+                }
+
+                connection.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error creating new wallet database" + e);
+        }
+
+    }
+
+    public void CreateWalletNewUserAccount(string username, string password)
+    {
+
+        Debug.Log("Creating wallet account now... ");
+        string connstring = "Server=localhost;Port=5432;User Id=postgres;Password=password;Database=postgres;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+
+
+                    command.CommandText = "CREATE DATABASE " + username + "wallet;";
+
+                    command.ExecuteNonQuery();
+                }
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "CREATE USER " + username + " WITH PASSWORD '" + password + "'; GRANT ALL PRIVILEGES ON DATABASE " + username + "wallet TO " + username + "; ";
+
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL server) Error creating new wallet account:  " + e);
+        }
+
+    }
+
+
+
 
     public void TestConnection()
     {
-        
-        SqlConnection con = new SqlConnection(adminConString);
+        string userConString = "Server=localhost;Port=5432;User Id=postgres;Password=password;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;");
         
             Debug.Log("Testing SQL Server connection");
             try
@@ -123,7 +221,7 @@ public class SQLConnection : MonoBehaviour
         //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
         try
         {
-            using (SqlConnection connection = new SqlConnection(userConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
             {
 
                 connection.Open();
@@ -178,7 +276,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(userConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
             {
                 connection.Open();
                 SQLServerConnected = true;
@@ -211,7 +309,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(userConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
             {
                 connection.Open();
                 SQLServerConnected = true;
@@ -249,7 +347,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(userConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
             {
 
                 connection.Open();
@@ -318,7 +416,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(userConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
             {
 
                 connection.Open();
@@ -367,7 +465,7 @@ public class SQLConnection : MonoBehaviour
         {
 
 
-            using (SqlConnection connection = new SqlConnection(userConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;"))
             {
 
                 connection.Open();

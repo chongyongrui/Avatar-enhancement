@@ -31,10 +31,14 @@ public class PlayerLocationUpdate : MonoBehaviour
         int startingy = startingCoordinates[1];
         int startingz = startingCoordinates[2];
         transform.position = new Vector3(startingx, startingy, startingz);
+        UpdateLocation();
+        InvokeRepeating("UpdateLocation", 2.0f, 2.0f);
+
+
     }
 
     // Update is called once per frame
-    void Update()
+    public void UpdateLocation()
     {
      int xpos = (int)Math.Ceiling(transform.position.x);
      int ypos = (int)Math.Ceiling(transform.position.y);

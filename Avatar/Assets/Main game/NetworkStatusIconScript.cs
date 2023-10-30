@@ -13,11 +13,12 @@ public class NetworkStatusIconScript : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        TestConnection();
+        InvokeRepeating("TestConnection", 10.0f, 7.0f);
     }
-
+    
     // Update is called once per frame
-    public void Update()
+    public void TestConnection()
     {
         try
         {

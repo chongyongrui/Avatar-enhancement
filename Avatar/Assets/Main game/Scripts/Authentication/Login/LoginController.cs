@@ -12,23 +12,24 @@ using Unity.Netcode;
 using UnityEngine.Networking;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Net;
-using System.Data.SqlClient;
+using Npgsql;
+using Debug = UnityEngine.Debug;
 
 public class LoginController : MonoBehaviour
 {
     [SerializeField] private TMP_InputField IPAddressInputField;
     [SerializeField] private TMP_InputField passwordInputField;
-    [SerializeField] private TMP_InputField nameInputField; 
+    [SerializeField] private TMP_InputField nameInputField;
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
     public bool isHost;
     public GameObject parentPopupWindow;
+    public GameObject registrationStatus;
     private GameObject errorWindow;
     private GameObject successfulLoginWindow;
     private string ledgerUrl;
@@ -38,8 +39,8 @@ public class LoginController : MonoBehaviour
     public string verifiedUsername;
     public string verifiedPassword;
     public string IPAddress;
-    
-  
+
+
 
 
 
@@ -54,7 +55,7 @@ public class LoginController : MonoBehaviour
             string hostName = Dns.GetHostName();
             IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
             IPAddressInputField.text = AuthController.instance.IPAddress;
-            nameInputField.text = AuthController.instance.registeredUsername;  
+            nameInputField.text = AuthController.instance.registeredUsername;
         }
         catch (Exception ex)
         {
@@ -63,7 +64,8 @@ public class LoginController : MonoBehaviour
             IPAddressInputField.text = IPAddress;
         }
 
-        DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(transform.gameObject);
+        
         ledgerUrl = "http://" + IPAddress + ":9000";
 
     }
@@ -72,30 +74,34 @@ public class LoginController : MonoBehaviour
     /// Starts coroutine to check if player is registered on the blockchain
     /// </summary>
     /// <returns></returns>
-    public async void Login(){
+    public async void Login()
+    {
 
-        if (DockerStatusIcon.instance.SQLServerConnection == false)
-        {
-            popupWindow.SetActive(true);
-            windowMessage.text = "Not connected to SQL Server!";
-        }
-        else
+        
+            
+        try 
         {
             //Get name and password from input fields
             string nameInput = nameInputField.text;
             string passwordInput = passwordInputField.text;
             IPAddress = IPAddressInputField.text;
-            
+            ledgerUrl = "http://" + IPAddress + ":9000";
 
-    //Add check that name is not already on the blockchain
-            StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, true));
+            //Add check that name is not already on the blockchain
+            StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 0));
+        }catch (Exception e)
+        {
+            popupWindow.SetActive(true);
+            registrationStatus.SetActive(true);
+            windowMessage.text = "Connection failed: " + e;
         }
-        
+
+
     }
 
     public void OnDestroy()
     {
-        UnityEngine.Debug.Log( "(ATTENTION) logincontroller destroyed!");
+        UnityEngine.Debug.Log("(ATTENTION) logincontroller destroyed!");
     }
 
     public async void AccessAdminPanel()
@@ -105,17 +111,29 @@ public class LoginController : MonoBehaviour
         string nameInput = nameInputField.text;
         string passwordInput = passwordInputField.text;
         IPAddress = IPAddressInputField.text;
-
+        ledgerUrl = "http://" + IPAddress + ":9000";
         //Add check that name is not already on the blockchain
-        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, false));
+        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 1));
+    }
+
+    public async void AccessMessagingPanel()
+    {
+
+        //Get name and password from input fields
+        string nameInput = nameInputField.text;
+        string passwordInput = passwordInputField.text;
+        IPAddress = IPAddressInputField.text;
+        ledgerUrl = "http://" + IPAddress + ":9000";
+        //Add check that name is not already on the blockchain
+        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 2));
     }
 
     public void CreateNewDB()
     {
-        string connstring = "Data Source=" + IPAddress + ";Initial Catalog=master;User ID=sa;Password=D5taCard;";
+        string connstring = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         try
         {
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
             {
 
                 connection.Open();
@@ -124,8 +142,7 @@ public class LoginController : MonoBehaviour
                 using (var command = connection.CreateCommand())
                 {
 
-                    command.CommandText = "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'AvatarProject')     " +
-                        "BEGIN  CREATE DATABASE AvatarProject  END";
+                    command.CommandText = "CREATE DATABASE IF NOT EXISTS AvatarProject";
 
                     command.ExecuteNonQuery();
                 }
@@ -144,11 +161,11 @@ public class LoginController : MonoBehaviour
 
     public void CreateTables()
     {
-        string connstring = "Data Source=" + IPAddress + ";Initial Catalog= AvatarProject;User ID=sa;Password=D5taCard;";
+        string connstring = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         try
         {
             //create the db connection
-            using (SqlConnection connection = new SqlConnection(connstring))
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
             {
 
                 connection.Open();
@@ -157,13 +174,15 @@ public class LoginController : MonoBehaviour
                 {
 
                     //sql statements to execute
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'userdata')BEGIN  CREATE TABLE userdata ( username_hash INT, password_hash INT )END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata (\r\n    username_hash INT,\r\n    password_hash INT\r\n);\r\n";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'weapons')BEGIN  CREATE TABLE weapons ( playerid INT, weaponid INT, quantity INT) END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  weapons ( playerid INT, weaponid INT, quantity INT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'playerlocation')BEGIN  CREATE TABLE playerlocation ( playerid INT, x INT, y INT, z INT) END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS playerlocation ( playerid INT, x INT, y INT, z INT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'IssuedCredentials')BEGIN  CREATE TABLE IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT) END;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedKeys ( receiver_hash varchar(20), key_type varchar(300), key_val varchar(300)) ;";
                     command.ExecuteNonQuery();
                 }
 
@@ -184,21 +203,21 @@ public class LoginController : MonoBehaviour
     /// <param name="password"></param>
     /// <param name="ledgerUrl"></param>
     /// <returns>Redirects user to main game page</returns>
-    private IEnumerator HandleLoginQueryResult(string username, string password, string ledgerUrl, bool loadMainScene)
+    private IEnumerator HandleLoginQueryResult(string username, string password, string ledgerUrl, int sceneNumber)
     {
         yield return StartCoroutine(CheckIfUserExists(username, ledgerUrl, (userExists) =>
         {
             if (userExists)
             {
-                
+
                 string seed = username;
                 string seedFormatted = seed.Replace(" ", "");
                 seed = seedFormatted.ToLower();
 
                 //Format name into wallet seed which is 32 characters
                 int numZero = 32 - seed.Length - 1;
-                
-                for (int i = 0; i < numZero; i++) 
+
+                for (int i = 0; i < numZero; i++)
                 {
                     seed = seed + "0";
                 }
@@ -218,10 +237,10 @@ public class LoginController : MonoBehaviour
 
                 // Debug.Log(url);
                 // Send the registration data to ACA-Py agent via HTTP request
-                StartCoroutine(SendLoginRequest(url, jsonData, password, username, loadMainScene));
+                StartCoroutine(SendLoginRequest(url, jsonData, password, username, sceneNumber));
             }
             else
-            {  
+            {
                 displayErrorText("Please register an account first!");
             }
         }));
@@ -234,31 +253,34 @@ public class LoginController : MonoBehaviour
     /// <param name="ledgerUrl"></param>
     /// <param name="callback"></param>
     /// <returns>True if player is registered on distributed ledger</returns>
-    public IEnumerator CheckIfUserExists(string username, string ledgerUrl, Action<bool> callback){
+    public IEnumerator CheckIfUserExists(string username, string ledgerUrl, Action<bool> callback)
+    {
         try
         {
             string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=1"; // Specify the transaction type as "1" for NYM transactions
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-            
+
             if (response.IsSuccessStatusCode)
             {
                 string responseBody = response.Content.ReadAsStringAsync().Result;
                 var transactions = JToken.Parse(responseBody)["results"];
-                
+
                 foreach (var transaction in transactions)
                 {
                     var responseData = transaction["txn"]["data"];
                     var alias = responseData["alias"];
-                    if(alias !=  null){
+                    if (alias != null)
+                    {
                         if (string.Compare(alias.ToString(), username) == 0)
                         {
                             callback(true);
                             yield break;
                         }
                     }
-                    else {
+                    else
+                    {
                         UnityEngine.Debug.Log("Alias is null");
-                        
+
                     }
                 }
             }
@@ -282,7 +304,7 @@ public class LoginController : MonoBehaviour
     /// <param name="password"></param>
     /// <param name="name"></param>
     /// <returns>Redirects players to main game page</returns>
-    IEnumerator SendLoginRequest(string url, string jsonData, string password, string name, bool loadMainScene)
+    IEnumerator SendLoginRequest(string url, string jsonData, string password, string name, int sceneNumber)
     {
         var request = new UnityWebRequest(url, "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
@@ -290,21 +312,22 @@ public class LoginController : MonoBehaviour
         request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
 
-        
+
 
         // yield return request.SendWebRequest();
         UnityWebRequestAsyncOperation httpRequest = request.SendWebRequest();
-        while(!httpRequest.isDone){
+        while (!httpRequest.isDone)
+        {
             yield return null;
         }
-        
+
         // yield return request.SendWebRequest();
         if (httpRequest.webRequest.result == UnityWebRequest.Result.Success)
         {
             UnityEngine.Debug.Log("Registration successful!");
             // Debug.Log(request.downloadHandler.text);
             var response = JsonUtility.FromJson<JsonData>(httpRequest.webRequest.downloadHandler.text);
-            
+
             //add arguments
             Dictionary<string, string> arguments = new Dictionary<string, string>();
             arguments.Add("DID", response.did);
@@ -316,9 +339,9 @@ public class LoginController : MonoBehaviour
             UnityEngine.Debug.Log("DID: " + arguments["DID"]);
             UnityEngine.Debug.Log("Verkey: " + arguments["VERKEY"]);
 
-            
 
-            bool isAuthenticated = AuthenticateWithSQLServer(name,password);
+
+            bool isAuthenticated = AuthenticateWithSQLServer(name, password);
 
             // Load Scene for choosing host/client
             if (isAuthenticated)
@@ -330,25 +353,28 @@ public class LoginController : MonoBehaviour
                 userdatapersist.Instance.verifiedPassword = verifiedPassword;
                 userdatapersist.Instance.verifiedUser = verifiedUsername;
                 userdatapersist.Instance.IPAdd = IPAddress;
+                StartAcaPyInstanceAsync(arguments);
 
 
-
-                if (loadMainScene)
+                if (sceneNumber == 0)
                 {
                     //configure the SQL server account as the user
-                    
+
                     Loader.Load(Loader.Scene.Main);
                 }
-                else
+                else if (sceneNumber == 1) 
                 {
                     SceneManager.LoadSceneAsync("Admin Panel");
                 }
-                //should only be run if they are the host
-                if (userdatapersist.Instance.isHost)
+                else if (sceneNumber == 2)
                 {
-                    StartAcaPyInstanceAsync(arguments);
+                    SceneManager.LoadSceneAsync("Messaging");
                 }
-               
+                //should only be run if they are the host
+                
+                    
+                
+
                 request.Dispose();
             }
             else
@@ -356,7 +382,7 @@ public class LoginController : MonoBehaviour
                 popupWindow.SetActive(true);
                 windowMessage.text = "Error logging in!";
             }
-            
+
 
         }
         else
@@ -368,21 +394,21 @@ public class LoginController : MonoBehaviour
 
 
 
-    public bool AuthenticateWithSQLServer( string username, string password)
+    public bool AuthenticateWithSQLServer(string username, string password)
     {
-        string adminConString = "Data Source=" + IPAddress + ";Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        SqlConnection con = new SqlConnection(adminConString);
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
         bool dataFound = false;
-        CreateNewDB();
+        //CreateNewDB();
         CreateTables();
 
         try
         {
-             using (SqlConnection connection = new SqlConnection(adminConString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
             {
 
                 connection.Open();
-             
+
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = "SELECT * FROM userdata WHERE username_hash = " + username.GetHashCode() + ";";
@@ -399,7 +425,7 @@ public class LoginController : MonoBehaviour
                             }
                             else if (reader["password_hash"].ToString() == password.GetHashCode().ToString())
                             {
-                               return true;
+                                return true;
                             }
                             else
                             {
@@ -411,8 +437,8 @@ public class LoginController : MonoBehaviour
                         reader.Close();
                     }
 
-                    
-                    
+
+
                 }
                 connection.Close();
 
@@ -448,7 +474,7 @@ public class LoginController : MonoBehaviour
             string currentScriptPath = Assembly.GetExecutingAssembly().Location; // Get the current script file path
             string currentScriptDirectory = Path.GetDirectoryName(currentScriptPath); // Get the directory path of the current script
             string composeFileFullPath = Path.Combine(currentScriptDirectory, composeFile); // Combine the current script directory with the relative compose file path
-            
+
             UnityEngine.Debug.Log("Overriding env file");
             //.env file path
             string envFullPath = Path.Combine(composeFileFullPath, ".env");
@@ -470,7 +496,7 @@ public class LoginController : MonoBehaviour
 
             bool processStarted = await Task.Run(() => process.WaitForExit(Timeout.Infinite));
             UnityEngine.Debug.Log("Process started: " + processStarted);
-
+            
         }
         catch (Exception ex)
         {
@@ -479,7 +505,7 @@ public class LoginController : MonoBehaviour
         finally
         {
             process.Close();
-           // process.Dispose();
+            // process.Dispose();
         }
     }
 
@@ -499,7 +525,7 @@ public class LoginController : MonoBehaviour
         }
     }
 
-    
+
     /// <summary>
     /// Function to load the contents of the .env file into a dictionary
     /// </summary>
@@ -548,7 +574,7 @@ public class LoginController : MonoBehaviour
         arguments.Add("ACAPY_ADMIN_PORT", "11001");
         arguments.Add("CONTROLLER_PORT", "3001");
         arguments.Add("ACAPY_ENDPOINT_URL", "http://localhost:8002/");
-        arguments.Add("LEDGER_URL", "http://host.docker.internal:9000");
+        arguments.Add("LEDGER_URL", "http://" + IPAddress + ":9000");
         arguments.Add("TAILS_SERVER_URL", "http://tails-server:6543");
         // string[] additionalArgs = { $"--WALLET_KEY={arguments["WALLET_KEY"]}", $"--LABEL={arguments["WALLET_NAME"]}", $"--WALLET_NAME={arguments["WALLET_NAME"]}", $"--AGENT_WALLET_SEED={arguments["SEED"]}", $"--ACAPY_ENDPOINT_PORT={arguments["ACAPY_ENDPOINT_PORT"]}", $"--ACAPY_ADMIN_PORT={arguments["ACAPY_ADMIN_PORT"]}", $"--CONTROLLER_PORT={arguments["CONTROLLER_PORT"]}" };
 
@@ -556,68 +582,32 @@ public class LoginController : MonoBehaviour
         await RunDockerComposeAsync(fullPath, arguments);
         UnityEngine.Debug.Log("Docker Compose completed.");
         // RunScriptInDirectory(directoryPath, scriptCommand, arguments);
+
+
+        //create wallet database on local sql wallet db
+        
     }
 
     /// <summary>
     /// Helper function for displaying error messages
     /// </summary>
     /// <param name="error"></param>
-    private void displayErrorText(string error){
-        errorWindow = parentPopupWindow.transform.GetChild(0).gameObject;                
+    private void displayErrorText(string error)
+    {
+        errorWindow = parentPopupWindow.transform.GetChild(0).gameObject;
         TMP_Text errorText = errorWindow.transform.GetChild(1).GetComponent<TMP_Text>();
         errorText.text = error;
         errorWindow.SetActive(true);
+        registrationStatus.SetActive(true);
     }
 
     /// <summary>
     /// Function that redirects users to registration pages
     /// </summary>
-    public void RedirectToRegistration(){
+    public void RedirectToRegistration()
+    {
         Loader.Load(Loader.Scene.Registration);
     }
 
-    public void CreateNewUserAccount(string username, string password)
-    {
-
-        string DBname = "AvatarProject";
-        string connstring = "Data Source=" + IPAddress + " ;Initial Catalog=AvatarProject;User ID=sa;Password=D5taCard;";
-        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
-        try
-        {
-            using (SqlConnection connection = new SqlConnection(connstring))
-            {
-
-                connection.Open();
-
-
-                using (var command = connection.CreateCommand())
-                {
-                    /*
-                     * IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ' username ' AND type = 'S') BEGIN
-                         CREATE LOGIN   username  WITH PASSWORD ='password' , CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF; 
-                        USE  AvatarProject; CREATE USER  username  FOR LOGIN  username ; 
-                        USE  AvatarProject ; GRANT SELECT, INSERT, UPDATE, DELETE TO  username  END;
-
-                     * 
-                     */
-
-                    command.CommandText = "IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = ' " + username + " ' AND type = 'S') " +
-                        "BEGIN CREATE LOGIN   " + username + " WITH PASSWORD = '" + password + "' ," +
-                        " CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF   USE AvatarProject; CREATE USER " + username + " FOR LOGIN " + username + " ;" +
-                        " USE AvatarProject; GRANT SELECT, INSERT, UPDATE, DELETE TO " + username + "  END; ";
-
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-
-
-            }
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.Log("(SQL server) Error creating new account:  " + e);
-        }
-
-    }
+   
 }

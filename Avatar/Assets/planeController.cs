@@ -7,7 +7,8 @@ public class planeController : MonoBehaviour
 {
 
     [SerializeField] public TMP_Text airSpeed;
- 
+    [SerializeField] Rigidbody planeBody;
+
 
     public float throttleIncrement = 0.1f;
     public float maxThrust = 200f;
@@ -55,13 +56,13 @@ public class planeController : MonoBehaviour
     
     private void Update()
     {
-
+        /*
         if (planeCameraController.instance.index != 4)
         {
             HandleInputs();
             airSpeed.text = throttle.ToString();
         }
-        
+        */
 
     }
 

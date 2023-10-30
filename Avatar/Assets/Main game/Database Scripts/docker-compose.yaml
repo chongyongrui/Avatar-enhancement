@@ -1,0 +1,14 @@
+version: "3.2"
+services:
+
+  postgresql-main-server-db:
+    image: postgres:latest
+    hostname: postgresql-main-server-db
+    environment:
+      POSTGRES_USER: sysadmin
+      POSTGRES_PASSWORD: D5taCard
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d/
+      - ./.postgres:/var/lib/postgresqlmainserver

@@ -27,6 +27,9 @@ TagManager:
   - NPC
   - PickableObject
   - BottomInventorySlot
+  - MiniGameTrigger
+  - chat
+  - RestrictedPickableObject
   layers:
   - Default
   - TransparentFX

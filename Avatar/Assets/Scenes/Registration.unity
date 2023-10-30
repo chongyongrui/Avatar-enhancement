@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5114,7 +5114,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Invitation Credential Code
+  m_text: Invitation Access Code
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7d2d9963859e2e53bb9c992143f10176, type: 2}
   m_sharedMaterial: {fileID: 1091089673121338030, guid: 7d2d9963859e2e53bb9c992143f10176, type: 2}
@@ -10998,6 +10998,7 @@ MonoBehaviour:
   IDInputField: {fileID: 933336323}
   dropDown: {fileID: 90804877}
   popupWindow: {fileID: 742400039}
+  registrationStatus: {fileID: 2095370776}
   windowMessage: {fileID: 1243475426}
   parentPopupWindow: {fileID: 1932329930}
   registeredUsername: 
