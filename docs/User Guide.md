@@ -396,4 +396,4 @@ Car asset part 1: [https://youtu.be/WTIERWH-LlQ](https://youtu.be/WTIERWH-LlQ)
 
 Car asset part 2: [https://youtu.be/9RLXgIaQFJQ](https://youtu.be/9RLXgIaQFJQ)
 
-Car asset part 3: [https://youtu.be/PzQY3E4vbm0](https://youtu.be/PzQY3E4vbm0)
+Dynamite asset: [https://youtu.be/PzQY3E4vbm0](https://youtu.be/PzQY3E4vbm0)
