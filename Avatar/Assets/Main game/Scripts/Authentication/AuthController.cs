@@ -389,6 +389,8 @@ public class AuthController : NetworkBehaviour
         }
     }
 
+
+
     public void UpdateUserInfoTable(string username, string password)
     {
         int usernameHash = username.GetHashCode();

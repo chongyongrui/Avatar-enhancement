@@ -63,8 +63,6 @@ public class AdminCredentialIssuer : MonoBehaviour
     {
         string ledgerUrl = "http://" + IPAddress + ":9000";
         Dictionary<string, string> requests = new Dictionary<string, string>();
-        /*try
-        {*/
         string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
         HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
@@ -408,69 +406,56 @@ public class AdminCredentialIssuer : MonoBehaviour
     }
 
 
-    public void test()
-    {
-        Debug.Log("Testing");
-        GetCredDef("9999", "2.1", "kopi");
-    }
 
-    public async void sendIssueReq(string transactionID, string type, string userID, string receiverName)
-    {
 
-        //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
+     public void sendIssueReq(string transactionID, string type, string userID, string receiverName)
+     {
+        popupWindow.SetActive(true);
+        windowMessage.text = "Processing...";
+
         string url = "http://" + IPAddress + ":11001/credential-definitions";
 
-        try
-        {
-            using (HttpClient httpClient = new HttpClient())
-            {
+         try
+         {
+             using (HttpClient httpClient = new HttpClient())
+             {
+                 string jsonPayload = $@"{{
+                 ""revocation_registry_size"": 1000,
+                 ""schema_id"": ""{transactionID}"",
+                 ""support_revocation"": false,
+                 ""tag"": ""default""
+             }}";
+
+                 httpClient.DefaultRequestHeaders.Accept.Clear();
+                 httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                 StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                 HttpResponseMessage response = httpClient.PostAsync(url, content).Result; // Blocking call
+
+                 if (response.IsSuccessStatusCode)
+                 {
+                     string responseBody = response.Content.ReadAsStringAsync().Result; // Blocking call
+                     Console.WriteLine(responseBody);
+                     popupWindow.SetActive(true);
+                     windowMessage.text = "Post Cred-def Success! \n";
+                     GetCredDef(userID, type, receiverName);
+                 }
+                 else
+                 {
+                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                 }
+             }
+         }
+         catch (Exception e)
+         {
+             popupWindow.SetActive(true);
+             windowMessage.text = "Error posting! Check if ACA-py has loaded! " + e;
+         }
+     }
 
 
-                // Prepare the JSON payload
-                string jsonPayload = $@"{{
-                ""revocation_registry_size"": 1000,
-                ""schema_id"": ""{transactionID}"",
-                ""support_revocation"": false,
-                ""tag"": ""default""
-                }}";
-
-
-
-                // Set headers
-                httpClient.DefaultRequestHeaders.Accept.Clear();
-                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-                // Create the request content
-                StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-                // Send the POST request
-                HttpResponseMessage response = await httpClient.PostAsync(url, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    string responseBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(responseBody);
-                    popupWindow.SetActive(true);
-                    windowMessage.text = "Post Cred-def Success! \n";
-                    GetCredDef(userID, type, receiverName);
-                }
-                else
-                {
-                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-                }
-                
-            }
-        }
-        catch (Exception e)
-        {
-            popupWindow.SetActive(true);
-            windowMessage.text = "Error posting! Check if ACA-py has loaded! " +e ;
-        }
-
-
-    }
-
-    public async void GetCredDef(string receiverID, string type, string receiverName)
+    public void GetCredDef(string receiverID, string type, string receiverName)
     {
         //Get ledger params
         //string attributes = GetAttributes(tranactionID);
@@ -504,6 +489,9 @@ public class AdminCredentialIssuer : MonoBehaviour
                         string val = responseData[attributes].ToString();
                         Debug.Log("Generating Key");
                         GenerateKey(val, receiverName, type);
+                        popupWindow.SetActive(true);
+                        windowMessage.text = "Success";
+                        break;
                     }
                 }
 
