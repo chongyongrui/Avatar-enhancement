@@ -16,7 +16,6 @@ using System.Net.Http;
 using System.Text;
 using I18N.Common;
 using System.Globalization;
-using UnityEditor.PackageManager;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;

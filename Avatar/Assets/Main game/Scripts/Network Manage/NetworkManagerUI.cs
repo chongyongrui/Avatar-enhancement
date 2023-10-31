@@ -71,7 +71,7 @@ public class NetworkManagerUI : NetworkBehaviour
         NetworkManager.Singleton.Shutdown();
         if (!IsServer) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
 
-        SceneManager.LoadScene("Main");
+        SceneManager.LoadScene("Login");
 
     }
     public void Client()

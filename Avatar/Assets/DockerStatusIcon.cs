@@ -23,7 +23,7 @@ public class DockerStatusIcon : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this.gameObject);
         TestSQLConnection();
-        InvokeRepeating("TestSQLConnection", 3.0f, 0.3f);
+        InvokeRepeating("TestSQLConnection", 0.3f, 3.0f);
     }
     // Update is called once per frame
     void Update()
