@@ -22,12 +22,12 @@ public class LauchDockerNetwork : MonoBehaviour
     public async void StartSQLDockerInstanceAsync()
     {
         //for unity player:
-        //string composeFilePath = "../../Assets/Main game/Database Scripts/";
-        
+        string composeFilePath = "../../Assets/Main game/Scripts/Database Scripts/";
+
 
         //FOR BUILD:
-        string assetsPath = Path.Combine(Application.dataPath, "..", "..");
-        string composeFilePath = assetsPath+"/Avatar/Assets/Main game/Database Scripts/";
+        //string assetsPath = Path.Combine(Application.dataPath, "..", "..");
+        //string composeFilePath = assetsPath+"/Avatar/Assets/Main game/Scripts/Database Scripts/";
         UnityEngine.Debug.Log(composeFilePath);
         UnityEngine.Debug.Log("Starting PostgreSQL Server Docker instance now");
         await RunDockerComposeAsync(composeFilePath);

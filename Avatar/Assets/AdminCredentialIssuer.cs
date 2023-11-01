@@ -1,3 +1,4 @@
+using Docker.DotNet;
 using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using Newtonsoft.Json.Linq;
 using Npgsql;
@@ -34,11 +35,12 @@ public class AdminCredentialIssuer : MonoBehaviour
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
     [SerializeField] private TMP_Dropdown dropDown;
-    [SerializeField] Camera  cam;
+    [SerializeField] Camera cam;
     private string IPAddress;
     private string issuer;
     bool validInput = false;
     public string ledgerUrl;
+    public static AdminCredentialIssuer instance;
     // Start is called before the first frame update
     void Start()
     {
@@ -46,7 +48,7 @@ public class AdminCredentialIssuer : MonoBehaviour
         ledgerUrl = "http://" + IPAddress + ":9000";
         issuer = userdatapersist.Instance.verifiedUser;
         issuerName.text = issuer;
-
+        instance = this;
         if (userdatapersist.Instance.verifiedUser != "admin")
         {
 
@@ -97,7 +99,7 @@ public class AdminCredentialIssuer : MonoBehaviour
                         string ans = senderAlias + " requests for dynamite access";
                         requests.Add(key, ans);
                     }
-                    
+
                 }
 
             }
@@ -124,7 +126,7 @@ public class AdminCredentialIssuer : MonoBehaviour
 
     }
 
-    
+
 
     public Dictionary<string, string> RemoveIssuedRequests(Dictionary<string, string> requests)
     {
@@ -134,7 +136,7 @@ public class AdminCredentialIssuer : MonoBehaviour
             {
 
                 connection.Open();
-                
+
                 using (var command = connection.CreateCommand())
                 {
 
@@ -162,7 +164,7 @@ public class AdminCredentialIssuer : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("(SQL server) Error updating requests"); 
+            Debug.Log("(SQL server) Error updating requests");
         }
 
 
@@ -277,55 +279,107 @@ public class AdminCredentialIssuer : MonoBehaviour
             windowMessage.text = "Expiry Date is in the wrong format!";
         }
 
-
-
-        if (validInput && type == "CAR")
+        if (MatchUserID(receiverName, userID))
         {
-            //get transaction ID using userID
-            string transactionID = GetTransactionID(userID, "2.1");
-            Debug.Log("Got transaction ID = " + transactionID);
-            string expiryString = expiryDate.ToString();
-            if (expiryString.Length < 8)
-            { // DD is single digit
-                expiryString = "0" + expiryString;
-            }
-            if (transactionID != null)
+            if (validInput && type == "CAR")
             {
-                Debug.Log("Sending Issue request...");
-                sendIssueReq(transactionID, "2.1", userID, receiverName);
-            }
+                //get transaction ID using userID
+                string transactionID = GetTransactionID(userID, "2.1");
+                Debug.Log("Got transaction ID = " + transactionID);
+                string expiryString = expiryDate.ToString();
+                if (expiryString.Length < 8)
+                { // DD is single digit
+                    expiryString = "0" + expiryString;
+                }
+                if (transactionID != null)
+                {
+                    Debug.Log("Sending Issue request...");
+                    sendIssueReq(transactionID, "2.1", userID, receiverName);
+                }
 
-        }
-        else if (type == "DYNAMITE")
-        {
-            string transactionID = GetTransactionID(userID, "2.2");
-            string expiryString = expiryDate.ToString();
-            if (expiryString.Length < 8)
-            { // DD is single digit
-                expiryString = "0" + expiryString;
             }
-            if (transactionID != null)
+            else if (type == "DYNAMITE")
             {
-                sendIssueReq(transactionID, "2.2", userID, receiverName);
+                string transactionID = GetTransactionID(userID, "2.2");
+                string expiryString = expiryDate.ToString();
+                if (expiryString.Length < 8)
+                { // DD is single digit
+                    expiryString = "0" + expiryString;
+                }
+                if (transactionID != null)
+                {
+                    sendIssueReq(transactionID, "2.2", userID, receiverName);
+                }
+            }
+            else
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Invalid type!";
             }
         }
         else
         {
             popupWindow.SetActive(true);
-            windowMessage.text = "Invalid type!";
+            windowMessage.text = "Invalid user ID / Receiver name!";
         }
 
 
     }
 
+    public bool MatchUserID(string username, string userID)
+    {
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
+        Debug.Log("Authenticating token with SQL server...");
+
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM userdata WHERE userid_hash = " + userID.GetHashCode() + ";";
+
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (reader["username_hash"].ToString() == username.GetHashCode().ToString())
+                            {
+                                return true;
+                            }
+
+                        }
+                    }
+
+                    connection.Close();
+
+                }
+
+                return false;
+
+            }
+        }
+
+        catch (Exception e)
+        {
+        }
+
+        return false;
+    }
+
+
     public string GetTransactionID(string userID, string target)
     {
         string attribute = (userID + target).GetHashCode().ToString();
-        Debug.Log("looking for filter = " +  attribute);    
+        Debug.Log("looking for filter = " + attribute);
         string value = null;
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query="+attribute+"&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=" + attribute + "&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -408,51 +462,51 @@ public class AdminCredentialIssuer : MonoBehaviour
 
 
 
-     public void sendIssueReq(string transactionID, string type, string userID, string receiverName)
-     {
+    public void sendIssueReq(string transactionID, string type, string userID, string receiverName)
+    {
         popupWindow.SetActive(true);
         windowMessage.text = "Processing...";
 
         string url = "http://" + IPAddress + ":11001/credential-definitions";
 
-         try
-         {
-             using (HttpClient httpClient = new HttpClient())
-             {
-                 string jsonPayload = $@"{{
+        try
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                string jsonPayload = $@"{{
                  ""revocation_registry_size"": 1000,
                  ""schema_id"": ""{transactionID}"",
                  ""support_revocation"": false,
                  ""tag"": ""default""
              }}";
 
-                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                 httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-                 StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                 HttpResponseMessage response = httpClient.PostAsync(url, content).Result; // Blocking call
+                HttpResponseMessage response = httpClient.PostAsync(url, content).Result; // Blocking call
 
-                 if (response.IsSuccessStatusCode)
-                 {
-                     string responseBody = response.Content.ReadAsStringAsync().Result; // Blocking call
-                     Console.WriteLine(responseBody);
-                     popupWindow.SetActive(true);
-                     windowMessage.text = "Post Cred-def Success! \n";
-                     GetCredDef(userID, type, receiverName);
-                 }
-                 else
-                 {
-                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-                 }
-             }
-         }
-         catch (Exception e)
-         {
-             popupWindow.SetActive(true);
-             windowMessage.text = "Error posting! Check if ACA-py has loaded! " + e;
-         }
-     }
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = response.Content.ReadAsStringAsync().Result; // Blocking call
+                    Console.WriteLine(responseBody);
+                    popupWindow.SetActive(true);
+                    windowMessage.text = "Post Cred-def Success! \n";
+                    GetCredDef(userID, type, receiverName);
+                }
+                else
+                {
+                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            popupWindow.SetActive(true);
+            windowMessage.text = "Error posting! Check if ACA-py has loaded! " + e;
+        }
+    }
 
 
     public void GetCredDef(string receiverID, string type, string receiverName)
@@ -512,18 +566,18 @@ public class AdminCredentialIssuer : MonoBehaviour
     }
 
 
-    public void GenerateKey(string keyParams,string receiver, string type)
+    public void GenerateKey(string keyParams, string receiver, string type)
     {
         //generate key using AES with ledger params and AES key
         string AESKey = GetAESKey(receiver);
-        
+
         byte[] keyBytes = System.Text.Encoding.UTF8.GetBytes(AESKey);
         if (keyBytes.Length != 32)
         {
             // Pad or truncate the key to 32 bytes
             Array.Resize(ref keyBytes, 32);
         }
-       
+
         string AESIV = keyParams.Substring(0, 32);
         string encyrptedString = keyParams.Substring(32, 32);
         string invalidPattern = "[^0-9A-Fa-f]";
@@ -546,7 +600,7 @@ public class AdminCredentialIssuer : MonoBehaviour
         {
             using (Aes newAes = Aes.Create())
             {
-                
+
                 newAes.Key = keyBytes;
                 newAes.IV = receivedAESIV;
                 byte[] encrypted = EncryptStringToBytes_Aes(newEncryptedString, newAes.Key, newAes.IV);
@@ -555,15 +609,15 @@ public class AdminCredentialIssuer : MonoBehaviour
                 popupWindow.SetActive(true);
                 windowMessage.text = "Key Issue Success! \n";
             }
-            
+
         }
         catch (Exception e)
         {
             Debug.Log("Failed at message encryption process" + e.Message);
         }
-        
 
-        
+
+
     }
 
 

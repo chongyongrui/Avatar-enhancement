@@ -86,7 +86,11 @@ public class AuthController : NetworkBehaviour
             if (credentialInputField.text == "genesis" || VerifyCredentialwithID(credential, ID, name, ledgerUrl))
             {
                 Debug.Log("credential is valid!");
-                StartCoroutine(HandleQueryResult(name, password, role, ledgerUrl));
+                if (SQLAddNewUserDetail(name, password, ID))
+                {
+                    StartCoroutine(HandleQueryResult(name, password, role, ledgerUrl, ID));
+                }
+                
             }
             else
             {
@@ -250,7 +254,7 @@ public class AuthController : NetworkBehaviour
     /// <param name="role"></param>
     /// <param name="ledgerUrl"></param>
     /// <returns></returns>
-    private IEnumerator HandleQueryResult(string username, string password, string role, string ledgerUrl)
+    private IEnumerator HandleQueryResult(string username, string password, string role, string ledgerUrl, string userID)
     {
         yield return StartCoroutine(CheckIfDuplicateUserExists(username, ledgerUrl, (aliasExists) =>
         {
@@ -288,7 +292,8 @@ public class AuthController : NetworkBehaviour
 
                 // Debug.Log(url);
                 // Send the registration data to ACA-Py agent via HTTP request
-                StartCoroutine(SendRegistrationRequest(url, jsonData, password, username));
+
+                StartCoroutine(SendRegistrationRequest(url, jsonData, password, username, userID));
             }
         }));
     }
@@ -301,7 +306,7 @@ public class AuthController : NetworkBehaviour
     /// <param name="password"></param>
     /// <param name="name"></param>
     /// <returns>Redirects players to main game page</returns>
-    private IEnumerator SendRegistrationRequest(string url, string jsonData, string password, string name)
+    private IEnumerator SendRegistrationRequest(string url, string jsonData, string password, string name, string userID)
     {
         var request = new UnityWebRequest(url, "POST");
         byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(jsonData);
@@ -334,7 +339,7 @@ public class AuthController : NetworkBehaviour
             //create new SQL server login for the new user
             registeredUsername = name;
             registeredPassword = password;
-            SQLAddNewUserDetail(name, password);
+            
 
             isNewUser = true;
 
@@ -365,7 +370,7 @@ public class AuthController : NetworkBehaviour
 
 
     // add the new users details into the userdetails db in master using SQL SA account
-    private void SQLAddNewUserDetail(string username, string password)
+    public bool SQLAddNewUserDetail(string username, string password, string userID)
     {
         string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         NpgsqlConnection con = new NpgsqlConnection(adminConString);
@@ -379,22 +384,25 @@ public class AuthController : NetworkBehaviour
 
 
             
-            UpdateUserInfoTable(username, password);
+            UpdateUserInfoTable(username, password, userID);
             con.Close();
+            return true;
 
         }
         catch (Exception ex)
         {
             Debug.Log("Error adding new user info to SQL server");
         }
+        return false;
     }
 
 
 
-    public void UpdateUserInfoTable(string username, string password)
+    public void UpdateUserInfoTable(string username, string password, string userID)
     {
         int usernameHash = username.GetHashCode();
         int passwordHash = password.GetHashCode();
+        int userIDHash = userID.GetHashCode();
         string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
         try
         {
@@ -403,11 +411,8 @@ public class AuthController : NetworkBehaviour
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-
-
-                    command.CommandText = "INSERT INTO userdata (username_hash,password_hash) VALUES (" + usernameHash + "," + passwordHash + ");";
+                    command.CommandText = "INSERT INTO userdata (username_hash,password_hash,userid_hash) VALUES (" + usernameHash + "," + passwordHash + "," + userIDHash + ");";
                     command.ExecuteNonQuery();
-                    Debug.Log("(SQL server) user added with id: " + usernameHash + " with password = " + passwordHash);
                 }
 
                 connection.Close();

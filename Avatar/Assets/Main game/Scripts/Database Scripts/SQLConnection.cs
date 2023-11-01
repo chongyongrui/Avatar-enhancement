@@ -76,7 +76,7 @@ public class SQLConnection : MonoBehaviour
                 con.Close();
 
 
-                LoginController.instance.CreateWalletNewUserAccount(userdatapersist.Instance.verifiedUser, userdatapersist.Instance.verifiedPassword);
+                CreateWalletNewUserAccount(userdatapersist.Instance.verifiedUser, userdatapersist.Instance.verifiedPassword);
                 NpgsqlConnection con2 = new NpgsqlConnection("Server=" + IPAddress + ";Port=5432;User Id=" + userdatapersist.Instance.verifiedUser +"; Password=" + userdatapersist.Instance.verifiedPassword +" ; Database=" + userdatapersist.Instance.verifiedUser + "wallet; ");
                 //LoginController.instance.CreateNewDB();
                 con.Open();
@@ -109,9 +109,91 @@ public class SQLConnection : MonoBehaviour
         Debug.Log("user con string is : " + userConString);
     }
 
-    
 
-    
+    public void CreateWalletNewUserAccount(string username, string password)
+    {
+
+        Debug.Log("Creating wallet account now... ");
+        string connstring = "Server=localhost;Port=5432;User Id=postgres;Password=password;Database=postgres;";
+        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
+        try
+        {
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+
+
+                    command.CommandText = "CREATE DATABASE " + username + "wallet;";
+
+                    command.ExecuteNonQuery();
+                }
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "DO $do$ BEGIN IF EXISTS( SELECT FROM pg_catalog.pg_roles WHERE  rolname = '" + username + "') " +
+                        "THEN RAISE NOTICE 'Role \"" + username + "\" already exists. Skipping.'; ELSE CREATE ROLE " + username + " LOGIN PASSWORD '" + password + "';" +
+                        " GRANT ALL PRIVILEGES ON DATABASE " + username + "wallet TO " + username + "; END IF; END $do$; ";
+
+                    command.ExecuteNonQuery();
+                }
+
+                connection.Close();
+
+
+            }
+
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL server) Error creating new wallet account:  " + e);
+        }
+        CreateWalletTables();
+    }
+
+    public void CreateWalletTables()
+    {
+        string connstring = "Server = localhost; Port = 5432; User Id = postgres; Password = password; Database = " + userdatapersist.Instance.verifiedUser + "wallet; ";
+        try
+        {
+            //create the db connection
+            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
+            {
+
+                connection.Open();
+                //set up objeect called command to allow db control
+                using (var command = connection.CreateCommand())
+                {
+
+                    //sql statements to execute
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS AES_Keys (receiver_hash varchar(20), key_val varchar(300));";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS DH_Private_Keys (receiver_hash varchar(20), key_val varchar(300));";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS other_keys ( key_type varchar(20),  key_val varchar(300));";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "GRANT ALL ON AES_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "GRANT ALL ON Other_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
+                    command.ExecuteNonQuery();
+                    command.CommandText = "GRANT ALL ON DH_Private_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
+                    command.ExecuteNonQuery();
+
+                }
+
+                connection.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error creating new wallet database" + e);
+        }
+
+    }
+
 
 
 

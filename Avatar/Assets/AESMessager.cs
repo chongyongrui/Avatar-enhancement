@@ -42,6 +42,7 @@ public class AESMessager : MonoBehaviour
     private static readonly HttpClient client = new HttpClient();
     public string message;
     public string hashedReceiverUserName;
+    public static List<string> messages = new List<string>();
     private void Start()
     {
         IPAddress = userdatapersist.Instance.IPAdd;
@@ -61,15 +62,124 @@ public class AESMessager : MonoBehaviour
         
     }
 
-    public void GetAllMessages()
-        
+    public void GetAllMessages()       
     {
-        List<string> messages = new List<string>();
+        if (ReceiverNameInputField.text.ToString() == "")
+        {
+            try
+            {
+                string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+                HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    var transactions = JToken.Parse(responseBody)["results"];
+                    messages.Clear();
+                    foreach (var transaction in transactions)
+                    {
+
+                        var responseData = transaction["txn"]["data"]["data"];
+                        var type = responseData["version"];
+                        var credName = responseData["name"];
+                        var attributes = responseData["attr_names"];
+
+                        if (type.ToString() == "5.0") // found a message
+                        {
+                            string target = credName.ToString();
+                            string receiver = target.Split(".")[0];
+                            string sender = target.Split(".")[1];
+                            string payload = attributes.ToString();
+                            string encryptedMessage = payload.Split(".")[0];
+                            string AESIV = payload.Split(".")[1];
+
+                            if (sender == userdatapersist.Instance.verifiedUser)
+                            {
+                                string data = "1." + receiver + "." + encryptedMessage + "." + AESIV;
+                                messages.Add(data);
+                            }
+                            else if (receiver == userdatapersist.Instance.verifiedUser)
+                            {
+                                string data = "0." + sender + "." + encryptedMessage + "." + AESIV;
+                                messages.Add(data);
+                            }
+                        }
+                    }
+
+                    //parse messages to show to UI
+
+                    string receivedMessages = "";
+                    string sentMessages = "";
+                    int i = 1;
+                    int j = 1;
+
+                    if (messages.Count > 0)
+                    {
+                        foreach (string message in messages)
+                        {
+
+                            string data = message;
+                            data = data.Replace("[", "").Replace("]", "");
+                            data = data.Replace("\"", "");
+                            data = data.Replace(" ", "");
+                            int type = Int32.Parse(data.Split(".")[0]);
+                            string name = data.Split(".")[1];
+                            string encryptedMessage = data.Split(".")[2];
+                            string AESIV = data.Split(".")[3];
+                            string AESKey = GetAESKey(name);
+                            Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + AESIV + " is aesiv " + AESKey);
+                            string result = DecryptMessage(encryptedMessage, AESIV, AESKey);
+
+                            if (type == 0 && result != null) // received
+                            {
+                                receivedMessages += ("\n" + i + ". From " + name + ": " + result + "\n");
+                                i++;
+                            }
+                            else if (type == 1 && result != null) // sent
+                            {
+                                sentMessages += ("\n" + j + ". To " + name + ": " + result + "\n");
+                                j++;
+
+                            }
+                        }
+
+
+                    }
+                    if (i == 1)
+                    {
+                        receivedMessages += "none found" + "\n";
+                    }
+                    if (j == 1)
+                    {
+                        sentMessages += "none found" + "\n";
+                    }
+
+                    SentMessages.text = sentMessages;
+                    ReceivedMessages.text = receivedMessages;
+                }
+                else
+                {
+                    Debug.Log("Error retrieving transactions!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log(ex.Message);
+                popupWindow.SetActive(true);
+                windowMessage.text = "Error parsing transactions!";
+            }
+        }
+    }
+
+
+    public void FilterMessages()
+    {
+        string targetUsername = ReceiverNameInputField.text.ToString();
         try
         {
             string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-            
+
             if (response.IsSuccessStatusCode)
             {
                 string responseBody = response.Content.ReadAsStringAsync().Result;
@@ -92,19 +202,19 @@ public class AESMessager : MonoBehaviour
                         string encryptedMessage = payload.Split(".")[0];
                         string AESIV = payload.Split(".")[1];
 
-                        if (sender == userdatapersist.Instance.verifiedUser)
+                        if (sender == userdatapersist.Instance.verifiedUser && receiver.Contains(targetUsername))
                         {
                             string data = "1." + receiver + "." + encryptedMessage + "." + AESIV;
                             messages.Add(data);
                         }
-                        else if (receiver == userdatapersist.Instance.verifiedUser)
+                        else if (receiver == userdatapersist.Instance.verifiedUser && sender.Contains(targetUsername))
                         {
                             string data = "0." + sender + "." + encryptedMessage + "." + AESIV;
                             messages.Add(data);
                         }
                     }
                 }
-                
+
                 //parse messages to show to UI
 
                 string receivedMessages = "";
@@ -142,7 +252,7 @@ public class AESMessager : MonoBehaviour
                         }
                     }
 
-                    
+
                 }
                 if (i == 1)
                 {

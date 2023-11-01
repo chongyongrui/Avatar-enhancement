@@ -22,6 +22,10 @@ using Debug = UnityEngine.Debug;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using System.Linq;
+using System.Data;
+using Unity.Mathematics;
+using Unity.Services.Relay.Models;
+using Unity.VisualScripting;
 
 public class LoginController : MonoBehaviour
 {
@@ -43,13 +47,9 @@ public class LoginController : MonoBehaviour
     public string verifiedPassword;
     public string IPAddress;
 
-
-
-
-
+   
     public void Awake()
     {
-
 
         instance = this;
         isHost = false;
@@ -79,9 +79,7 @@ public class LoginController : MonoBehaviour
     /// <returns></returns>
     public async void Login()
     {
-
-        
-            
+  
         try 
         {
             //Get name and password from input fields
@@ -177,7 +175,7 @@ public class LoginController : MonoBehaviour
                 {
 
                     //sql statements to execute
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata (\r\n    username_hash INT,\r\n    password_hash INT\r\n);\r\n";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata ( username_hash INT, password_hash INT, userid_hash INT);";
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS  weapons ( playerid INT, weaponid INT, quantity INT) ;";
                     command.ExecuteNonQuery();
@@ -570,20 +568,14 @@ public class LoginController : MonoBehaviour
     public async void StartAcaPyInstanceAsync(Dictionary<string, string> arguments)
     {
         //FOR BUILD:
-        string assetsPath = Path.Combine(Application.dataPath, "..", "..");
-        string composeFilePath = assetsPath + "/Avatar/Assets/Main Scene Folder/Scripts/Wallet/";
-        string assetFolderFilePath = Application.dataPath;
-        Debug.Log("composeFilePath = " + composeFilePath);
-
+        //string assetsPath = Path.Combine(Application.dataPath, "..", "..");
+        //string composeFilePath = assetsPath + "/Avatar/Assets/Main Scene Folder/Scripts/Wallet/";
+        //string assetFolderFilePath = Application.dataPath;
+        //Debug.Log("composeFilePath = " + composeFilePath);
 
         //for Unity player:
-        //string composeFilePath = "../../Assets/Main Scene Folder/Scripts/Wallet/";
+        string composeFilePath = "../../Assets/Main Scene Folder/Scripts/Wallet/";
 
-
-
-
-        //string composeFilePath = "../Avatar/Assets/Main Scene Folder/Scripts/Wallet/";
-        
         arguments.Add("ACAPY_ENDPOINT_PORT", "8001");
         arguments.Add("ACAPY_ADMIN_PORT", "11001");
         arguments.Add("CONTROLLER_PORT", "3001");
@@ -606,87 +598,7 @@ public class LoginController : MonoBehaviour
     
 
 
-    public void CreateWalletNewUserAccount(string username, string password)
-    {
-
-        Debug.Log("Creating wallet account now... ");
-        string connstring = "Server=localhost;Port=5432;User Id=postgres;Password=password;Database=postgres;";
-        //string connstring = "Data Source=192.168.56.1;Initial Catalog=AvatarProject;User ID=user;Password=user;";
-        try
-        {
-            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
-            {
-
-                connection.Open();
-
-                using (var command = connection.CreateCommand())
-                {
-
-
-                    command.CommandText = "CREATE DATABASE " + username + "wallet;";
-
-                    command.ExecuteNonQuery();
-                }
-                using (var command = connection.CreateCommand())
-                {
-
-                    command.CommandText = "CREATE USER " + username + " WITH PASSWORD '" + password + "'; GRANT ALL PRIVILEGES ON DATABASE " + username + "wallet TO " + username + "; ";
-
-                    command.ExecuteNonQuery();
-                }
-
-                connection.Close();
-
-
-            }
-            CreateWalletTables();
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.Log("(SQL server) Error creating new wallet account:  " + e);
-        }
-
-    }
-
-    public void CreateWalletTables()
-    {
-        string connstring = "Server = localhost; Port = 5432; User Id = postgres; Password = password; Database = " + userdatapersist.Instance.verifiedUser + "wallet; ";
-        try
-        {
-            //create the db connection
-            using (NpgsqlConnection connection = new NpgsqlConnection(connstring))
-            {
-
-                connection.Open();
-                //set up objeect called command to allow db control
-                using (var command = connection.CreateCommand())
-                {
-
-                    //sql statements to execute
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS AES_Keys (receiver_hash varchar(20), key_val varchar(300));";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS DH_Private_Keys (receiver_hash varchar(20), key_val varchar(300));";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS other_keys ( key_type varchar(20),  key_val varchar(300));";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "GRANT ALL ON AES_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "GRANT ALL ON Other_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "GRANT ALL ON DH_Private_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
-                    command.ExecuteNonQuery();
-
-                }
-
-                connection.Close();
-            }
-        }
-        catch (Exception e)
-        {
-            UnityEngine.Debug.Log("(SQL Server) Error creating new wallet database" + e);
-        }
-
-    }
+    
     /// <summary>
     /// Helper function for displaying error messages
     /// </summary>

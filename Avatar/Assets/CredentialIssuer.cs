@@ -11,7 +11,6 @@ using UnityEngine.Windows;
 using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-
 using System.Net.Http;
 using System.Text;
 using I18N.Common;
@@ -39,6 +38,7 @@ public class CredentialIssuer : MonoBehaviour
     private string issuer;
     bool validInput = false;
     public string ledgerUrl;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -49,7 +49,6 @@ public class CredentialIssuer : MonoBehaviour
         if (userdatapersist.Instance.verifiedUser != "admin")
         {
             keyPanel.SetActive(true);
-
         }
     }
 
@@ -312,7 +311,7 @@ public class CredentialIssuer : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Expiry Date is in the wrong format!";
         }
-        if (CheckAdminConnection() == true)
+        if (CheckAdminConnection() == true && AdminCredentialIssuer.instance.MatchUserID(userdatapersist.Instance.verifiedUser, userID))
         {
             if (validInput && type != "ACCOUNT")
             {
@@ -338,7 +337,7 @@ public class CredentialIssuer : MonoBehaviour
         else
         {
             popupWindow.SetActive(true);
-            windowMessage.text = "Create connection with admin before requesting!";
+            windowMessage.text = "Check for invalid inputs!";
         }
 
 
