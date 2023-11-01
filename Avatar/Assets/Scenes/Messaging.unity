@@ -3685,6 +3685,7 @@ MonoBehaviour:
   MessagesPanel: {fileID: 1143589856}
   message: 
   hashedReceiverUserName: 
+  isFiltered: 0
 --- !u!114 &700578734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7570,7 +7571,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 700578733}
         m_TargetAssemblyTypeName: AESMessager, Assembly-CSharp
-        m_MethodName: GetAllMessages
+        m_MethodName: ShowAllMessages
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

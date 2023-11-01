@@ -43,6 +43,7 @@ public class AESMessager : MonoBehaviour
     public string message;
     public string hashedReceiverUserName;
     public static List<string> messages = new List<string>();
+    public bool isFiltered = false;
     private void Start()
     {
         IPAddress = userdatapersist.Instance.IPAdd;
@@ -62,10 +63,15 @@ public class AESMessager : MonoBehaviour
         
     }
 
+    public void ShowAllMessages()
+    {
+        isFiltered = false;
+        GetAllMessages();
+    }
+
     public void GetAllMessages()       
     {
-        if (ReceiverNameInputField.text.ToString() == "")
-        {
+        
             try
             {
                 string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
@@ -154,8 +160,12 @@ public class AESMessager : MonoBehaviour
                         sentMessages += "none found" + "\n";
                     }
 
+                    if (isFiltered == false)
+                    {
                     SentMessages.text = sentMessages;
                     ReceivedMessages.text = receivedMessages;
+                    }
+                    
                 }
                 else
                 {
@@ -168,12 +178,13 @@ public class AESMessager : MonoBehaviour
                 popupWindow.SetActive(true);
                 windowMessage.text = "Error parsing transactions!";
             }
-        }
+        
     }
 
 
     public void FilterMessages()
     {
+        isFiltered = true;
         string targetUsername = ReceiverNameInputField.text.ToString();
         try
         {
