@@ -183,7 +183,7 @@ public class LoginController : MonoBehaviour
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedKeys ( receiver_hash varchar(20), key_type varchar(300), key_val varchar(300)) ;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedKeys ( receiver_hash varchar(20), key_type varchar(500), key_val varchar(500)) ;";
                     command.ExecuteNonQuery();
                 }
 

@@ -78,7 +78,7 @@ public class DHMessager : MonoBehaviour
         issuerName.text = username;
         UpdateInvtersInvitees();
         InvokeRepeating("UpdateInvtersInvitees", 10.0f, 5.0f);
-
+        
         
     }
 
@@ -94,7 +94,7 @@ public class DHMessager : MonoBehaviour
 
 
             var generator = new DHParametersGenerator();
-            generator.Init(512, 10, new SecureRandom());
+            generator.Init(1024, 10, new SecureRandom());
             DHParameters param = generator.GenerateParameters();
             PostDHParametersAsString(param, hashedReceiverUserName + "-" + username + ".params");
             // Generate key pair for Party A
@@ -497,25 +497,20 @@ public class DHMessager : MonoBehaviour
             string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
 
 
+            int halfLength = input.Length / 2;
+            string key1 = input.Substring(0, halfLength);
+            string key2 = input.Substring(halfLength);
 
-            List<string> result = new List<string>();
-
-            for (int i = 0; i < input.Length; i += 250)
-            {
-                int length = Math.Min(250, input.Length - i);
-                result.Add(input.Substring(i, length));
-            }
-
-            if (result.Count == 1)
-            {
-                Debug.Log("Count is 1, " + result[0]);
+            
+               
                 using (HttpClient httpClient = new HttpClient())
                 {
 
                     // Prepare the JSON payload
                     string jsonPayload = $@"{{
                 ""attributes"": [
-                    ""1.{result[0]}""      
+                    ""1.{key1}"",
+                    ""2.{key2}""   
                     
                    
                 ],
@@ -543,7 +538,7 @@ public class DHMessager : MonoBehaviour
                         Console.WriteLine($"Request failed with status code: {response.StatusCode}");
                     }
                 }
-            }
+            
 
         } catch(Exception ex)
         {
@@ -796,20 +791,22 @@ public class DHMessager : MonoBehaviour
 
                     if (type.ToString() == "3.2" && credName.ToString() == username)
                     {
-                        Debug.Log("The found static attributes 1 are " + attributes[0].ToString());
-                        string[] stringsToSort = { attributes[0].ToString() };
-
-                        // Sort the strings by their first character
-                        var sortedStrings = stringsToSort.OrderBy(str => str[0]);
-                        string foundKey = "";
-                        foreach (var str in sortedStrings)
+                        string input1 = attributes[0].ToString();
+                        string input2 = attributes[1].ToString();
+                        string k1 = null;
+                        string k2 = null;
+                        if (input1.Substring(0,2) == "1.")
                         {
-                            string cutString = str.Substring(2);
-                            foundKey += cutString;
+                            k1 = input1.Substring(2);
+                            k2 = input2.Substring(2);
                         }
-                        Debug.Log("Found static key = " + foundKey);
-
-                        return foundKey;
+                        else
+                        {
+                            k1 = input2.Substring(2);
+                            k2 = input1.Substring(2);
+                        }
+                        Debug.Log("Found key string is " + k1 + k2);
+                        return k1+k2;
                     }
                 }
 
@@ -834,29 +831,44 @@ public class DHMessager : MonoBehaviour
     public static DHParameters ExtractDHParameters(string input)
     {
         // Define regular expressions to match each parameter
-        string pPattern = @"P:(\d+)";
-        string gPattern = @"G:(\d+)";
-        string qPattern = @"Q:(\d+)";
+        string pPattern1 = @"P1:(\d+)";
+        string gPattern1 = @"G1:(\d+)";
+        string qPattern1 = @"Q1:(\d+)";
+        string pPattern2 = @"P2:(\d+)";
+        string gPattern2 = @"G2:(\d+)";
+        string qPattern2 = @"Q2:(\d+)";
         string mPattern = @"M:(\d+)";
         string lPattern = @"L:(\d+)";
         string jPattern = @"J:(\d+)";
 
         // Match each parameter using the regular expressions
-        Match pMatch = Regex.Match(input, pPattern);
-        Match gMatch = Regex.Match(input, gPattern);
-        Match qMatch = Regex.Match(input, qPattern);
+        Match pMatch1 = Regex.Match(input, pPattern1);
+        Match gMatch1 = Regex.Match(input, gPattern1);
+        Match qMatch1 = Regex.Match(input, qPattern1);
+        Match pMatch2 = Regex.Match(input, pPattern2);
+        Match gMatch2 = Regex.Match(input, gPattern2);
+        Match qMatch2 = Regex.Match(input, qPattern2);
         Match mMatch = Regex.Match(input, mPattern);
         Match lMatch = Regex.Match(input, lPattern);
         Match jMatch = Regex.Match(input, jPattern);
 
 
 
-        BigInteger p = pMatch.Success ? new BigInteger(pMatch.Groups[1].Value) : BigInteger.Zero;
-        BigInteger g = gMatch.Success ? new BigInteger(gMatch.Groups[1].Value) : BigInteger.Zero;
-        BigInteger q = qMatch.Success ? new BigInteger(qMatch.Groups[1].Value) : BigInteger.Zero;
+        string p1 = pMatch1.Success ? pMatch1.Groups[1].Value : null;
+        string g1 = gMatch1.Success ? gMatch1.Groups[1].Value : null;
+        string q1 = qMatch1.Success ? qMatch1.Groups[1].Value : null;
+        string p2 = pMatch2.Success ? pMatch2.Groups[1].Value : null;
+        string g2 = gMatch2.Success ? gMatch2.Groups[1].Value : null;
+        string q2 = qMatch2.Success ? qMatch2.Groups[1].Value : null;
         int m = mMatch.Success ? int.Parse(mMatch.Groups[1].Value) : 0;
         int l = lMatch.Success ? int.Parse(lMatch.Groups[1].Value) : 0;
         BigInteger j = jMatch.Success ? new BigInteger(jMatch.Groups[1].Value) : BigInteger.Zero;
+
+        BigInteger p = new BigInteger(p1 + p2);
+        BigInteger g = new BigInteger(g1 + g2);
+        BigInteger q = new BigInteger(q1 + q2);
+
+        
 
         Debug.Log("P: " + p.ToString() + "G: " + g.ToString() + " Q: " + q.ToString() + "J: " + j.ToString()
             + "M: " + m.ToString() + "L: " + l.ToString());
@@ -880,8 +892,9 @@ public class DHMessager : MonoBehaviour
         sb.AppendLine($"J (Subgroup Factor): {dhParams.J}");
         sb.AppendLine($"M: {dhParams.M}");
         sb.AppendLine($"L: {dhParams.L}");
-
         Debug.Log(sb.ToString());
+
+        string[] vals = ParseLargeValues(dhParams.P.ToString(), dhParams.G.ToString(), dhParams.Q.ToString());
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
         string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
@@ -893,9 +906,12 @@ public class DHMessager : MonoBehaviour
                 // Prepare the JSON payload
                 string jsonPayload = $@"{{
                 ""attributes"": [
-                    ""P:{dhParams.P}"", 
-                    ""G:{dhParams.G}"",
-                    ""Q:{dhParams.Q}"",
+                    ""P1:{vals[0]}"", 
+                    ""G1:{vals[2]}"",
+                    ""Q1:{vals[4]}"",
+                    ""P2:{vals[1]}"", 
+                    ""G2:{vals[3]}"",
+                    ""Q2:{vals[5]}"",
                     ""J:{dhParams.J}"",
                     ""M:{dhParams.M}"",
                     ""L:{dhParams.L}""
@@ -942,6 +958,22 @@ public class DHMessager : MonoBehaviour
     public void OpenAdminScene()
     {
         SceneManager.LoadSceneAsync("Admin Panel");
+    }
+
+    public string[] ParseLargeValues(string P, string G, string Q)
+    {
+        string[] values = new string[6];
+        int PhalfLength = P.Length / 2;
+        values[0] = P.Substring(0, PhalfLength);
+        values[1] = P.Substring(PhalfLength);
+        int GhalfLength = G.Length / 2;
+        values[2] = G.Substring(0, GhalfLength);
+        values[3] = G.Substring(GhalfLength);
+        int QhalfLength = Q.Length / 2;
+        values[4] = Q.Substring(0, QhalfLength);
+        values[5] = Q.Substring(QhalfLength);
+
+        return values; 
     }
 
 
