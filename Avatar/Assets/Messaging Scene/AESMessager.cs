@@ -292,7 +292,19 @@ public class AESMessager : MonoBehaviour
     }
 
 
-    public void EncryptAndSend()
+    public void SendData()
+    {
+        if (FileMangerOpener.instance.pictureMode)
+        {
+            ImageSender.Instance.EncryptAndSendImage();
+        }
+        else
+        {
+            EncryptAndSendMessage();
+        }
+    }
+
+    public void EncryptAndSendMessage()
     {
 
         message = MessageString.text;
@@ -302,7 +314,7 @@ public class AESMessager : MonoBehaviour
         DHMessager.instance.GetEstablishedConnections(connections);
         if (connections.ContainsKey(hashedReceiverUserName))
         {
-            
+
             string keyValue = GetAESKey(hashedReceiverUserName);
 
             byte[] keyBytes = System.Text.Encoding.UTF8.GetBytes(keyValue);
@@ -313,38 +325,7 @@ public class AESMessager : MonoBehaviour
                 Array.Resize(ref keyBytes, 32);
             }
             // Your message to be encrypted
-            try
-            {
-                using (Aes myAes = Aes.Create())
-                {
-                    myAes.Key = keyBytes;
-
-                    // Generate a random IV for encryption
-                    myAes.GenerateIV();
-
-                    // Encrypt the string to an array of bytes
-                    byte[] encrypted = EncryptStringToBytes_Aes(message, myAes.Key, myAes.IV);
-
-                    string encryptedString = BitConverter.ToString(encrypted).Replace("-", string.Empty);
-
-                    string AESIV = BitConverter.ToString(myAes.IV).Replace("-", string.Empty);
-
-
-                    Debug.Log("AESIV is " + AESIV);
-                    Debug.Log("encrypted message is " + encryptedString);
-                                        
-                    string attribute = encryptedString + "." + AESIV;
-                    string schemaName = hashedReceiverUserName + "." + userdatapersist.Instance.verifiedUser;
-                    //post message to ledger
-                    PostMessageToLedger(schemaName, attribute, 5);
-                }
-                popupWindow.SetActive(true);
-                windowMessage.text = "Message Sent!";
-            }
-            catch (Exception e)
-            {
-                Debug.Log("Failed at message encryption process" + e.Message);
-            }
+            EncryptAndPost(keyBytes, message, 5);
 
         }
         else
@@ -353,6 +334,42 @@ public class AESMessager : MonoBehaviour
             windowMessage.text = "Connection does not exist!";
         }
         GetAllMessages();
+    }
+
+    public void EncryptAndPost(byte[] keyBytes, string stringToEncrypt, int version)
+    {
+        try
+        {
+            using (Aes myAes = Aes.Create())
+            {
+                myAes.Key = keyBytes;
+
+                // Generate a random IV for encryption
+                myAes.GenerateIV();
+
+                // Encrypt the string to an array of bytes
+                byte[] encrypted = EncryptStringToBytes_Aes(stringToEncrypt, myAes.Key, myAes.IV);
+
+                string encryptedString = BitConverter.ToString(encrypted).Replace("-", string.Empty);
+
+                string AESIV = BitConverter.ToString(myAes.IV).Replace("-", string.Empty);
+
+
+                Debug.Log("AESIV is " + AESIV);
+                Debug.Log("encrypted message is " + encryptedString);
+
+                string attribute = encryptedString + "." + AESIV;
+                string schemaName = hashedReceiverUserName + "." + userdatapersist.Instance.verifiedUser;
+                //post message to ledger
+                PostMessageToLedger(schemaName, attribute, version);
+            }
+            popupWindow.SetActive(true);
+            windowMessage.text = "Message Sent!";
+        }
+        catch (Exception e)
+        {
+            Debug.Log("Failed at message encryption process" + e.Message);
+        }
     }
 
     public string GetAESKey(string connectionName)
@@ -520,7 +537,7 @@ public class AESMessager : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
+    public static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
     {
         // Check arguments.
         if (plainText == null || plainText.Length <= 0)
@@ -608,4 +625,6 @@ public class AESMessager : MonoBehaviour
         ConnectionsPanel.SetActive(true);
         MessagesPanel.SetActive(false);
     }
+
+
 }

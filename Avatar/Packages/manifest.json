@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.srejonkhan.another-file-browser": "https://github.com/SrejonKhan/AnotherFileBrowser.git",
     "com.unity.animation.rigging": "1.1.1",
     "com.unity.cinemachine": "2.8.9",
     "com.unity.collab-proxy": "2.0.0",
