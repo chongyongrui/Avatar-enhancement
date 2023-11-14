@@ -70,6 +70,7 @@ public class LoginController : MonoBehaviour
         DontDestroyOnLoad(transform.gameObject);
         
         ledgerUrl = "http://" + IPAddress + ":9000";
+        CreateTables();
 
     }
 

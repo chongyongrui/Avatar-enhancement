@@ -95,19 +95,26 @@ public class AESMessager : MonoBehaviour
                             string target = credName.ToString();
                             string receiver = target.Split(".")[0];
                             string sender = target.Split(".")[1];
-                            string payload = attributes.ToString();
-                            string encryptedMessage = payload.Split(".")[0];
-                            string AESIV = payload.Split(".")[1];
+                            List<string> data = new List<string>();
+                            data.Add(attributes[0].ToString());
+                            data.Add(attributes[1].ToString());
+                            data.Add(attributes[2].ToString());
+                            data.Add(attributes[3].ToString());
+                            data.Add(attributes[4].ToString());
+                            data.Sort();
+                        string encryptedMessage = data[0].Substring(2) +  data[1].Substring(2) +  data[2].Substring(2) +  data[3].Substring(2) +  data[4].Substring(2);
 
-                            if (sender == userdatapersist.Instance.verifiedUser)
+
+
+                        if (sender == userdatapersist.Instance.verifiedUser)
                             {
-                                string data = "1." + receiver + "." + encryptedMessage + "." + AESIV;
-                                messages.Add(data);
+                                string parsed = "1." + receiver + "." + encryptedMessage ;
+                                messages.Add(parsed);
                             }
                             else if (receiver == userdatapersist.Instance.verifiedUser)
                             {
-                                string data = "0." + sender + "." + encryptedMessage + "." + AESIV;
-                                messages.Add(data);
+                                string parsed = "0." + sender + "." + encryptedMessage ;
+                                messages.Add(parsed);
                             }
                         }
                     }
@@ -131,10 +138,10 @@ public class AESMessager : MonoBehaviour
                             int type = Int32.Parse(data.Split(".")[0]);
                             string name = data.Split(".")[1];
                             string encryptedMessage = data.Split(".")[2];
-                            string AESIV = data.Split(".")[3];
+                           
                             string AESKey = GetAESKey(name);
-                            Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + AESIV + " is aesiv " + AESKey);
-                            string result = DecryptMessage(encryptedMessage, AESIV, AESKey);
+                            //Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + AESIV + " is aesiv " + AESKey);
+                            string result = DecryptMessage(encryptedMessage,AESKey);
 
                             if (type == 0 && result != null) // received
                             {
@@ -211,16 +218,16 @@ public class AESMessager : MonoBehaviour
                         string sender = target.Split(".")[1];
                         string payload = attributes.ToString();
                         string encryptedMessage = payload.Split(".")[0];
-                        string AESIV = payload.Split(".")[1];
+                        
 
                         if (sender == userdatapersist.Instance.verifiedUser && receiver.Contains(targetUsername))
                         {
-                            string data = "1." + receiver + "." + encryptedMessage + "." + AESIV;
+                            string data = "1." + receiver + "." + encryptedMessage;
                             messages.Add(data);
                         }
                         else if (receiver == userdatapersist.Instance.verifiedUser && sender.Contains(targetUsername))
                         {
-                            string data = "0." + sender + "." + encryptedMessage + "." + AESIV;
+                            string data = "0." + sender + "." + encryptedMessage;
                             messages.Add(data);
                         }
                     }
@@ -245,10 +252,10 @@ public class AESMessager : MonoBehaviour
                         int type = Int32.Parse(data.Split(".")[0]);
                         string name = data.Split(".")[1];
                         string encryptedMessage = data.Split(".")[2];
-                        string AESIV = data.Split(".")[3];
+                        
                         string AESKey = GetAESKey(name);
-                        Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + AESIV + " is aesiv " + AESKey);
-                        string result = DecryptMessage(encryptedMessage, AESIV, AESKey);
+                        
+                        string result = DecryptMessage(encryptedMessage, AESKey);
 
                         if (type == 0 && result != null) // received
                         {
@@ -343,10 +350,14 @@ public class AESMessager : MonoBehaviour
             using (Aes myAes = Aes.Create())
             {
                 myAes.Key = keyBytes;
-
+                string invalidPattern = "[^0-9A-Fa-f]";
                 // Generate a random IV for encryption
-                myAes.GenerateIV();
-
+                string newAESIV = Regex.Replace("72A1A378198862143BFD039620623D1B", invalidPattern, "");
+                byte[] receivedAESIV = Enumerable.Range(0, newAESIV.Length)
+                .Where(x => x % 2 == 0)
+                .Select(x => Convert.ToByte(newAESIV.Substring(x, 2), 16))
+                .ToArray();
+                myAes.IV = receivedAESIV; 
                 // Encrypt the string to an array of bytes
                 byte[] encrypted = EncryptStringToBytes_Aes(stringToEncrypt, myAes.Key, myAes.IV);
 
@@ -355,10 +366,10 @@ public class AESMessager : MonoBehaviour
                 string AESIV = BitConverter.ToString(myAes.IV).Replace("-", string.Empty);
 
 
-                Debug.Log("AESIV is " + AESIV);
+                
                 Debug.Log("encrypted message is " + encryptedString);
 
-                string attribute = encryptedString + "." + AESIV;
+                string attribute = encryptedString;
                 string schemaName = hashedReceiverUserName + "." + userdatapersist.Instance.verifiedUser;
                 //post message to ledger
                 PostMessageToLedger(schemaName, attribute, version);
@@ -414,7 +425,7 @@ public class AESMessager : MonoBehaviour
         return foundKey;
     }
 
-    public string DecryptMessage(string encyrptedString, string AESIV, string keyValue)
+    public string DecryptMessage(string encyrptedString,string keyValue)
     {
         //encyrptedString = "3B1141E83052B69E881031F0DBE411C9EFB121EB66B4531141B73CE26BE826BC";
         //AESIV = "43FC7601EF84A2A18E317E2F29FC5D2A";
@@ -425,7 +436,7 @@ public class AESMessager : MonoBehaviour
 
         // Use Regex.Replace to remove all characters that are not in the valid range.
         string newEncryptedString = Regex.Replace(encyrptedString, invalidPattern, "");
-        string newAESIV = Regex.Replace(AESIV, invalidPattern, "");
+        string newAESIV = Regex.Replace("72A1A378198862143BFD039620623D1B", invalidPattern, "");
         
         Debug.Log("newEncryptedString string is :" + newEncryptedString + " newAESIV is " + newAESIV + " and key is " + keyValue);
 
@@ -450,9 +461,6 @@ public class AESMessager : MonoBehaviour
                 // Pad or truncate the key to 32 bytes
                 Array.Resize(ref newkeybuytes, 32);
             }
-           
-
-
 
             newAes.Key = newkeybuytes;
             newAes.IV = receivedAESIV;
@@ -460,7 +468,6 @@ public class AESMessager : MonoBehaviour
             
         }
 
-     
         return decryptedMessage;
     }
 
@@ -473,13 +480,24 @@ public class AESMessager : MonoBehaviour
             //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
             string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
             string dateTimeSec = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
+            int chunkSize = attribute.Length / 5;
+            string chunk1 = attribute.Substring(0, chunkSize);
+            string chunk2 = attribute.Substring(chunkSize, chunkSize);
+            string chunk3 = attribute.Substring(2 * chunkSize, chunkSize);
+            string chunk4 = attribute.Substring(3 * chunkSize, chunkSize);
+            string chunk5 = attribute.Substring(4 * chunkSize);
+
             using (HttpClient httpClient = new HttpClient())
             {
 
                 // Prepare the JSON payload
                 string jsonPayload = $@"{{
                 ""attributes"": [
-                    ""{attribute}""                
+                    ""1.{chunk1}"",  
+                    ""2.{chunk2}"",
+                    ""3.{chunk3}"",
+                    ""4.{chunk4}"",
+                    ""5.{chunk5}""
                 ],
                 ""schema_name"": ""{schemaName}.{dateTimeSec.GetHashCode()}"",
                 ""schema_version"": ""{version}.0""
