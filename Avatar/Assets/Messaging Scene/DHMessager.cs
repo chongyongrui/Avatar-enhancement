@@ -299,12 +299,13 @@ public class DHMessager : MonoBehaviour
         try
         {
             string hashedInviterUserName = ReceiverNameInputField.text.ToString();
+            string invalidPattern = "[^0-9A-Fa-f.-]";
+            hashedReceiverUserName = Regex.Replace(hashedReceiverUserName, invalidPattern, "");
             DHParameters foundDHParams = GetDHParams(username + "-" + hashedInviterUserName + ".params", ledgerUrl);
             var keyGen2 = GeneratorUtilities.GetKeyPairGenerator("DH");
             var kgp2 = new DHKeyGenerationParameters(new SecureRandom(), foundDHParams);
             keyGen2.Init(kgp2);
             AsymmetricCipherKeyPair B = keyGen2.GenerateKeyPair();
-
             string StaticKeyString = GetStaticKeyString(username + "-" + hashedInviterUserName + ".A", ledgerUrl);
             Debug.Log("Found StaticKeyString of A by B is " + StaticKeyString);
 
@@ -316,13 +317,13 @@ public class DHMessager : MonoBehaviour
             Debug.Log("person B's public key is " + stringDHStaticKeyPairPartyB);
             PostStaticPublicKey(stringDHStaticKeyPairPartyB, username + "-" + hashedInviterUserName + ".B");  //post public static key
             BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
-            Debug.Log("B ans is " + Bans.ToString());
-
             //add to local wallet
-            AddAESKeyToWallet(hashedInviterUserName, Bans);
-            UpdateInvtersInvitees();
-            popupWindow.SetActive(true);
-            windowMessage.text = "Successfully confirmed connection!";
+           
+                AddAESKeyToWallet(hashedInviterUserName, Bans);
+                UpdateInvtersInvitees();
+                popupWindow.SetActive(true);
+                windowMessage.text = "Successfully confirmed connection!";
+            
         }
         catch( Exception e)
         {
@@ -333,6 +334,8 @@ public class DHMessager : MonoBehaviour
 
 
     }
+
+    
 
     public void ACalculateSecret()
     {
@@ -348,19 +351,21 @@ public class DHMessager : MonoBehaviour
             var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
             var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
             string myPrivateKey = GetDHPrivateKeySQL(hashedReceiverUserName);
-            
+          
             myPrivateKey = Regex.Replace(myPrivateKey, invalidPattern, "");
 
             AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, myPrivateKey);
             internalKeyAgreeA.Init(A.Private);
             BigInteger Aans = internalKeyAgreeA.CalculateAgreement(importedKeyA);
             Debug.Log("A ans is " + Aans.ToString());
-
-            //add to local wallet 
-            AddAESKeyToWallet(hashedReceiverUserName, Aans);
-            UpdateInvtersInvitees();
-            popupWindow.SetActive(true);
-            windowMessage.text = "Successfully established connection!";
+            //add to local wallet if no such connection exists
+           
+                AddAESKeyToWallet(hashedReceiverUserName, Aans);
+                UpdateInvtersInvitees();
+                popupWindow.SetActive(true);
+                windowMessage.text = "Successfully established connection!";
+            
+            
         }
         catch (Exception e )
         {
@@ -371,6 +376,7 @@ public class DHMessager : MonoBehaviour
 
     }
 
+    
     public void AddAESKeyToWallet(string connectionName, BigInteger keyVal)
     {
         string username = userdatapersist.Instance.verifiedUser;

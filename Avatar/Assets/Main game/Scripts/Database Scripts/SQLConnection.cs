@@ -169,11 +169,11 @@ public class SQLConnection : MonoBehaviour
                 {
 
                     //sql statements to execute
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS AES_Keys (receiver_hash varchar(20), key_val varchar(500));";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS AES_Keys (receiver_hash VARCHAR(20) UNIQUE NOT NULL, key_val varchar(500));";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS DH_Private_Keys (receiver_hash varchar(20), key_val varchar(500));";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS DH_Private_Keys (receiver_hash VARCHAR(20) UNIQUE NOT NULL, key_val varchar(500));";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS other_keys ( key_type varchar(20),  key_val varchar(500));";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS other_keys ( key_type varchar(20) UNIQUE NOT NULL,  key_val varchar(500));";
                     command.ExecuteNonQuery();
                     command.CommandText = "GRANT ALL ON AES_Keys TO " + userdatapersist.Instance.verifiedUser + ";";
                     command.ExecuteNonQuery();

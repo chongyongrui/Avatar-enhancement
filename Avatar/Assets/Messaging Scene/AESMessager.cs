@@ -1,5 +1,3 @@
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Crypto;
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -8,17 +6,8 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using Newtonsoft.Json.Linq;
-using System.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Npgsql;
-using Org.BouncyCastle.Asn1.Cms;
-using UnityEngine.Windows;
-using Unity.Collections;
-using Org.BouncyCastle.Utilities;
-using System.Numerics;
-using Org.BouncyCastle.Asn1.Crmf;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -27,16 +16,16 @@ public class AESMessager : MonoBehaviour
     public static AESMessager instance;
     public string username;
     public static byte[] userPublicKey;
-    [SerializeField]  TMP_InputField ReceiverNameInputField;
-    [SerializeField]  TMP_InputField MessageString;
-    [SerializeField]  TMP_Text SentMessages;
-    [SerializeField]  TMP_Text ReceivedMessages;
+    [SerializeField] TMP_InputField ReceiverNameInputField;
+    [SerializeField] TMP_InputField MessageString;
+    [SerializeField] TMP_Text SentMessages;
+    [SerializeField] TMP_Text ReceivedMessages;
     [SerializeField] TMP_Text issuerName;
     public string ReceiverName;
     public string IPAddress;
     public string ledgerUrl;
-    [SerializeField]   GameObject popupWindow;
-    [SerializeField]   TMP_Text windowMessage;
+    [SerializeField] GameObject popupWindow;
+    [SerializeField] TMP_Text windowMessage;
     [SerializeField] GameObject ConnectionsPanel;
     [SerializeField] GameObject MessagesPanel;
     private static readonly HttpClient client = new HttpClient();
@@ -60,7 +49,7 @@ public class AESMessager : MonoBehaviour
         }
         GetAllMessages();
         InvokeRepeating("GetAllMessages", 10.0f, 10.0f);
-        
+
     }
 
     public void ShowAllMessages()
@@ -69,125 +58,143 @@ public class AESMessager : MonoBehaviour
         GetAllMessages();
     }
 
-    public void GetAllMessages()       
+    public void GetAllMessages()
     {
-        
-            try
+
+        //try
+        {
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
+
+            if (response.IsSuccessStatusCode)
             {
-                string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
-                HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
-
-                if (response.IsSuccessStatusCode)
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var transactions = JToken.Parse(responseBody)["results"];
+                messages.Clear();
+                foreach (var transaction in transactions)
                 {
-                    string responseBody = response.Content.ReadAsStringAsync().Result;
-                    var transactions = JToken.Parse(responseBody)["results"];
-                    messages.Clear();
-                    foreach (var transaction in transactions)
+                    ParseToString(transaction,"");
+                }
+
+                string receivedMessages = "";
+                string sentMessages = "";
+                int i = 1;
+                int j = 1;
+
+                if (messages.Count > 0)
+                {
+                    foreach (string message in messages)
                     {
-
-                        var responseData = transaction["txn"]["data"]["data"];
-                        var type = responseData["version"];
-                        var credName = responseData["name"];
-                        var attributes = responseData["attr_names"];
-
-                        if (type.ToString() == "5.0") // found a message
-                        {
-                            string target = credName.ToString();
-                            string receiver = target.Split(".")[0];
-                            string sender = target.Split(".")[1];
-                            List<string> data = new List<string>();
-                            data.Add(attributes[0].ToString());
-                            data.Add(attributes[1].ToString());
-                            data.Add(attributes[2].ToString());
-                            data.Add(attributes[3].ToString());
-                            data.Add(attributes[4].ToString());
-                            data.Sort();
-                        string encryptedMessage = data[0].Substring(2) +  data[1].Substring(2) +  data[2].Substring(2) +  data[3].Substring(2) +  data[4].Substring(2);
-
-
-
-                        if (sender == userdatapersist.Instance.verifiedUser)
-                            {
-                                string parsed = "1." + receiver + "." + encryptedMessage ;
-                                messages.Add(parsed);
-                            }
-                            else if (receiver == userdatapersist.Instance.verifiedUser)
-                            {
-                                string parsed = "0." + sender + "." + encryptedMessage ;
-                                messages.Add(parsed);
-                            }
-                        }
+                        ParseToMessage(ref receivedMessages, ref sentMessages, ref i, ref j, message);
                     }
+                }
+                if (i == 1)
+                {
+                    receivedMessages += "none found" + "\n";
+                }
+                if (j == 1)
+                {
+                    sentMessages += "none found" + "\n";
+                }
 
-                    //parse messages to show to UI
-
-                    string receivedMessages = "";
-                    string sentMessages = "";
-                    int i = 1;
-                    int j = 1;
-
-                    if (messages.Count > 0)
-                    {
-                        foreach (string message in messages)
-                        {
-
-                            string data = message;
-                            data = data.Replace("[", "").Replace("]", "");
-                            data = data.Replace("\"", "");
-                            data = data.Replace(" ", "");
-                            int type = Int32.Parse(data.Split(".")[0]);
-                            string name = data.Split(".")[1];
-                            string encryptedMessage = data.Split(".")[2];
-                           
-                            string AESKey = GetAESKey(name);
-                            //Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + AESIV + " is aesiv " + AESKey);
-                            string result = DecryptMessage(encryptedMessage,AESKey);
-
-                            if (type == 0 && result != null) // received
-                            {
-                                receivedMessages += ("\n" + i + ". From " + name + ": " + result + "\n");
-                                i++;
-                            }
-                            else if (type == 1 && result != null) // sent
-                            {
-                                sentMessages += ("\n" + j + ". To " + name + ": " + result + "\n");
-                                j++;
-
-                            }
-                        }
-
-
-                    }
-                    if (i == 1)
-                    {
-                        receivedMessages += "none found" + "\n";
-                    }
-                    if (j == 1)
-                    {
-                        sentMessages += "none found" + "\n";
-                    }
-
-                    if (isFiltered == false)
-                    {
+                if (isFiltered == false)
+                {
                     SentMessages.text = sentMessages;
                     ReceivedMessages.text = receivedMessages;
-                    }
-                    
                 }
-                else
-                {
-                    Debug.Log("Error retrieving transactions!");
-                }
+
             }
-            catch (Exception ex)
+            else
             {
-                Debug.Log(ex.Message);
-                popupWindow.SetActive(true);
-                windowMessage.text = "Error parsing transactions!";
+                Debug.Log("Error retrieving transactions!");
             }
+        }
         
+
     }
 
+    private void ParseToMessage(ref string receivedMessages, ref string sentMessages, ref int i, ref int j, string message)
+    {
+
+        string data = message;
+        data = data.Replace("[", "").Replace("]", "");
+        data = data.Replace("\"", "");
+        data = data.Replace(" ", "");
+        int type = Int32.Parse(data.Split(".")[0]);
+        string name = data.Split(".")[1];
+        string encryptedMessage = data.Split(".")[2];
+        string foundAESIV = data.Split(".")[3];
+        string AESKey = GetAESKey(name);
+        Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + foundAESIV + " is aesiv " + AESKey);
+        try
+        {
+            string result = DecryptMessage(encryptedMessage, AESKey, foundAESIV);
+
+            if (type == 0 && result != null) // received
+            {
+                receivedMessages += ("\n" + i + ". From " + name + ": " + result + "\n");
+                i++;
+            }
+            else if (type == 1 && result != null) // sent
+            {
+                sentMessages += ("\n" + j + ". To " + name + ": " + result + "\n");
+                j++;
+
+            }
+        }
+        catch (Exception e)
+        {
+            if (type == 0 ) // received
+            {
+                receivedMessages += ("\n" + i + ". From " + name + ": Error parsing message \n");
+                i++;
+            }
+            else if (type == 1) // sent
+            {
+                sentMessages += ("\n" + j + ". To " + name + ": Error parsing message \n");
+                j++;
+
+            }
+        }
+
+    }
+
+    private static void ParseToString(JToken transaction, string keyWordSearch)
+    {
+        var responseData = transaction["txn"]["data"]["data"];
+        var type = responseData["version"];
+        var credName = responseData["name"];
+        var attributes = responseData["attr_names"];
+
+        if (type.ToString() == "5.0") // found a message
+        {
+            string target = credName.ToString();
+            string receiver = target.Split(".")[0];
+            string sender = target.Split(".")[1];
+            List<string> data = new List<string>();
+            data.Add(attributes[0].ToString());
+            data.Add(attributes[1].ToString());
+            data.Add(attributes[2].ToString());
+            data.Add(attributes[3].ToString());
+            data.Add(attributes[4].ToString());
+            data.Add(attributes[5].ToString());
+            data.Sort();
+            string encryptedMessage = data[1].Substring(2) + data[2].Substring(2) + data[3].Substring(2) + data[4].Substring(2) + data[5].Substring(2);
+            string AESIV = data[0].Substring(2);
+
+
+            if (sender == userdatapersist.Instance.verifiedUser && receiver.Contains(keyWordSearch))
+            {
+                string parsed = "1." + receiver + "." + encryptedMessage + "." + AESIV;
+                messages.Add(parsed);
+            }
+            else if (receiver == userdatapersist.Instance.verifiedUser && receiver.Contains(keyWordSearch))
+            {
+                string parsed = "0." + sender + "." + encryptedMessage + "." + AESIV;
+                messages.Add(parsed);
+            }
+        }
+    }
 
     public void FilterMessages()
     {
@@ -206,34 +213,8 @@ public class AESMessager : MonoBehaviour
                 foreach (var transaction in transactions)
                 {
 
-                    var responseData = transaction["txn"]["data"]["data"];
-                    var type = responseData["version"];
-                    var credName = responseData["name"];
-                    var attributes = responseData["attr_names"];
-
-                    if (type.ToString() == "5.0") // found a message
-                    {
-                        string target = credName.ToString();
-                        string receiver = target.Split(".")[0];
-                        string sender = target.Split(".")[1];
-                        string payload = attributes.ToString();
-                        string encryptedMessage = payload.Split(".")[0];
-                        
-
-                        if (sender == userdatapersist.Instance.verifiedUser && receiver.Contains(targetUsername))
-                        {
-                            string data = "1." + receiver + "." + encryptedMessage;
-                            messages.Add(data);
-                        }
-                        else if (receiver == userdatapersist.Instance.verifiedUser && sender.Contains(targetUsername))
-                        {
-                            string data = "0." + sender + "." + encryptedMessage;
-                            messages.Add(data);
-                        }
-                    }
+                    ParseToString(transaction, targetUsername);
                 }
-
-                //parse messages to show to UI
 
                 string receivedMessages = "";
                 string sentMessages = "";
@@ -245,31 +226,8 @@ public class AESMessager : MonoBehaviour
                     foreach (string message in messages)
                     {
 
-                        string data = message;
-                        data = data.Replace("[", "").Replace("]", "");
-                        data = data.Replace("\"", "");
-                        data = data.Replace(" ", "");
-                        int type = Int32.Parse(data.Split(".")[0]);
-                        string name = data.Split(".")[1];
-                        string encryptedMessage = data.Split(".")[2];
-                        
-                        string AESKey = GetAESKey(name);
-                        
-                        string result = DecryptMessage(encryptedMessage, AESKey);
-
-                        if (type == 0 && result != null) // received
-                        {
-                            receivedMessages += ("\n" + i + ". From " + name + ": " + result + "\n");
-                            i++;
-                        }
-                        else if (type == 1 && result != null) // sent
-                        {
-                            sentMessages += ("\n" + j + ". To " + name + ": " + result + "\n");
-                            j++;
-
-                        }
+                        ParseToMessage(ref receivedMessages, ref sentMessages, ref i, ref j, message);
                     }
-
 
                 }
                 if (i == 1)
@@ -283,6 +241,7 @@ public class AESMessager : MonoBehaviour
 
                 SentMessages.text = sentMessages;
                 ReceivedMessages.text = receivedMessages;
+
             }
             else
             {
@@ -317,7 +276,7 @@ public class AESMessager : MonoBehaviour
         message = MessageString.text;
         hashedReceiverUserName = ReceiverNameInputField.text.ToString();
         //check if such a connection exists
-        Dictionary<string,int> connections = new Dictionary<string, int>();
+        Dictionary<string, int> connections = new Dictionary<string, int>();
         DHMessager.instance.GetEstablishedConnections(connections);
         if (connections.ContainsKey(hashedReceiverUserName))
         {
@@ -351,28 +310,23 @@ public class AESMessager : MonoBehaviour
             {
                 myAes.Key = keyBytes;
                 string invalidPattern = "[^0-9A-Fa-f]";
-                // Generate a random IV for encryption
-                string newAESIV = Regex.Replace("72A1A378198862143BFD039620623D1B", invalidPattern, "");
-                byte[] receivedAESIV = Enumerable.Range(0, newAESIV.Length)
-                .Where(x => x % 2 == 0)
-                .Select(x => Convert.ToByte(newAESIV.Substring(x, 2), 16))
-                .ToArray();
-                myAes.IV = receivedAESIV; 
+                myAes.GenerateIV();
+                string AESIV = BitConverter.ToString(myAes.IV).Replace("-", string.Empty);
                 // Encrypt the string to an array of bytes
                 byte[] encrypted = EncryptStringToBytes_Aes(stringToEncrypt, myAes.Key, myAes.IV);
 
                 string encryptedString = BitConverter.ToString(encrypted).Replace("-", string.Empty);
 
-                string AESIV = BitConverter.ToString(myAes.IV).Replace("-", string.Empty);
 
 
-                
+
+
                 Debug.Log("encrypted message is " + encryptedString);
 
                 string attribute = encryptedString;
                 string schemaName = hashedReceiverUserName + "." + userdatapersist.Instance.verifiedUser;
                 //post message to ledger
-                PostMessageToLedger(schemaName, attribute, version);
+                PostMessageToLedger(schemaName, attribute, version, AESIV);
             }
             popupWindow.SetActive(true);
             windowMessage.text = "Message Sent!";
@@ -404,6 +358,7 @@ public class AESMessager : MonoBehaviour
                             {
                                 Debug.Log("(SQL server) no prior private key data found");
 
+
                             }
                             else
                             {
@@ -425,7 +380,7 @@ public class AESMessager : MonoBehaviour
         return foundKey;
     }
 
-    public string DecryptMessage(string encyrptedString,string keyValue)
+    public string DecryptMessage(string encyrptedString, string keyValue, string foundAESIV)
     {
         //encyrptedString = "3B1141E83052B69E881031F0DBE411C9EFB121EB66B4531141B73CE26BE826BC";
         //AESIV = "43FC7601EF84A2A18E317E2F29FC5D2A";
@@ -436,8 +391,8 @@ public class AESMessager : MonoBehaviour
 
         // Use Regex.Replace to remove all characters that are not in the valid range.
         string newEncryptedString = Regex.Replace(encyrptedString, invalidPattern, "");
-        string newAESIV = Regex.Replace("72A1A378198862143BFD039620623D1B", invalidPattern, "");
-        
+        string newAESIV = Regex.Replace(foundAESIV, invalidPattern, "");
+
         Debug.Log("newEncryptedString string is :" + newEncryptedString + " newAESIV is " + newAESIV + " and key is " + keyValue);
 
         byte[] receivedEncryptedMessage = Enumerable.Range(0, newEncryptedString.Length)
@@ -449,7 +404,8 @@ public class AESMessager : MonoBehaviour
         .Where(x => x % 2 == 0)
         .Select(x => Convert.ToByte(newAESIV.Substring(x, 2), 16))
         .ToArray();
-        
+
+
         using (Aes newAes = Aes.Create())
         {
             string newkeyValue = keyValue;
@@ -465,7 +421,7 @@ public class AESMessager : MonoBehaviour
             newAes.Key = newkeybuytes;
             newAes.IV = receivedAESIV;
             decryptedMessage = DecryptStringFromBytes_Aes(receivedEncryptedMessage, newAes.Key, newAes.IV);
-            
+
         }
 
         return decryptedMessage;
@@ -473,7 +429,7 @@ public class AESMessager : MonoBehaviour
 
 
 
-    public async void PostMessageToLedger(string schemaName, string attribute, int version)
+    public async void PostMessageToLedger(string schemaName, string attribute, int version, string AESIV)
     {
         try
         {
@@ -497,7 +453,8 @@ public class AESMessager : MonoBehaviour
                     ""2.{chunk2}"",
                     ""3.{chunk3}"",
                     ""4.{chunk4}"",
-                    ""5.{chunk5}""
+                    ""5.{chunk5}"",
+                    ""0.{AESIV}""
                 ],
                 ""schema_name"": ""{schemaName}.{dateTimeSec.GetHashCode()}"",
                 ""schema_version"": ""{version}.0""
@@ -527,12 +484,13 @@ public class AESMessager : MonoBehaviour
                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
                 }
             }
-        }catch (Exception e)
+        }
+        catch (Exception e)
         {
             popupWindow.SetActive(true);
             windowMessage.text = "Failed to post message. Check if ACA-py has loaded.";
         }
-        
+
 
     }
 
@@ -554,7 +512,7 @@ public class AESMessager : MonoBehaviour
         return bytes;
     }
 
-    // Start is called before the first frame update
+
     public static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
     {
         // Check arguments.
@@ -566,17 +524,12 @@ public class AESMessager : MonoBehaviour
             throw new ArgumentNullException("IV");
         byte[] encrypted;
 
-        // Create an Aes object
-        // with the specified key and IV.
+
         using (Aes aesAlg = Aes.Create())
         {
             aesAlg.Key = Key;
             aesAlg.IV = IV;
-
-            // Create an encryptor to perform the stream transform.
             ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
-
-            // Create the streams used for encryption.
             using (MemoryStream msEncrypt = new MemoryStream())
             {
                 using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
@@ -590,14 +543,12 @@ public class AESMessager : MonoBehaviour
                 }
             }
         }
-
-        // Return the encrypted bytes from the memory stream.
         return encrypted;
     }
 
     static string DecryptStringFromBytes_Aes(byte[] cipherText, byte[] Key, byte[] IV)
     {
-        // Check arguments.
+
         if (cipherText == null || cipherText.Length <= 0)
             throw new ArgumentNullException("cipherText");
         if (Key == null || Key.Length <= 0)
@@ -605,21 +556,15 @@ public class AESMessager : MonoBehaviour
         if (IV == null || IV.Length <= 0)
             throw new ArgumentNullException("IV");
 
-        // Declare the string used to hold
-        // the decrypted text.
         string plaintext = null;
 
-        // Create an Aes object
-        // with the specified key and IV.
         using (Aes aesAlg = Aes.Create())
         {
             aesAlg.Key = Key;
             aesAlg.IV = IV;
 
-            // Create a decryptor to perform the stream transform.
             ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
 
-            // Create the streams used for decryption.
             using (MemoryStream msDecrypt = new MemoryStream(cipherText))
             {
                 using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
@@ -627,8 +572,6 @@ public class AESMessager : MonoBehaviour
                     using (StreamReader srDecrypt = new StreamReader(csDecrypt))
                     {
 
-                        // Read the decrypted bytes from the decrypting stream
-                        // and place them in a string.
                         plaintext = srDecrypt.ReadToEnd();
                     }
                 }

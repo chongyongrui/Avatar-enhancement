@@ -176,13 +176,13 @@ public class LoginController : MonoBehaviour
                 {
 
                     //sql statements to execute
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata ( username_hash INT, password_hash INT, userid_hash INT);";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata ( username_hash INT UNIQUE NOT NULL, password_hash INT, userid_hash INT);";
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS  weapons ( playerid INT, weaponid INT, quantity INT) ;";
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS playerlocation ( playerid INT, x INT, y INT, z INT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT UNIQUE NOT NULL, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedKeys ( receiver_hash varchar(20), key_type varchar(500), key_val varchar(500)) ;";
                     command.ExecuteNonQuery();
