@@ -351,7 +351,11 @@ public class DHMessager : MonoBehaviour
             var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
             var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
             string myPrivateKey = GetDHPrivateKeySQL(hashedReceiverUserName);
-          
+            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
+            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
+            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
+            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
+            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
             myPrivateKey = Regex.Replace(myPrivateKey, invalidPattern, "");
 
             AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, myPrivateKey);

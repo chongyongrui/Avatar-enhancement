@@ -260,14 +260,9 @@ public class AESMessager : MonoBehaviour
 
     public void SendData()
     {
-        if (FileMangerOpener.instance.pictureMode)
-        {
-            ImageSender.Instance.EncryptAndSendImage();
-        }
-        else
-        {
+  
             EncryptAndSendMessage();
-        }
+      
     }
 
     public void EncryptAndSendMessage()
