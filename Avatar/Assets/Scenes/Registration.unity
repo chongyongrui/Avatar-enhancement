@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5331,8 +5331,8 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
-  m_InputType: 0
+  m_ContentType: 7
+  m_InputType: 2
   m_AsteriskChar: 42
   m_KeyboardType: 0
   m_LineType: 0
@@ -10113,8 +10113,13 @@ MonoBehaviour:
   userIDInputField: {fileID: 611267369}
   expiryInputField: {fileID: 985449013}
   issuerName: {fileID: 0}
+  adminRequests: {fileID: 0}
+  keyPanel: {fileID: 0}
+  keyText: {fileID: 0}
   popupWindow: {fileID: 0}
   windowMessage: {fileID: 0}
+  dropDown: {fileID: 0}
+  ledgerUrl: 
 --- !u!1 &1855645860
 GameObject:
   m_ObjectHideFlags: 0

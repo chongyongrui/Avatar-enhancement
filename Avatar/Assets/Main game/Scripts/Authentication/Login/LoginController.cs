@@ -19,6 +19,13 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using Npgsql;
 using Debug = UnityEngine.Debug;
+using Docker.DotNet;
+using Docker.DotNet.Models;
+using System.Linq;
+using System.Data;
+using Unity.Mathematics;
+using Unity.Services.Relay.Models;
+using Unity.VisualScripting;
 
 public class LoginController : MonoBehaviour
 {
@@ -40,13 +47,9 @@ public class LoginController : MonoBehaviour
     public string verifiedPassword;
     public string IPAddress;
 
-
-
-
-
+   
     public void Awake()
     {
-
 
         instance = this;
         isHost = false;
@@ -67,6 +70,7 @@ public class LoginController : MonoBehaviour
         DontDestroyOnLoad(transform.gameObject);
         
         ledgerUrl = "http://" + IPAddress + ":9000";
+        CreateTables();
 
     }
 
@@ -76,9 +80,7 @@ public class LoginController : MonoBehaviour
     /// <returns></returns>
     public async void Login()
     {
-
-        
-            
+  
         try 
         {
             //Get name and password from input fields
@@ -174,15 +176,15 @@ public class LoginController : MonoBehaviour
                 {
 
                     //sql statements to execute
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata (\r\n    username_hash INT,\r\n    password_hash INT\r\n);\r\n";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS userdata ( username_hash INT UNIQUE NOT NULL, password_hash INT, userid_hash INT);";
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS  weapons ( playerid INT, weaponid INT, quantity INT) ;";
                     command.ExecuteNonQuery();
                     command.CommandText = "CREATE TABLE IF NOT EXISTS playerlocation ( playerid INT, x INT, y INT, z INT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedCredentials ( CredentialID INT UNIQUE NOT NULL, Issuer varchar(20), UserID varchar(20), Expiry INT, Activated BIT) ;";
                     command.ExecuteNonQuery();
-                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedKeys ( receiver_hash varchar(20), key_type varchar(300), key_val varchar(300)) ;";
+                    command.CommandText = "CREATE TABLE IF NOT EXISTS  IssuedKeys ( receiver_hash varchar(20), key_type varchar(500), key_val varchar(500)) ;";
                     command.ExecuteNonQuery();
                 }
 
@@ -362,7 +364,7 @@ public class LoginController : MonoBehaviour
 
                     Loader.Load(Loader.Scene.Main);
                 }
-                else if (sceneNumber == 1) 
+                else if (sceneNumber == 1)
                 {
                     SceneManager.LoadSceneAsync("Admin Panel");
                 }
@@ -370,10 +372,10 @@ public class LoginController : MonoBehaviour
                 {
                     SceneManager.LoadSceneAsync("Messaging");
                 }
-                //should only be run if they are the host
-                
-                    
-                
+             
+
+               
+
 
                 request.Dispose();
             }
@@ -392,7 +394,7 @@ public class LoginController : MonoBehaviour
     }
 
 
-
+   
 
     public bool AuthenticateWithSQLServer(string username, string password)
     {
@@ -496,7 +498,7 @@ public class LoginController : MonoBehaviour
 
             bool processStarted = await Task.Run(() => process.WaitForExit(Timeout.Infinite));
             UnityEngine.Debug.Log("Process started: " + processStarted);
-            
+
         }
         catch (Exception ex)
         {
@@ -566,10 +568,15 @@ public class LoginController : MonoBehaviour
     /// <returns></returns>
     public async void StartAcaPyInstanceAsync(Dictionary<string, string> arguments)
     {
-        //string composeFilePath = "../../Assets/Main Scene Folder/Scripts/Wallet/";
-        string composeFilePath = "../../Avatar/Assets/Main Scene Folder/Scripts/Wallet/";
-        string partialPath ="Assets/Main Scene Folder/Scripts/Wallet/";
-        string fullPath = Path.Combine(Application.dataPath, partialPath);
+        //FOR BUILD:
+        //string assetsPath = Path.Combine(Application.dataPath, "..", "..");
+        //string composeFilePath = assetsPath + "/Avatar/Assets/Main Scene Folder/Scripts/Wallet/";
+        //string assetFolderFilePath = Application.dataPath;
+        //Debug.Log("composeFilePath = " + composeFilePath);
+
+        //for Unity player:
+        string composeFilePath = "../../Assets/Main Scene Folder/Scripts/Wallet/";
+
         arguments.Add("ACAPY_ENDPOINT_PORT", "8001");
         arguments.Add("ACAPY_ADMIN_PORT", "11001");
         arguments.Add("CONTROLLER_PORT", "3001");
@@ -579,7 +586,7 @@ public class LoginController : MonoBehaviour
         // string[] additionalArgs = { $"--WALLET_KEY={arguments["WALLET_KEY"]}", $"--LABEL={arguments["WALLET_NAME"]}", $"--WALLET_NAME={arguments["WALLET_NAME"]}", $"--AGENT_WALLET_SEED={arguments["SEED"]}", $"--ACAPY_ENDPOINT_PORT={arguments["ACAPY_ENDPOINT_PORT"]}", $"--ACAPY_ADMIN_PORT={arguments["ACAPY_ADMIN_PORT"]}", $"--CONTROLLER_PORT={arguments["CONTROLLER_PORT"]}" };
 
         UnityEngine.Debug.Log("Starting ACA-PY instance now");
-        await RunDockerComposeAsync(fullPath, arguments);
+        await RunDockerComposeAsync(composeFilePath, arguments);
         UnityEngine.Debug.Log("Docker Compose completed.");
         // RunScriptInDirectory(directoryPath, scriptCommand, arguments);
 
@@ -588,6 +595,11 @@ public class LoginController : MonoBehaviour
         
     }
 
+
+    
+
+
+    
     /// <summary>
     /// Helper function for displaying error messages
     /// </summary>

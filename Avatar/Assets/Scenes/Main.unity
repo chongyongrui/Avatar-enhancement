@@ -6023,8 +6023,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemCode: 
-  toolTip: {fileID: 310718996}
-  toolTipText: {fileID: 1106078886}
   isRestricted: 1
   itemKey: 0
 --- !u!1001 &1592588849
@@ -8414,6 +8412,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 489742653143043043, guid: 14529cb2a62050b429ad94fdde88536b, type: 3}
+      propertyPath: m_text
+      value: Main Menu
+      objectReference: {fileID: 0}
     - target: {fileID: 489742654131680081, guid: 14529cb2a62050b429ad94fdde88536b, type: 3}
       propertyPath: network
       value: 
@@ -8425,6 +8427,10 @@ PrefabInstance:
     - target: {fileID: 489742654131680087, guid: 14529cb2a62050b429ad94fdde88536b, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 3157038725
+      objectReference: {fileID: 0}
+    - target: {fileID: 489742654301684694, guid: 14529cb2a62050b429ad94fdde88536b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []

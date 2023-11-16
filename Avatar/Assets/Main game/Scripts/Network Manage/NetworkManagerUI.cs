@@ -10,6 +10,9 @@ using System.Net;
 using Unity.Netcode.Transports.UTP;
 using System.Net.Sockets;
 using System;
+using Docker.DotNet;
+using System.Threading.Tasks;
+using Docker.DotNet.Models;
 
 public class NetworkManagerUI : NetworkBehaviour
 {
@@ -66,12 +69,24 @@ public class NetworkManagerUI : NetworkBehaviour
         // NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnect;
         // NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnect;
     }
+
+    static async Task CloseDockerContainers()
+    {
+        Debug.Log("closing docker container");
+        using (var client = new DockerClientConfiguration(new Uri("http://localhost:2375")).CreateClient())
+        {
+            string containerId = "wallet-acapy-1"; // Replace with your container's ID or name
+            // Send the pause command to the container
+            await client.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters { Force = true });
+        }
+    }
+
     public void Leave()
     {
         NetworkManager.Singleton.Shutdown();
         if (!IsServer) NetworkManager.Singleton.DisconnectClient(NetworkManager.Singleton.LocalClientId);
-
-        SceneManager.LoadScene("Main");
+        CloseDockerContainers();
+        SceneManager.LoadScene("Login");
 
     }
     public void Client()
