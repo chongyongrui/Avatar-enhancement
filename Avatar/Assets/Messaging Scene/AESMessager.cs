@@ -434,7 +434,7 @@ public class AESMessager : MonoBehaviour
         try
         {
             //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
-            string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
+            string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
             string dateTimeSec = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss");
             int chunkSize = attribute.Length / 5;
             string chunk1 = attribute.Substring(0, chunkSize);

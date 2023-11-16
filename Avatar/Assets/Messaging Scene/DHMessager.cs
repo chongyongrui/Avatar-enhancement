@@ -500,7 +500,7 @@ public class DHMessager : MonoBehaviour
         try
         {
             //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
-            string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
+            string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
 
 
             int halfLength = input.Length / 2;
@@ -903,7 +903,7 @@ public class DHMessager : MonoBehaviour
         string[] vals = ParseLargeValues(dhParams.P.ToString(), dhParams.G.ToString(), dhParams.Q.ToString());
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
-        string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
+        string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
         try
         {
             using (HttpClient httpClient = new HttpClient())

@@ -467,7 +467,7 @@ public class AdminCredentialIssuer : MonoBehaviour
         popupWindow.SetActive(true);
         windowMessage.text = "Processing...";
 
-        string url = "http://" + IPAddress + ":11001/credential-definitions";
+        string url = "http://localhost:11001/credential-definitions";
 
         try
         {

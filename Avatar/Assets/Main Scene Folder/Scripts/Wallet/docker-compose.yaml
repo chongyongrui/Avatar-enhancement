@@ -21,7 +21,7 @@ services:
       ACAPY_ENDPOINT_PORT: "8002"
       ACAPY_ENDPOINT_URL: "http://localhost:8002/"
       ACAPY_ADMIN_PORT: "${ACAPY_ADMIN_PORT}"
-      LEDGER_URL: "http://host.docker.internal:9000"
+      LEDGER_URL: "http://192.168.0.103:9000"
       TAILS_SERVER_URL: "http://tails-server:6543"
       CONTROLLER_PORT: "${CONTROLLER_PORT}"
       WALLET_NAME: "Bobby"
@@ -41,7 +41,7 @@ services:
         --wallet-name ${WALLET_NAME} \
         --wallet-key ${WALLET_KEY} \
         --seed ${AGENT_WALLET_SEED} \
-        --genesis-url http://host.docker.internal:9000/genesis \
+        --genesis-url http://192.168.0.103:9000/genesis \
         --tails-server-base-url ${TAILS_SERVER_URL} \
         --label ${LABEL} \
         --auto-accept-invites \
@@ -90,7 +90,7 @@ services:
    volumes:
      - /issuer/tails-files:/tails-files/
    environment:
-     GENESIS_URL: "http://host.docker.internal:9000/genesis"
+     GENESIS_URL: "http://192.168.0.103:9000/genesis"
      TAILS_SERVER_URL: "${TAILS_SERVER_URL}"
    command: >
      tails-server

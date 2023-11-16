@@ -488,7 +488,7 @@ public class CredentialIssuer : MonoBehaviour
     {
 
         //string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
-        string url = "http://" + IPAddress + ":11001/schemas?create_transaction_for_endorser=false";
+        string url = "http://localhost:11001/schemas?create_transaction_for_endorser=false";
         int schemaVer1 = 0;
         int schemaVer2 = 0;
         string jsonPayload = null;
