@@ -319,10 +319,10 @@ public class DHMessager : MonoBehaviour
             BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
             //add to local wallet
            
-                AddAESKeyToWallet(hashedInviterUserName, Bans);
-                UpdateInvtersInvitees();
-                popupWindow.SetActive(true);
-                windowMessage.text = "Successfully confirmed connection!";
+            AddAESKeyToWallet(hashedInviterUserName, Bans);
+            UpdateInvtersInvitees();
+            popupWindow.SetActive(true);
+            windowMessage.text = "Successfully confirmed connection!";
             
         }
         catch( Exception e)

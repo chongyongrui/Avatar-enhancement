@@ -52,6 +52,12 @@ public class CredentialIssuer : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// Reads the ledger to see if there are any credentials that can be added to the users wallet
+    /// </summary>
+    /// <param name="receiverID"> the user's username</param>
+    /// <param name="type">the code of the type of crednetial to check for</param>
     public async void GetCredDef(string receiverID, string type)
     {
         //Get ledger params
@@ -105,6 +111,10 @@ public class CredentialIssuer : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks if there are any new credentials of all types issued to the user 
+    /// </summary>
+
     public void GetKeys()
     {
         string receiverID = userIDInputField.text;
@@ -113,6 +123,11 @@ public class CredentialIssuer : MonoBehaviour
         string myKeys = GetSQLKeys();
         keyText.text = myKeys;
     }
+
+    /// <summary>
+    /// Gets all available keys the users has from his local PSQL wallet
+    /// </summary>
+    /// <returns>string of all keys strored on the PSQL wallet </returns>
 
     public string GetSQLKeys()
     {
@@ -162,6 +177,13 @@ public class CredentialIssuer : MonoBehaviour
         return null;
     }
 
+
+    /// <summary>
+    /// Creates a new credential in the form of a key by encrypting the public key params with the private AES key
+    /// 
+    /// </summary>
+    /// <param name="keyParams">the public key params to encrypt</param>
+    /// <param name="type">the code of the type of credential that will be created</param>
     public void GenerateKey(string keyParams, string type)
     {
         //generate key using AES with ledger params and AES key
@@ -215,6 +237,12 @@ public class CredentialIssuer : MonoBehaviour
 
     }
 
+
+    /// <summary>
+    /// Adds the key to the PSQL wallet of the user
+    /// </summary>
+    /// <param name="encryptedKey">the encrypted key value</param>
+    /// <param name="type">the code of the type of key </param>
     public void SQLAddKey(string encryptedKey, string type)
     {
         string username = userdatapersist.Instance.verifiedUser;
@@ -246,6 +274,11 @@ public class CredentialIssuer : MonoBehaviour
 
         }
     }
+
+    /// <summary>
+    /// Checks if the user has an established connection with the admin
+    /// </summary>
+    /// <returns>boolean representing the presence of a connection with the admin</returns>
 
     public bool CheckAdminConnection()
     {
@@ -287,7 +320,9 @@ public class CredentialIssuer : MonoBehaviour
     }
 
 
-
+    /// <summary>
+    /// Posts to a ledger a schema representing the request for a certian type of credential
+    /// </summary>
 
     public async void RequestCredential()
     {
@@ -296,21 +331,9 @@ public class CredentialIssuer : MonoBehaviour
         string userID = userIDInputField.text;
         int expiryDate = -1;
         string type = dropDown.captionText.text;
-
+        validInput = true;
         //check if date in the valid format
-        try
-        {
-            expiryDate = Int32.Parse(expiryInputField.text);
-            DateTime date = DateTime.ParseExact(expiryInputField.text, "ddmmyyyy", CultureInfo.InvariantCulture);
-            Debug.Log("Input date is " + date);
-            validInput = true;
-        }
-        catch (Exception)
-        {
-            Console.WriteLine($"Unable to parse '{expiryInputField.text}'");
-            popupWindow.SetActive(true);
-            windowMessage.text = "Expiry Date is in the wrong format!";
-        }
+        
         if (CheckAdminConnection() == true && AdminCredentialIssuer.instance.MatchUserID(userdatapersist.Instance.verifiedUser, userID))
         {
             if (validInput && type != "ACCOUNT")
@@ -344,7 +367,9 @@ public class CredentialIssuer : MonoBehaviour
 
     }
 
-
+    /// <summary>
+    /// Creates and post a invitation token to the ledger in the form of a schema
+    /// </summary>
 
     public async void GenerateCredential()
     {
@@ -395,6 +420,16 @@ public class CredentialIssuer : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Encrypts a string using AES
+    /// </summary>
+    /// <param name="plainText">the string to be encrypted</param>
+    /// <param name="Key">the AES key used to encrypt the string</param>
+    /// <param name="IV">the AES initialisation vector to encrypt the string</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+
+
     static byte[] EncryptStringToBytes_Aes(string plainText, byte[] Key, byte[] IV)
     {
         // Check arguments.
@@ -436,7 +471,11 @@ public class CredentialIssuer : MonoBehaviour
     }
 
 
-
+    /// <summary>
+    /// Retrieves the AES key for a given connection from PSQL wallet
+    /// </summary>
+    /// <param name="connectionName"> the username of the AES key associated with</param>
+    /// <returns></returns>
 
     public string GetAESKey(string connectionName)
     {
@@ -481,7 +520,15 @@ public class CredentialIssuer : MonoBehaviour
     }
 
 
-
+    /// <summary>
+    /// Writes a request to the ledger
+    /// </summary>
+    /// <param name="issuer">the username wring the request</param>
+    /// <param name="credentialID">the value of the credential that will be written to the ledger</param>
+    /// <param name="userID"></param>
+    /// <param name="expiry"></param>
+    /// <param name="expiryString"></param>
+    /// <param name="type"></param>
 
 
     public async void sendReq(string issuer, int credentialID, string userID, int expiry, string expiryString, string type)

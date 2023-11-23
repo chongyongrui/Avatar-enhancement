@@ -188,7 +188,7 @@ public class AESMessager : MonoBehaviour
                 string parsed = "1." + receiver + "." + encryptedMessage + "." + AESIV;
                 messages.Add(parsed);
             }
-            else if (receiver == userdatapersist.Instance.verifiedUser && receiver.Contains(keyWordSearch))
+            else if (receiver == userdatapersist.Instance.verifiedUser && sender.Contains(keyWordSearch))
             {
                 string parsed = "0." + sender + "." + encryptedMessage + "." + AESIV;
                 messages.Add(parsed);

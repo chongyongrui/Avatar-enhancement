@@ -6,10 +6,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using System.Net;
 using Npgsql;
-using UnityEngine.UI;
-using static UnityEngine.Rendering.PostProcessing.SubpixelMorphologicalAntialiasing;
-using static UnityEngine.UIElements.UxmlAttributeDescription;
-using UnityEngine.Rendering.PostProcessing;
+
 
 
 public class SQLConnection : MonoBehaviour
@@ -98,8 +95,9 @@ public class SQLConnection : MonoBehaviour
                 SQLServerConnected = false;
             }
 
+            
+            CreateWalletTables();
             initialConfigSuccess = true;
-
         }
     }
 
