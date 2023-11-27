@@ -33,6 +33,7 @@ public class AESMessager : MonoBehaviour
     public string hashedReceiverUserName;
     public static List<string> messages = new List<string>();
     public bool isFiltered = false;
+
     private void Start()
     {
         IPAddress = userdatapersist.Instance.IPAdd;
