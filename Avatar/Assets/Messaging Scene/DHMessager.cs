@@ -189,9 +189,9 @@ public class DHMessager : MonoBehaviour
     /// Fully establish an accepted invite by getting invitee's public key and calculating secret key
     /// </summary>
 
-    public void ACalculateSecret()
+    public void ACalculateSecret(string hashedReceiverUserName )
     {
-        hashedReceiverUserName = ReceiverNameInputField.text.ToString();
+        
         if (addressBook.ContainsKey(hashedReceiverUserName) && addressBook[hashedReceiverUserName] == 2)
         {
             try
@@ -324,11 +324,21 @@ public class DHMessager : MonoBehaviour
     /// </summary>
     public void UpdateInvtersInvitees()
     {
+
+
+        List<string> newAcceptedConnections = new List<string>();
         addressBook.Clear();
         GetEstablishedConnections(addressBook);  //value is 3
         GetDHAcceptedInvites(addressBook, username, ledgerUrl);  //value is 2
         GetDHSentInvites(addressBook, username, ledgerUrl);  //value is 0
         GetDHInvites(addressBook, username, ledgerUrl); //value is 1
+
+        newAcceptedConnections.Clear();
+
+
+
+
+
 
         //parse hash table into the different strings lists
         int i = 1;
@@ -352,6 +362,7 @@ public class DHMessager : MonoBehaviour
             {
                 acceptedInviteesResult += ("\n" + j + ". " + key + "\n");
                 j++;
+                newAcceptedConnections.Add(key);
             }
             else if (value == 1)
             {
@@ -382,7 +393,21 @@ public class DHMessager : MonoBehaviour
         receivedInvites.text = receivedInvitations;
         acceptedInvites.text = acceptedInviteesResult;
         connections.text = sentInvitesResult;
+        AutoEstablishAcceptedConnections(newAcceptedConnections);
+    }
 
+
+
+    public void AutoEstablishAcceptedConnections(List<string> acceptedConnections)
+    {
+        foreach (string key in acceptedConnections)
+        {
+            ACalculateSecret(key);
+            popupWindow.SetActive(true);
+            windowMessage.text = "Successfully established new connection with " + key;
+        }
+
+        acceptedConnections.Clear();
     }
 
 

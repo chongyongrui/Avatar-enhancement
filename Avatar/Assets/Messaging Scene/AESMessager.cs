@@ -166,6 +166,7 @@ public class AESMessager : MonoBehaviour
         var type = responseData["version"];
         var credName = responseData["name"];
         var attributes = responseData["attr_names"];
+        
 
         if (type.ToString() == "5.0") // found a message
         {
