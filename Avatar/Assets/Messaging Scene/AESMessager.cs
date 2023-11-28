@@ -125,7 +125,19 @@ public class AESMessager : MonoBehaviour
         string name = data.Split(".")[1];
         string encryptedMessage = data.Split(".")[2];
         string foundAESIV = data.Split(".")[3];
+        string dateTimeData = data.Split(".")[4];
         string AESKey = GetAESKey(name);
+
+
+
+        long unixTimestamp = long.Parse(dateTimeData);
+        DateTimeOffset utcDateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(unixTimestamp);
+        TimeZoneInfo targetTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time"); // Use the appropriate time zone ID
+        DateTimeOffset targetDateTimeOffset = TimeZoneInfo.ConvertTime(utcDateTimeOffset, targetTimeZone);
+        string date = (targetDateTimeOffset.ToString("dd/MM/yy"));
+        string time = (targetDateTimeOffset.ToString("HH:mm"));
+
+
         Debug.Log("type is " + type + ", " + encryptedMessage + " is message, " + foundAESIV + " is aesiv " + AESKey);
         try
         {
@@ -133,12 +145,12 @@ public class AESMessager : MonoBehaviour
 
             if (type == 0 && result != null) // received
             {
-                receivedMessages += ("\n" + i + ". From " + name + ": " + result + "\n");
+                receivedMessages += ("\n" + i + ". ("+ date + " " + time +") From " + name + ": " + result + "\n");
                 i++;
             }
             else if (type == 1 && result != null) // sent
             {
-                sentMessages += ("\n" + j + ". To " + name + ": " + result + "\n");
+                sentMessages += ("\n" + j + ". (" + date + " " + time + ") To " + name + ": " + result + "\n");
                 j++;
 
             }
@@ -166,7 +178,12 @@ public class AESMessager : MonoBehaviour
         var type = responseData["version"];
         var credName = responseData["name"];
         var attributes = responseData["attr_names"];
+        string dateTimeData = transaction["txnMetadata"]["txnTime"].ToString();
+
+
         
+
+
 
         if (type.ToString() == "5.0") // found a message
         {
@@ -187,12 +204,12 @@ public class AESMessager : MonoBehaviour
 
             if (sender == userdatapersist.Instance.verifiedUser && receiver.Contains(keyWordSearch))
             {
-                string parsed = "1." + receiver + "." + encryptedMessage + "." + AESIV;
+                string parsed = "1." + receiver + "." + encryptedMessage + "." + AESIV + "." + dateTimeData;
                 messages.Add(parsed);
             }
             else if (receiver == userdatapersist.Instance.verifiedUser && sender.Contains(keyWordSearch))
             {
-                string parsed = "0." + sender + "." + encryptedMessage + "." + AESIV;
+                string parsed = "0." + sender + "." + encryptedMessage + "." + AESIV + "." + dateTimeData;
                 messages.Add(parsed);
             }
         }
@@ -379,10 +396,7 @@ public class AESMessager : MonoBehaviour
 
     public string DecryptMessage(string encyrptedString, string keyValue, string foundAESIV)
     {
-        //encyrptedString = "3B1141E83052B69E881031F0DBE411C9EFB121EB66B4531141B73CE26BE826BC";
-        //AESIV = "43FC7601EF84A2A18E317E2F29FC5D2A";
-        //keyValue = "605430400530133053453980900039527052859476385626838272470836173704642956803610946381913979656307099007090924853107517882456801765988013644390716291693597";
-
+       
         string decryptedMessage = null;
         string invalidPattern = "[^0-9A-Fa-f]";
 
