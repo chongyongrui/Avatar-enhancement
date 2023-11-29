@@ -29,6 +29,7 @@ public class AdminCredentialIssuer : MonoBehaviour
     [SerializeField] private TMP_Text issuerName;
     [SerializeField] private GameObject userRequest;
     [SerializeField] private GameObject adminGenerate;
+    [SerializeField] private GameObject adminIssue;
     [SerializeField] private GameObject adminReceiverFields;
     [SerializeField] private TMP_InputField receiverNameInputField;
     [SerializeField] private TMP_Text requets;
@@ -54,6 +55,7 @@ public class AdminCredentialIssuer : MonoBehaviour
 
             userRequest.SetActive(true);
             adminGenerate.SetActive(false);
+            adminIssue.SetActive(false);
             adminReceiverFields.SetActive(false);
             this.gameObject.SetActive(false);
             InvokeRepeating("GetRequests", 10.0f, 5.0f);

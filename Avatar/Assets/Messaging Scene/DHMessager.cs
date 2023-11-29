@@ -58,6 +58,7 @@ public class DHMessager : MonoBehaviour
     private AsymmetricCipherKeyPair keyPair;
     public static DHParameters dHParameters;
     public static Dictionary<string, int> addressBook = new Dictionary<string, int>();
+    public static List<string> newAcceptedConnections = new List<string>();
 
 
 
@@ -326,14 +327,14 @@ public class DHMessager : MonoBehaviour
     {
 
 
-        List<string> newAcceptedConnections = new List<string>();
+       
         addressBook.Clear();
         GetEstablishedConnections(addressBook);  //value is 3
         GetDHAcceptedInvites(addressBook, username, ledgerUrl);  //value is 2
         GetDHSentInvites(addressBook, username, ledgerUrl);  //value is 0
         GetDHInvites(addressBook, username, ledgerUrl); //value is 1
 
-        newAcceptedConnections.Clear();
+        
 
 
 
@@ -394,6 +395,7 @@ public class DHMessager : MonoBehaviour
         acceptedInvites.text = acceptedInviteesResult;
         connections.text = sentInvitesResult;
         AutoEstablishAcceptedConnections(newAcceptedConnections);
+        newAcceptedConnections.Clear();
     }
 
 
