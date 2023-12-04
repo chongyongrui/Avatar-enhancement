@@ -40,6 +40,11 @@ Note: As a user, PGadmin4 is used to access the local Aca-py wallet. As a host, 
 ![Untitled](userguide/Untitled.png)
 
 It is **recommended to have PostgreSQL uninstalled** if it is installed on your current machine. This prevents potential port conflicts. The PostgreSQL instance runs on a Docker container. The local Aca-py wallet is hosted on port **5432**, while if you are the host, the server PostgreSQL database is hosted on port **5433**. 
+    
+## Developer guide
+
+If you are interested to see how the code funcitons and want to learn more, you can refer to the Developer Guide [here](developerguide.md).
+
 
 ## Step-by-step Instructions
 
@@ -99,7 +104,7 @@ It is **recommended to have PostgreSQL uninstalled** if it is installed on your 
     $ sudo apt-get update
     $ sudo apt-get install -y libindy
     ```
-    
+
 
 ## Start-up guide
 
