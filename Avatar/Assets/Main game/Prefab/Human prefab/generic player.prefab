@@ -834,9 +834,8 @@ GameObject:
   - component: {fileID: 8793682441582430714}
   - component: {fileID: 5985359373204563230}
   - component: {fileID: 7625162992114533138}
-  - component: {fileID: -4439015907594055892}
   m_Layer: 6
-  m_Name: CH pick up
+  m_Name: generic player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1385,21 +1384,6 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &-4439015907594055892
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4900686166078442603}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 830a1dbcb9c17014382c10df28216108, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  skins:
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!1 &4900686166078442622
 GameObject:
   m_ObjectHideFlags: 0
