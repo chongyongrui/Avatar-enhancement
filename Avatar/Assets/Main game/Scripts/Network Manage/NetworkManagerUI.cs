@@ -47,7 +47,7 @@ public class NetworkManagerUI : NetworkBehaviour
             // string hostName = Dns.GetHostName();
             // IPAddress = Dns.GetHostEntry(hostName).AddressList[1].ToString();
             // IPAddressInputField.text = AuthController.instance.IPAddress;
-            nameInputField.text =userdatapersist.Instance.verifiedUser;
+            nameInputField.text = userdatapersist.Instance.verifiedUser;
             Debug.Log(userdatapersist.Instance.verifiedUser + "Name");
         }
         catch (Exception ex)
@@ -159,9 +159,13 @@ public class NetworkManagerUI : NetworkBehaviour
     {//Debug.Log($"ClientId {clientId} connected, LocalClientId is {NetworkManager.Singleton.LocalClientId}");
         if (clientId == NetworkManager.Singleton.LocalClientId)
         {
-            Holder.SetActive(false);
-            LeaveButton.gameObject.SetActive(true);
-            //UpdatePlayernameServerRPC(nameInputField.text);
+            if (Holder != null)
+            {
+                Holder.SetActive(false);
+                LeaveButton.gameObject.SetActive(true);
+                
+            }
+
 
 
         }

@@ -4017,7 +4017,8 @@ MonoBehaviour:
   expiryInputField: {fileID: 1176689171}
   issuerName: {fileID: 732981025}
   userRequest: {fileID: 1783665169}
-  adminGenerate: {fileID: 324551714}
+  adminGenerate: {fileID: 1646417070}
+  adminIssue: {fileID: 324551714}
   adminReceiverFields: {fileID: 556789221}
   receiverNameInputField: {fileID: 350976852}
   requets: {fileID: 6424632165895528492}

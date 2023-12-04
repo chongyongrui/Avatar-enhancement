@@ -1,0 +1,43 @@
+@startuml
+hide footbox
+
+participant AESMessager
+activate AESMessager
+participant HttpResponseMessage
+activate HttpResponseMessage
+
+AESMessager -> HttpResponseMessage: client.GetAsync(transactionsUrl)
+HttpResponseMessage -> AESMessager:response
+note left: gets the ledger content in JSON format
+
+deactivate HttpResponseMessage
+loop all transactions in reponse
+
+AESMessager -> AESMessager : ParseToString()
+activate AESMessager 
+return 
+note left: string is added to a List
+ 
+
+end
+ 
+loop all items in List
+
+AESMessager -> AESMessager : ParseToMessage()
+activate AESMessager 
+
+AESMessager -> AESMessager : GetAESKey()
+activate AESMessager 
+return AESKey
+
+AESMessager -> AESMessager : DecryptMessage()
+activate AESMessager 
+return result
+
+
+return 
+note left: decrypted result is added \nto a string to be shown on UI
+
+
+end
+@enduml

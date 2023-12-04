@@ -4350,7 +4350,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f6b1814bf8203e45acc0fda9189b9be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: 0
+  RshoulderTransform: {fileID: 0}
+  RelbowTransform: {fileID: 0}
+  RhipTransform: {fileID: 0}
+  RkneeTransform: {fileID: 0}
+  LshoulderTransform: {fileID: 0}
+  LelbowTransform: {fileID: 0}
+  LhipTransform: {fileID: 0}
+  LkneeTransform: {fileID: 0}
+  startDancing: 0
+  danceFrame: 0
+  frameCount: 0
+  Rshoulder: 0
+  Relbow: 0
+  Rhip: 0
+  Rknee: 0
 --- !u!1 &1590561605
 GameObject:
   m_ObjectHideFlags: 0

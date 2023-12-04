@@ -1,0 +1,47 @@
+@startuml
+hide footbox
+
+participant AESMessager
+participant DHMessager
+
+activate AESMessager
+activate DHMessager
+
+
+AESMessager-> AESMessager: SendData()
+activate AESMessager
+note left: function run when "send" button pressed
+AESMessager-> AESMessager: EncryptAndSendMessage()
+activate AESMessager
+AESMessager-> DHMessager: GetEstablishedConnections()
+DHMessager --> AESMessager: connections
+
+alt connections contains target receiver
+
+
+AESMessager-> AESMessager: GetAESKey()
+activate AESMessager
+return keyValue
+AESMessager-> AESMessager: EncryptandPost()
+activate AESMessager
+AESMessager-> AESMessager: EncryptStringToBytes_Aes()
+activate AESMessager
+return encrytped
+
+AESMessager-> AESMessager: PostMessageToLedger()
+activate AESMessager
+return 
+return 
+end
+
+
+AESMessager-> AESMessager: GetAllMessages()
+activate AESMessager
+note left: updates the User Interface with new messages
+return 
+
+
+return
+return
+return
+@enduml

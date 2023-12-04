@@ -58,6 +58,7 @@ public class DHMessager : MonoBehaviour
     private AsymmetricCipherKeyPair keyPair;
     public static DHParameters dHParameters;
     public static Dictionary<string, int> addressBook = new Dictionary<string, int>();
+    public static List<string> newAcceptedConnections = new List<string>();
 
 
 
@@ -82,47 +83,164 @@ public class DHMessager : MonoBehaviour
         
     }
 
-
+    /// <summary>
+    /// Initial creation of Diffie Hellman parameters and creates a user invite to establish connection
+    /// </summary>
     public void AShareParams()
     {
 
-        try
-        {
-            hashedReceiverUserName = ReceiverNameInputField.text.ToString();
 
-            // to-do: check if such a connection is pending or not
+        hashedReceiverUserName = ReceiverNameInputField.text.ToString();
+        if (!addressBook.ContainsKey(hashedReceiverUserName)) {
+            try
+            {
 
 
-            var generator = new DHParametersGenerator();
-            generator.Init(1024, 10, new SecureRandom());
-            DHParameters param = generator.GenerateParameters();
-            PostDHParametersAsString(param, hashedReceiverUserName + "-" + username + ".params");
-            // Generate key pair for Party A
-            var keyGen1 = GeneratorUtilities.GetKeyPairGenerator("DH");
-            var kgp1 = new DHKeyGenerationParameters(new SecureRandom(), param);
-            keyGen1.Init(kgp1);
-            AsymmetricCipherKeyPair A = keyGen1.GenerateKeyPair();
-            string stringDHStaticKeyPairPartyA = GetPublicKey(A);
-            Debug.Log("person A's public key is " + stringDHStaticKeyPairPartyA);
-            PostStaticPublicKey(stringDHStaticKeyPairPartyA, hashedReceiverUserName + "-" + username + ".A");  //post public static key
+                var generator = new DHParametersGenerator();
+                generator.Init(1024, 10, new SecureRandom());
+                DHParameters param = generator.GenerateParameters();
+                PostDHParametersAsString(param, hashedReceiverUserName + "-" + username + ".params");
+                // Generate key pair for Party A
+                var keyGen1 = GeneratorUtilities.GetKeyPairGenerator("DH");
+                var kgp1 = new DHKeyGenerationParameters(new SecureRandom(), param);
+                keyGen1.Init(kgp1);
+                AsymmetricCipherKeyPair A = keyGen1.GenerateKeyPair();
+                string stringDHStaticKeyPairPartyA = GetPublicKey(A);
+                Debug.Log("person A's public key is " + stringDHStaticKeyPairPartyA);
+                PostStaticPublicKey(stringDHStaticKeyPairPartyA, hashedReceiverUserName + "-" + username + ".A");  //post public static key
 
-            //save private key to wallet for this communication link
-            string privateKey = GetPrivateKey(A);
-            AddDHPrivateKeySQL(hashedReceiverUserName, privateKey);
-            UpdateInvtersInvitees();
-            popupWindow.SetActive(true);
-            windowMessage.text = "Successfully send invitation!" ;
+                //save private key to wallet for this communication link
+                string privateKey = GetPrivateKey(A);
+                AddDHPrivateKeySQL(hashedReceiverUserName, privateKey);
+                UpdateInvtersInvitees();
+                popupWindow.SetActive(true);
+                windowMessage.text = "Successfully send invitation!";
+            }
+            catch (Exception e)
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Failed to send invitation" + e;
+            }
         }
-        catch (Exception e)
+        else
         {
             popupWindow.SetActive(true);
-            windowMessage.text = "Failed to send invitation" + e;
+            windowMessage.text = "Invitation already exists";
         }
         
+    }
 
+    
+
+    /// <summary>
+    /// Accept a connection invite by creating DH private and public keys and calculating secret key
+    /// </summary>
+
+    public void BGetParamsAndCalcSecret()
+    {
+        string hashedInviterUserName = ReceiverNameInputField.text.ToString();
+        if (addressBook.ContainsKey(hashedInviterUserName) && addressBook[hashedInviterUserName] == 1)
+        {
+
+            try
+            {
+
+                string invalidPattern = "[^0-9A-Fa-f.-]";
+                hashedReceiverUserName = Regex.Replace(hashedReceiverUserName, invalidPattern, "");
+                DHParameters foundDHParams = GetDHParams(username + "-" + hashedInviterUserName + ".params", ledgerUrl);
+                var keyGen2 = GeneratorUtilities.GetKeyPairGenerator("DH");
+                var kgp2 = new DHKeyGenerationParameters(new SecureRandom(), foundDHParams);
+                keyGen2.Init(kgp2);
+                AsymmetricCipherKeyPair B = keyGen2.GenerateKeyPair();
+                string StaticKeyString = GetStaticKeyString(username + "-" + hashedInviterUserName + ".A", ledgerUrl);
+                Debug.Log("Found StaticKeyString of A by B is " + StaticKeyString);
+
+                // B calc
+                var importedKey = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
+                var internalKeyAgreeB = AgreementUtilities.GetBasicAgreement("DH");
+                internalKeyAgreeB.Init(B.Private);
+                string stringDHStaticKeyPairPartyB = GetPublicKey(B);
+                Debug.Log("person B's public key is " + stringDHStaticKeyPairPartyB);
+                PostStaticPublicKey(stringDHStaticKeyPairPartyB, username + "-" + hashedInviterUserName + ".B");  //post public static key
+                BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
+                //add to local wallet
+
+                AddAESKeyToWallet(hashedInviterUserName, Bans);
+                UpdateInvtersInvitees();
+                popupWindow.SetActive(true);
+                windowMessage.text = "Successfully confirmed connection!";
+
+            }
+            catch (Exception e)
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Failed to confirm invitation" + e;
+            }
+
+        }
+        else
+        {
+            popupWindow.SetActive(true);
+            windowMessage.text = "Invite does not exist";
+        }
 
     }
 
+    /// <summary>
+    /// Fully establish an accepted invite by getting invitee's public key and calculating secret key
+    /// </summary>
+
+    public void ACalculateSecret(string hashedReceiverUserName )
+    {
+        
+        if (addressBook.ContainsKey(hashedReceiverUserName) && addressBook[hashedReceiverUserName] == 2)
+        {
+            try
+            {
+                string invalidPattern = "[^0-9A-Fa-f.-]";
+
+                DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "-" + username + ".params", ledgerUrl);
+                string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "-" + username + ".B", ledgerUrl);
+                StaticKeyString = Regex.Replace(StaticKeyString, invalidPattern, "");
+                Debug.Log("Found StaticKeyString of B by A is " + StaticKeyString);
+                var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
+                var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
+                string myPrivateKey = GetDHPrivateKeySQL(hashedReceiverUserName);
+    
+                myPrivateKey = Regex.Replace(myPrivateKey, invalidPattern, "");
+
+                AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, myPrivateKey);
+                internalKeyAgreeA.Init(A.Private);
+                BigInteger Aans = internalKeyAgreeA.CalculateAgreement(importedKeyA);
+                Debug.Log("A ans is " + Aans.ToString());
+                //add to local wallet if no such connection exists
+
+                AddAESKeyToWallet(hashedReceiverUserName, Aans);
+                UpdateInvtersInvitees();
+                popupWindow.SetActive(true);
+                windowMessage.text = "Successfully established connection!";
+
+
+            }
+            catch (Exception e)
+            {
+                popupWindow.SetActive(true);
+                windowMessage.text = "Failed to establish invitation" + e;
+            }
+
+        }
+        else
+        {
+            popupWindow.SetActive(true);
+            windowMessage.text = "Accepted invite does not exist";
+        }
+    }
+
+    /// <summary>
+    /// Add a key to PSQL wallet
+    /// </summary>
+    /// <param name="receiver"> the name of the connection receiver the key is for</param>
+    /// <param name="key">the key value</param>
     public void AddDHPrivateKeySQL(string receiver, string key)
     {
         string username = userdatapersist.Instance.verifiedUser;
@@ -150,7 +268,15 @@ public class DHMessager : MonoBehaviour
         }
     }
 
-    public string GetDHPrivateKeySQL(string receiver) {
+
+
+    /// <summary>
+    /// retrieve the private DH key for a certain connection
+    /// </summary>
+    /// <param name="receiver">user name of the connection retrieving for</param>
+    /// <returns></returns>
+    public string GetDHPrivateKeySQL(string receiver)
+    {
 
         string username = userdatapersist.Instance.verifiedUser;
         string password = userdatapersist.Instance.verifiedPassword;
@@ -193,14 +319,28 @@ public class DHMessager : MonoBehaviour
 
     }
 
+
+    /// <summary>
+    /// Updates the User Interface of the current connections and state of each connection
+    /// </summary>
     public void UpdateInvtersInvitees()
     {
+
+
+       
         addressBook.Clear();
         GetEstablishedConnections(addressBook);  //value is 3
-        GetDHAcceptedInvites(addressBook,username, ledgerUrl);  //value is 2
-        GetDHSentInvites(addressBook,username, ledgerUrl);  //value is 0
-        GetDHInvites(addressBook,username, ledgerUrl); //value is 1
-       
+        GetDHAcceptedInvites(addressBook, username, ledgerUrl);  //value is 2
+        GetDHSentInvites(addressBook, username, ledgerUrl);  //value is 0
+        GetDHInvites(addressBook, username, ledgerUrl); //value is 1
+
+        
+
+
+
+
+
+
         //parse hash table into the different strings lists
         int i = 1;
         int j = 1;
@@ -223,11 +363,14 @@ public class DHMessager : MonoBehaviour
             {
                 acceptedInviteesResult += ("\n" + j + ". " + key + "\n");
                 j++;
-            }else if (value == 1)
+                newAcceptedConnections.Add(key);
+            }
+            else if (value == 1)
             {
                 receivedInvitations += ("\n" + k + ". " + key + "\n");
                 k++;
-            }else if (value == 0)
+            }
+            else if (value == 0)
             {
                 sentInvitesResult += ("\n" + i + ". (pending) " + key + "\n");
                 i++;
@@ -251,15 +394,36 @@ public class DHMessager : MonoBehaviour
         receivedInvites.text = receivedInvitations;
         acceptedInvites.text = acceptedInviteesResult;
         connections.text = sentInvitesResult;
-
+        AutoEstablishAcceptedConnections(newAcceptedConnections);
+        newAcceptedConnections.Clear();
     }
 
-    public void GetEstablishedConnections(Dictionary<string,int>addressBook)
+
+
+    public void AutoEstablishAcceptedConnections(List<string> acceptedConnections)
     {
-        
+        foreach (string key in acceptedConnections)
+        {
+            ACalculateSecret(key);
+            popupWindow.SetActive(true);
+            windowMessage.text = "Successfully established new connection with " + key;
+        }
+
+        acceptedConnections.Clear();
+    }
+
+
+    /// <summary>
+    /// Gets all the established connections the user has
+    /// </summary>
+    /// <param name="addressBook">Map to store the connection and the state of the connection</param>
+
+    public void GetEstablishedConnections(Dictionary<string, int> addressBook)
+    {
+
         string username = userdatapersist.Instance.verifiedUser;
         string password = userdatapersist.Instance.verifiedPassword;
-        
+
         try
         {
             using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
@@ -276,7 +440,7 @@ public class DHMessager : MonoBehaviour
                             Debug.Log("(SQL server) Coonection found with id " + reader["receiver_hash"]);
 
                             addressBook.Add(reader["receiver_hash"].ToString(), 3);
-                               
+
                         }
                         reader.Close();
                     }
@@ -290,97 +454,14 @@ public class DHMessager : MonoBehaviour
             Debug.Log("(SQL Server) Error getting private key " + e);
         }
 
-       
-    }
-
-    public void BGetParamsAndCalcSecret()
-    {
-
-        try
-        {
-            string hashedInviterUserName = ReceiverNameInputField.text.ToString();
-            string invalidPattern = "[^0-9A-Fa-f.-]";
-            hashedReceiverUserName = Regex.Replace(hashedReceiverUserName, invalidPattern, "");
-            DHParameters foundDHParams = GetDHParams(username + "-" + hashedInviterUserName + ".params", ledgerUrl);
-            var keyGen2 = GeneratorUtilities.GetKeyPairGenerator("DH");
-            var kgp2 = new DHKeyGenerationParameters(new SecureRandom(), foundDHParams);
-            keyGen2.Init(kgp2);
-            AsymmetricCipherKeyPair B = keyGen2.GenerateKeyPair();
-            string StaticKeyString = GetStaticKeyString(username + "-" + hashedInviterUserName + ".A", ledgerUrl);
-            Debug.Log("Found StaticKeyString of A by B is " + StaticKeyString);
-
-            // B calc
-            var importedKey = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
-            var internalKeyAgreeB = AgreementUtilities.GetBasicAgreement("DH");
-            internalKeyAgreeB.Init(B.Private);
-            string stringDHStaticKeyPairPartyB = GetPublicKey(B);
-            Debug.Log("person B's public key is " + stringDHStaticKeyPairPartyB);
-            PostStaticPublicKey(stringDHStaticKeyPairPartyB, username + "-" + hashedInviterUserName + ".B");  //post public static key
-            BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
-            //add to local wallet
-           
-                AddAESKeyToWallet(hashedInviterUserName, Bans);
-                UpdateInvtersInvitees();
-                popupWindow.SetActive(true);
-                windowMessage.text = "Successfully confirmed connection!";
-            
-        }
-        catch( Exception e)
-        {
-            popupWindow.SetActive(true);
-            windowMessage.text = "Failed to confirm invitation" + e;
-        }
-        
-
 
     }
 
-    
-
-    public void ACalculateSecret()
-    {
-
-        try
-        {
-            string invalidPattern = "[^0-9A-Fa-f.-]";
-            hashedReceiverUserName = ReceiverNameInputField.text.ToString();
-            DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "-" + username + ".params", ledgerUrl);
-            string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "-" + username + ".B", ledgerUrl);
-            StaticKeyString = Regex.Replace(StaticKeyString, invalidPattern, "");
-            Debug.Log("Found StaticKeyString of B by A is " + StaticKeyString);
-            var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
-            var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
-            string myPrivateKey = GetDHPrivateKeySQL(hashedReceiverUserName);
-            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
-            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
-            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
-            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
-            Debug.Log("MY PRIVATE KEY IS " + myPrivateKey);
-            myPrivateKey = Regex.Replace(myPrivateKey, invalidPattern, "");
-
-            AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, myPrivateKey);
-            internalKeyAgreeA.Init(A.Private);
-            BigInteger Aans = internalKeyAgreeA.CalculateAgreement(importedKeyA);
-            Debug.Log("A ans is " + Aans.ToString());
-            //add to local wallet if no such connection exists
-           
-                AddAESKeyToWallet(hashedReceiverUserName, Aans);
-                UpdateInvtersInvitees();
-                popupWindow.SetActive(true);
-                windowMessage.text = "Successfully established connection!";
-            
-            
-        }
-        catch (Exception e )
-        {
-            popupWindow.SetActive(true);
-            windowMessage.text = "Failed to establish invitation" + e;
-        }
-        
-
-    }
-
-    
+    /// <summary>
+    /// Add key to PSQL table in wallet
+    /// </summary>
+    /// <param name="connectionName">user name of associated key</param>
+    /// <param name="keyVal">key value</param>
     public void AddAESKeyToWallet(string connectionName, BigInteger keyVal)
     {
         string username = userdatapersist.Instance.verifiedUser;
@@ -413,7 +494,12 @@ public class DHMessager : MonoBehaviour
 
     }
 
-    // This returns A
+    /// <summary>
+    /// Get public key from Key Pair 
+    /// </summary>
+    /// <param name="keyPair">Cypher key pair</param>
+    /// <returns>public key</returns>
+    /// <exception cref="NullReferenceException"></exception>
     public string GetPublicKey(AsymmetricCipherKeyPair keyPair)
     {
         var dhPublicKeyParameters = keyPair.Public as DHPublicKeyParameters;
@@ -424,7 +510,13 @@ public class DHMessager : MonoBehaviour
         throw new NullReferenceException("The key pair provided is not a valid DH keypair.");
     }
 
-    // This returns a
+
+    /// <summary>
+    /// Get private key from Key Pair 
+    /// </summary>
+    /// <param name="keyPair">Cypher key pair</param>
+    /// <returns>private key</returns>
+    /// <exception cref="NullReferenceException"></exception>
     public string GetPrivateKey(AsymmetricCipherKeyPair keyPair)
     {
         var dhPrivateKeyParameters = keyPair.Private as DHPrivateKeyParameters;
@@ -434,23 +526,21 @@ public class DHMessager : MonoBehaviour
         }
         throw new NullReferenceException("The key pair provided is not a valid DH keypair.");
     }
-
+    /// <summary>
+    /// Create cypher key pair from Diffie Hellman parameters
+    /// </summary>
+    /// <param name="P">prime value of Diffie Hellman parameter</param>
+    /// <param name="privateKeyString">private key</param>
+    /// <returns>cypher key pair</returns>
+    /// <exception cref="ArgumentException"></exception>
     public AsymmetricCipherKeyPair GetKeyPairFromPrivateKeyString(DHParameters P, string privateKeyString){
     try
     {
-        // Parse the string and convert it to a BigInteger
+        
         BigInteger xValue = new BigInteger(privateKeyString);
-
-        // Create DH key parameters
-        var dhParameters = P; // Replace with your actual DH parameters
-
-        // Create DH private key parameters
+        var dhParameters = P; 
         var dhPrivateKeyParameters = new DHPrivateKeyParameters(xValue, dhParameters);
-
-        // Create a DH public key from the private key
         var dhPublicKeyParameters = new DHPublicKeyParameters(dhPrivateKeyParameters.X.ModPow(dhParameters.G, dhParameters.P), dhParameters);
-
-        // Create an AsymmetricCipherKeyPair
         var keyPair = new AsymmetricCipherKeyPair(dhPublicKeyParameters, dhPrivateKeyParameters);
 
         return keyPair;
@@ -462,7 +552,11 @@ public class DHMessager : MonoBehaviour
     }
 }
 
-
+    /// <summary>
+    /// Converts public key to byte string
+    /// </summary>
+    /// <param name="publicKey">public key</param>
+    /// <returns>public key bytes in string</returns>
     public static string PublicKeyToString(AsymmetricKeyParameter publicKey)
     {
         SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(publicKey);
@@ -473,7 +567,11 @@ public class DHMessager : MonoBehaviour
 
         return publicKeyString;
     }
-
+    /// <summary>
+    /// converts byte string ot public key
+    /// </summary>
+    /// <param name="publicKeyBase64">byte string of key</param>
+    /// <returns>key</returns>
     public static AsymmetricKeyParameter PublicStaticKeyFromString(string publicKeyBase64)
     {
         try
@@ -498,7 +596,11 @@ public class DHMessager : MonoBehaviour
     }
 
     
-
+    /// <summary>
+    /// Post public key to ledger
+    /// </summary>
+    /// <param name="input">key value</param>
+    /// <param name="schemaName">name/type of ledger post</param>
     public async void PostStaticPublicKey(string input, string schemaName)
     {
         try

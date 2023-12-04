@@ -1,0 +1,82 @@
+@startuml
+hide footbox
+
+participant DHMessager_Inviter_A
+participant Ledger
+participant DHMessager_Invitee_B
+
+
+activate Ledger
+
+
+activate DHMessager_Inviter_A
+DHMessager_Inviter_A-> DHMessager_Inviter_A: AShareParams()
+activate DHMessager_Inviter_A
+note left: function run when "invite" button pressed
+DHMessager_Inviter_A-> DHMessager_Inviter_A: GenerateParameters()
+activate DHMessager_Inviter_A
+return
+
+
+DHMessager_Inviter_A-> Ledger: PostDHParameters()
+Ledger --> DHMessager_Inviter_A
+DHMessager_Inviter_A-> DHMessager_Inviter_A: GenerateKeyPair()
+activate DHMessager_Inviter_A
+return AsymmetricCipherKeyPair
+DHMessager_Inviter_A-> Ledger: PostStaticPublicKey()
+Ledger --> DHMessager_Inviter_A
+
+DHMessager_Inviter_A-> DHMessager_Inviter_A: AddDHPrivateKeySQL()
+activate DHMessager_Inviter_A
+return 
+return
+
+
+
+activate DHMessager_Invitee_B
+DHMessager_Invitee_B-> DHMessager_Invitee_B: BGetParamsAndCalcSecret()
+activate DHMessager_Invitee_B
+note right: function run when "accept" button pressed
+DHMessager_Invitee_B-> Ledger: GetDHParams()
+Ledger -> DHMessager_Invitee_B: foundDHParamms
+DHMessager_Invitee_B-> DHMessager_Invitee_B: DHKeyGenerationParameters(foundDHParams)
+activate DHMessager_Invitee_B
+return keyGeneratorPair
+DHMessager_Invitee_B-> Ledger: GetStaticKeyString()
+Ledger -> DHMessager_Invitee_B: StaticKeyString
+DHMessager_Invitee_B-> DHMessager_Invitee_B:DHPublicKeyParameters()
+activate DHMessager_Invitee_B
+return 
+DHMessager_Invitee_B-> Ledger:PostStaticPublicKey()
+Ledger --> DHMessager_Invitee_B
+DHMessager_Invitee_B-> DHMessager_Invitee_B: CalculateAgreement
+note right: calculate the symmetric key
+activate DHMessager_Invitee_B
+return Bans
+DHMessager_Invitee_B-> DHMessager_Invitee_B: AddAESKeyToWallet
+activate DHMessager_Invitee_B
+return 
+return
+
+
+
+DHMessager_Inviter_A-> DHMessager_Inviter_A: ACalculateSecret()
+activate DHMessager_Inviter_A
+note left: function run automatically when user goes to messaging screen
+DHMessager_Inviter_A-> Ledger: GetDHParams()
+Ledger -> DHMessager_Inviter_A: foundDHParamms
+DHMessager_Inviter_A-> Ledger: GetStaticKeyString()
+Ledger -> DHMessager_Inviter_A: StaticKeyString
+DHMessager_Inviter_A-> DHMessager_Inviter_A: GetDHPrivateKeySQL()
+activate DHMessager_Inviter_A
+return myPrivateKey
+DHMessager_Inviter_A-> DHMessager_Inviter_A: CalculateAgreement
+note left: calculate the symmetric key
+activate DHMessager_Inviter_A
+return Aans
+DHMessager_Inviter_A-> DHMessager_Inviter_A: AddAESKeyToWallet
+activate DHMessager_Inviter_A
+return 
+return
+
+@enduml
