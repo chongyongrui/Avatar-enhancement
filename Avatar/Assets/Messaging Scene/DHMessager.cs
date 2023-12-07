@@ -33,18 +33,19 @@ using UnityEngine.SceneManagement;
 
 public class DHMessager : MonoBehaviour
 {
-
     public static DHMessager instance;
     public string username;
     public static byte[] userPublicKey;
+
     [SerializeField] public TMP_InputField ReceiverNameInputField;
+
     //[SerializeField] public TMP_InputField MessageString;
     public string ReceiverName;
     public string IPAddress;
     public string ledgerUrl;
     [SerializeField] GameObject popupWindow;
     [SerializeField] GameObject ConnectionsPanel;
-    [SerializeField] GameObject MessagesPanel; 
+    [SerializeField] GameObject MessagesPanel;
     [SerializeField] TMP_Text windowMessage;
     [SerializeField] TMP_Text receivedInvites;
     [SerializeField] TMP_Text acceptedInvites;
@@ -61,8 +62,6 @@ public class DHMessager : MonoBehaviour
     public static List<string> newAcceptedConnections = new List<string>();
 
 
-
-
     private void Start()
     {
         IPAddress = userdatapersist.Instance.IPAdd;
@@ -76,11 +75,10 @@ public class DHMessager : MonoBehaviour
         {
             Debug.Log("Unable to get username from Login page.");
         }
+
         issuerName.text = username;
         UpdateInvtersInvitees();
         InvokeRepeating("UpdateInvtersInvitees", 10.0f, 5.0f);
-        
-        
     }
 
     /// <summary>
@@ -88,14 +86,11 @@ public class DHMessager : MonoBehaviour
     /// </summary>
     public void AShareParams()
     {
-
-
         hashedReceiverUserName = ReceiverNameInputField.text.ToString();
-        if (!addressBook.ContainsKey(hashedReceiverUserName)) {
+        if (!addressBook.ContainsKey(hashedReceiverUserName))
+        {
             try
             {
-
-
                 var generator = new DHParametersGenerator();
                 generator.Init(1024, 10, new SecureRandom());
                 DHParameters param = generator.GenerateParameters();
@@ -107,7 +102,8 @@ public class DHMessager : MonoBehaviour
                 AsymmetricCipherKeyPair A = keyGen1.GenerateKeyPair();
                 string stringDHStaticKeyPairPartyA = GetPublicKey(A);
                 Debug.Log("person A's public key is " + stringDHStaticKeyPairPartyA);
-                PostStaticPublicKey(stringDHStaticKeyPairPartyA, hashedReceiverUserName + "-" + username + ".A");  //post public static key
+                PostStaticPublicKey(stringDHStaticKeyPairPartyA,
+                    hashedReceiverUserName + "-" + username + ".A"); //post public static key
 
                 //save private key to wallet for this communication link
                 string privateKey = GetPrivateKey(A);
@@ -127,24 +123,19 @@ public class DHMessager : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Invitation already exists";
         }
-        
     }
 
-    
 
     /// <summary>
     /// Accept a connection invite by creating DH private and public keys and calculating secret key
     /// </summary>
-
     public void BGetParamsAndCalcSecret()
     {
         string hashedInviterUserName = ReceiverNameInputField.text.ToString();
         if (addressBook.ContainsKey(hashedInviterUserName) && addressBook[hashedInviterUserName] == 1)
         {
-
             try
             {
-
                 string invalidPattern = "[^0-9A-Fa-f.-]";
                 hashedReceiverUserName = Regex.Replace(hashedReceiverUserName, invalidPattern, "");
                 DHParameters foundDHParams = GetDHParams(username + "-" + hashedInviterUserName + ".params", ledgerUrl);
@@ -161,7 +152,8 @@ public class DHMessager : MonoBehaviour
                 internalKeyAgreeB.Init(B.Private);
                 string stringDHStaticKeyPairPartyB = GetPublicKey(B);
                 Debug.Log("person B's public key is " + stringDHStaticKeyPairPartyB);
-                PostStaticPublicKey(stringDHStaticKeyPairPartyB, username + "-" + hashedInviterUserName + ".B");  //post public static key
+                PostStaticPublicKey(stringDHStaticKeyPairPartyB,
+                    username + "-" + hashedInviterUserName + ".B"); //post public static key
                 BigInteger Bans = internalKeyAgreeB.CalculateAgreement(importedKey);
                 //add to local wallet
 
@@ -169,44 +161,41 @@ public class DHMessager : MonoBehaviour
                 UpdateInvtersInvitees();
                 popupWindow.SetActive(true);
                 windowMessage.text = "Successfully confirmed connection!";
-
             }
             catch (Exception e)
             {
                 popupWindow.SetActive(true);
                 windowMessage.text = "Failed to confirm invitation" + e;
             }
-
         }
         else
         {
             popupWindow.SetActive(true);
             windowMessage.text = "Invite does not exist";
         }
-
     }
 
     /// <summary>
     /// Fully establish an accepted invite by getting invitee's public key and calculating secret key
     /// </summary>
-
-    public void ACalculateSecret(string hashedReceiverUserName )
+    public void ACalculateSecret()
     {
-        
+        string hashedReceiverUserName = ReceiverNameInputField.text.ToString();
         if (addressBook.ContainsKey(hashedReceiverUserName) && addressBook[hashedReceiverUserName] == 2)
         {
             try
             {
                 string invalidPattern = "[^0-9A-Fa-f.-]";
 
-                DHParameters foundDHParams = GetDHParams(hashedReceiverUserName + "-" + username + ".params", ledgerUrl);
+                DHParameters foundDHParams =
+                    GetDHParams(hashedReceiverUserName + "-" + username + ".params", ledgerUrl);
                 string StaticKeyString = GetStaticKeyString(hashedReceiverUserName + "-" + username + ".B", ledgerUrl);
                 StaticKeyString = Regex.Replace(StaticKeyString, invalidPattern, "");
                 Debug.Log("Found StaticKeyString of B by A is " + StaticKeyString);
                 var importedKeyA = new DHPublicKeyParameters(new BigInteger(StaticKeyString), foundDHParams);
                 var internalKeyAgreeA = AgreementUtilities.GetBasicAgreement("DH");
                 string myPrivateKey = GetDHPrivateKeySQL(hashedReceiverUserName);
-    
+
                 myPrivateKey = Regex.Replace(myPrivateKey, invalidPattern, "");
 
                 AsymmetricCipherKeyPair A = GetKeyPairFromPrivateKeyString(foundDHParams, myPrivateKey);
@@ -219,15 +208,12 @@ public class DHMessager : MonoBehaviour
                 UpdateInvtersInvitees();
                 popupWindow.SetActive(true);
                 windowMessage.text = "Successfully established connection!";
-
-
             }
             catch (Exception e)
             {
                 popupWindow.SetActive(true);
                 windowMessage.text = "Failed to establish invitation" + e;
             }
-
         }
         else
         {
@@ -247,9 +233,10 @@ public class DHMessager : MonoBehaviour
         string password = userdatapersist.Instance.verifiedPassword;
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " +
+                                                                      username + ";Password=" + password +
+                                                                      ";Database=" + username + "wallet;"))
             {
-
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
@@ -257,9 +244,8 @@ public class DHMessager : MonoBehaviour
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) DH_Private_Keys added with id: " + receiver + " with key val  " + key);
                 }
+
                 connection.Close();
-
-
             }
         }
         catch (Exception e)
@@ -269,7 +255,6 @@ public class DHMessager : MonoBehaviour
     }
 
 
-
     /// <summary>
     /// retrieve the private DH key for a certain connection
     /// </summary>
@@ -277,13 +262,14 @@ public class DHMessager : MonoBehaviour
     /// <returns></returns>
     public string GetDHPrivateKeySQL(string receiver)
     {
-
         string username = userdatapersist.Instance.verifiedUser;
         string password = userdatapersist.Instance.verifiedPassword;
         string foundKey = null;
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " +
+                                                                      username + ";Password=" + password +
+                                                                      ";Database=" + username + "wallet;"))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
@@ -296,17 +282,17 @@ public class DHMessager : MonoBehaviour
                             if (reader["key_val"] == null)
                             {
                                 Debug.Log("(SQL server) no prior private key data found");
-
                             }
                             else
                             {
                                 foundKey = reader["key_val"].ToString();
                             }
                         }
+
                         reader.Close();
                     }
-                    connection.Close();
 
+                    connection.Close();
                 }
             }
         }
@@ -316,7 +302,6 @@ public class DHMessager : MonoBehaviour
         }
 
         return foundKey;
-
     }
 
 
@@ -325,20 +310,11 @@ public class DHMessager : MonoBehaviour
     /// </summary>
     public void UpdateInvtersInvitees()
     {
-
-
-       
         addressBook.Clear();
-        GetEstablishedConnections(addressBook);  //value is 3
-        GetDHAcceptedInvites(addressBook, username, ledgerUrl);  //value is 2
-        GetDHSentInvites(addressBook, username, ledgerUrl);  //value is 0
+        GetEstablishedConnections(addressBook); //value is 3
+        GetDHAcceptedInvites(addressBook, username, ledgerUrl); //value is 2
+        GetDHSentInvites(addressBook, username, ledgerUrl); //value is 0
         GetDHInvites(addressBook, username, ledgerUrl); //value is 1
-
-        
-
-
-
-
 
 
         //parse hash table into the different strings lists
@@ -381,10 +357,12 @@ public class DHMessager : MonoBehaviour
         {
             sentInvitesResult += "none found";
         }
+
         if (j == 1)
         {
             acceptedInviteesResult += "none found";
         }
+
         if (k == 1)
         {
             receivedInvitations += "none found";
@@ -394,22 +372,6 @@ public class DHMessager : MonoBehaviour
         receivedInvites.text = receivedInvitations;
         acceptedInvites.text = acceptedInviteesResult;
         connections.text = sentInvitesResult;
-        AutoEstablishAcceptedConnections(newAcceptedConnections);
-        newAcceptedConnections.Clear();
-    }
-
-
-
-    public void AutoEstablishAcceptedConnections(List<string> acceptedConnections)
-    {
-        foreach (string key in acceptedConnections)
-        {
-            ACalculateSecret(key);
-            popupWindow.SetActive(true);
-            windowMessage.text = "Successfully established new connection with " + key;
-        }
-
-        acceptedConnections.Clear();
     }
 
 
@@ -417,16 +379,16 @@ public class DHMessager : MonoBehaviour
     /// Gets all the established connections the user has
     /// </summary>
     /// <param name="addressBook">Map to store the connection and the state of the connection</param>
-
     public void GetEstablishedConnections(Dictionary<string, int> addressBook)
     {
-
         string username = userdatapersist.Instance.verifiedUser;
         string password = userdatapersist.Instance.verifiedPassword;
 
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " +
+                                                                      username + ";Password=" + password +
+                                                                      ";Database=" + username + "wallet;"))
             {
                 connection.Open();
                 using (var command = connection.CreateCommand())
@@ -436,16 +398,15 @@ public class DHMessager : MonoBehaviour
                     {
                         while (reader.Read())
                         {
-
                             Debug.Log("(SQL server) Coonection found with id " + reader["receiver_hash"]);
 
                             addressBook.Add(reader["receiver_hash"].ToString(), 3);
-
                         }
+
                         reader.Close();
                     }
-                    connection.Close();
 
+                    connection.Close();
                 }
             }
         }
@@ -453,8 +414,6 @@ public class DHMessager : MonoBehaviour
         {
             Debug.Log("(SQL Server) Error getting private key " + e);
         }
-
-
     }
 
     /// <summary>
@@ -468,30 +427,25 @@ public class DHMessager : MonoBehaviour
         string password = userdatapersist.Instance.verifiedPassword;
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " + username + ";Password=" + password + ";Database=" + username + "wallet;"))
+            using (NpgsqlConnection connection = new NpgsqlConnection("Server=localhost;Port=5432;User Id= " +
+                                                                      username + ";Password=" + password +
+                                                                      ";Database=" + username + "wallet;"))
             {
-
                 connection.Open();
                 using (var command = connection.CreateCommand())
                 {
-                    command.CommandText = "INSERT into AES_Keys VALUES ('" + connectionName+ "'," + keyVal +");";
+                    command.CommandText = "INSERT into AES_Keys VALUES ('" + connectionName + "'," + keyVal + ");";
                     command.ExecuteNonQuery();
                     Debug.Log("(SQL server) AESKey added with id: " + connectionName + " with key val  " + keyVal);
                 }
+
                 connection.Close();
-
-
             }
         }
         catch (Exception e)
         {
             Debug.Log("(SQL Server) Error adding key " + e);
         }
-
-
-
-
-
     }
 
     /// <summary>
@@ -507,6 +461,7 @@ public class DHMessager : MonoBehaviour
         {
             return dhPublicKeyParameters.Y.ToString();
         }
+
         throw new NullReferenceException("The key pair provided is not a valid DH keypair.");
     }
 
@@ -524,8 +479,10 @@ public class DHMessager : MonoBehaviour
         {
             return dhPrivateKeyParameters.X.ToString();
         }
+
         throw new NullReferenceException("The key pair provided is not a valid DH keypair.");
     }
+
     /// <summary>
     /// Create cypher key pair from Diffie Hellman parameters
     /// </summary>
@@ -533,24 +490,26 @@ public class DHMessager : MonoBehaviour
     /// <param name="privateKeyString">private key</param>
     /// <returns>cypher key pair</returns>
     /// <exception cref="ArgumentException"></exception>
-    public AsymmetricCipherKeyPair GetKeyPairFromPrivateKeyString(DHParameters P, string privateKeyString){
-    try
+    public AsymmetricCipherKeyPair GetKeyPairFromPrivateKeyString(DHParameters P, string privateKeyString)
     {
-        
-        BigInteger xValue = new BigInteger(privateKeyString);
-        var dhParameters = P; 
-        var dhPrivateKeyParameters = new DHPrivateKeyParameters(xValue, dhParameters);
-        var dhPublicKeyParameters = new DHPublicKeyParameters(dhPrivateKeyParameters.X.ModPow(dhParameters.G, dhParameters.P), dhParameters);
-        var keyPair = new AsymmetricCipherKeyPair(dhPublicKeyParameters, dhPrivateKeyParameters);
+        try
+        {
+            BigInteger xValue = new BigInteger(privateKeyString);
+            var dhParameters = P;
+            var dhPrivateKeyParameters = new DHPrivateKeyParameters(xValue, dhParameters);
+            var dhPublicKeyParameters =
+                new DHPublicKeyParameters(dhPrivateKeyParameters.X.ModPow(dhParameters.G, dhParameters.P),
+                    dhParameters);
+            var keyPair = new AsymmetricCipherKeyPair(dhPublicKeyParameters, dhPrivateKeyParameters);
 
-        return keyPair;
+            return keyPair;
+        }
+        catch (Exception ex)
+        {
+            // Handle any parsing or conversion errors
+            throw new ArgumentException("Invalid private key string", ex);
+        }
     }
-    catch (Exception ex)
-    {
-        // Handle any parsing or conversion errors
-        throw new ArgumentException("Invalid private key string", ex);
-    }
-}
 
     /// <summary>
     /// Converts public key to byte string
@@ -567,6 +526,7 @@ public class DHMessager : MonoBehaviour
 
         return publicKeyString;
     }
+
     /// <summary>
     /// converts byte string ot public key
     /// </summary>
@@ -595,7 +555,7 @@ public class DHMessager : MonoBehaviour
         }
     }
 
-    
+
     /// <summary>
     /// Post public key to ledger
     /// </summary>
@@ -613,13 +573,11 @@ public class DHMessager : MonoBehaviour
             string key1 = input.Substring(0, halfLength);
             string key2 = input.Substring(halfLength);
 
-            
-               
-                using (HttpClient httpClient = new HttpClient())
-                {
 
-                    // Prepare the JSON payload
-                    string jsonPayload = $@"{{
+            using (HttpClient httpClient = new HttpClient())
+            {
+                // Prepare the JSON payload
+                string jsonPayload = $@"{{
                 ""attributes"": [
                     ""1.{key1}"",
                     ""2.{key2}""   
@@ -630,45 +588,43 @@ public class DHMessager : MonoBehaviour
                 ""schema_version"": ""3.2""
             }}";
 
-                    // Set headers
-                    httpClient.DefaultRequestHeaders.Accept.Clear();
-                    httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                // Set headers
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(
+                    new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-                    // Create the request content
-                    StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                // Create the request content
+                StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-                    // Send the POST request
-                    HttpResponseMessage response = await httpClient.PostAsync(url, content);
+                // Send the POST request
+                HttpResponseMessage response = await httpClient.PostAsync(url, content);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string responseBody = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(responseBody);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Request failed with status code: {response.StatusCode}");
-                    }
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine(responseBody);
                 }
-            
-
-        } catch(Exception ex)
+                else
+                {
+                    Console.WriteLine($"Request failed with status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (Exception ex)
         {
             Debug.Log(ex.Message);
             popupWindow.SetActive(true);
             windowMessage.text = "Failed to post to ledger! Ensure ACA-Py agent has loaded!";
         }
-        
     }
 
 
-
-    public void GetDHInvites(Dictionary<string, int> addressBook,string username, string ledgerUrl)
+    public void GetDHInvites(Dictionary<string, int> addressBook, string username, string ledgerUrl)
     {
-        
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl =
+                $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -678,20 +634,19 @@ public class DHMessager : MonoBehaviour
 
                 foreach (var transaction in transactions)
                 {
-
                     var responseData = transaction["txn"]["data"]["data"];
                     var type = responseData["version"];
                     var credName = responseData["name"];
                     var attributes = responseData["attr_names"];
 
-                    if (type.ToString() == "3.1" ) // found a DH paramter that is to connect to you
+                    if (type.ToString() == "3.1") // found a DH paramter that is to connect to you
                     {
                         string target = credName.ToString();
                         string[] words = target.Split("-");
                         string sender = words[1].Split(".")[0];
                         string stage = words[1].Split(".")[1];
                         string receiver = words[0];
-                        
+
                         if (receiver == username)
                         {
                             string[] vals = words[1].Split(".");
@@ -700,10 +655,8 @@ public class DHMessager : MonoBehaviour
                                 addressBook.Add(vals[0], 1);
                             }
                         }
-                        
                     }
                 }
-
             }
             else
             {
@@ -716,16 +669,15 @@ public class DHMessager : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Error parsing transactions!";
         }
-
     }
 
 
     public void GetDHAcceptedInvites(Dictionary<string, int> addressBook, string username, string ledgerUrl)
     {
-        
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl =
+                $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -735,7 +687,6 @@ public class DHMessager : MonoBehaviour
 
                 foreach (var transaction in transactions)
                 {
-
                     var responseData = transaction["txn"]["data"]["data"];
                     var type = responseData["version"];
                     var credName = responseData["name"];
@@ -743,13 +694,13 @@ public class DHMessager : MonoBehaviour
 
                     if (type.ToString() == "3.2") // found a DH paramter that is to connect to you
                     {
-
                         string target = credName.ToString();
                         string[] words = target.Split("-");
                         string sender = words[1].Split(".")[0];
                         string stage = words[1].Split(".")[1];
                         string receiver = words[0];
-                        Debug.Log("finding accepted invites sender and receiver of params is " + sender + " to " + receiver + "in state " + stage);
+                        Debug.Log("finding accepted invites sender and receiver of params is " + sender + " to " +
+                                  receiver + "in state " + stage);
                         if (sender == username && stage == "B")
                         {
                             if (!addressBook.ContainsKey(words[0]))
@@ -757,10 +708,8 @@ public class DHMessager : MonoBehaviour
                                 addressBook.Add(words[0], 2);
                             }
                         }
-
                     }
                 }
-
             }
             else
             {
@@ -773,17 +722,14 @@ public class DHMessager : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Error parsing transactions!";
         }
-
-        
-
     }
 
     public void GetDHSentInvites(Dictionary<string, int> addressBook, string username, string ledgerUrl)
     {
-        
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl =
+                $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -793,7 +739,6 @@ public class DHMessager : MonoBehaviour
 
                 foreach (var transaction in transactions)
                 {
-
                     var responseData = transaction["txn"]["data"]["data"];
                     var type = responseData["version"];
                     var credName = responseData["name"];
@@ -805,7 +750,8 @@ public class DHMessager : MonoBehaviour
                         string[] words = target.Split("-");
                         string sender = words[1].Split(".")[0];
                         string receiver = words[0];
-                        Debug.Log("finding sent invites sender and receiver of params is " + sender + " to " + receiver);
+                        Debug.Log("finding sent invites sender and receiver of params is " + sender + " to " +
+                                  receiver);
                         if (sender == username)
                         {
                             if (!addressBook.ContainsKey(words[0]))
@@ -813,10 +759,8 @@ public class DHMessager : MonoBehaviour
                                 addressBook.Add(words[0], 0);
                             }
                         }
-
                     }
                 }
-
             }
             else
             {
@@ -829,16 +773,14 @@ public class DHMessager : MonoBehaviour
             popupWindow.SetActive(true);
             windowMessage.text = "Error parsing transactions!";
         }
-
-       
     }
 
     public DHParameters GetDHParams(string username, string ledgerUrl)
     {
-
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl =
+                $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -848,20 +790,19 @@ public class DHMessager : MonoBehaviour
 
                 foreach (var transaction in transactions)
                 {
-
                     var responseData = transaction["txn"]["data"]["data"];
                     var type = responseData["version"];
                     var credName = responseData["name"];
                     var attributes = responseData["attr_names"];
 
-                    if (type.ToString() == "3.1" && credName.ToString() == username) // found a DH paramter that is to connect to you
+                    if (type.ToString() == "3.1" &&
+                        credName.ToString() == username) // found a DH paramter that is to connect to you
                     {
                         Debug.Log("The found attributes are " + attributes.ToString());
                         DHParameters foundDHParams = ExtractDHParameters(attributes.ToString());
                         return foundDHParams;
                     }
                 }
-
             }
             else
             {
@@ -876,16 +817,15 @@ public class DHMessager : MonoBehaviour
         }
 
         return null;
-
     }
 
 
     public string GetStaticKeyString(string username, string ledgerUrl)
     {
-
         try
         {
-            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
+            string transactionsUrl =
+                $"{ledgerUrl}/ledger/domain?query=&type=101"; // Specify the transaction type as "101" for schemas
             HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
             if (response.IsSuccessStatusCode)
@@ -895,7 +835,6 @@ public class DHMessager : MonoBehaviour
 
                 foreach (var transaction in transactions)
                 {
-
                     var responseData = transaction["txn"]["data"]["data"];
                     var type = responseData["version"];
                     var credName = responseData["name"];
@@ -907,7 +846,7 @@ public class DHMessager : MonoBehaviour
                         string input2 = attributes[1].ToString();
                         string k1 = null;
                         string k2 = null;
-                        if (input1.Substring(0,2) == "1.")
+                        if (input1.Substring(0, 2) == "1.")
                         {
                             k1 = input1.Substring(2);
                             k2 = input2.Substring(2);
@@ -917,11 +856,11 @@ public class DHMessager : MonoBehaviour
                             k1 = input2.Substring(2);
                             k2 = input1.Substring(2);
                         }
+
                         Debug.Log("Found key string is " + k1 + k2);
-                        return k1+k2;
+                        return k1 + k2;
                     }
                 }
-
             }
             else
             {
@@ -936,7 +875,6 @@ public class DHMessager : MonoBehaviour
         }
 
         return null;
-
     }
 
 
@@ -965,7 +903,6 @@ public class DHMessager : MonoBehaviour
         Match jMatch = Regex.Match(input, jPattern);
 
 
-
         string p1 = pMatch1.Success ? pMatch1.Groups[1].Value : null;
         string g1 = gMatch1.Success ? gMatch1.Groups[1].Value : null;
         string q1 = qMatch1.Success ? qMatch1.Groups[1].Value : null;
@@ -980,13 +917,11 @@ public class DHMessager : MonoBehaviour
         BigInteger g = new BigInteger(g1 + g2);
         BigInteger q = new BigInteger(q1 + q2);
 
-        
 
         Debug.Log("P: " + p.ToString() + "G: " + g.ToString() + " Q: " + q.ToString() + "J: " + j.ToString()
-            + "M: " + m.ToString() + "L: " + l.ToString());
+                  + "M: " + m.ToString() + "L: " + l.ToString());
 
         return new DHParameters(p, g, q, m, l, j, null); // Adjust as needed
-
     }
 
     public async void PostDHParametersAsString(DHParameters dhParams, string schemaName)
@@ -1014,7 +949,6 @@ public class DHMessager : MonoBehaviour
         {
             using (HttpClient httpClient = new HttpClient())
             {
-
                 // Prepare the JSON payload
                 string jsonPayload = $@"{{
                 ""attributes"": [
@@ -1034,7 +968,8 @@ public class DHMessager : MonoBehaviour
 
                 // Set headers
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Accept.Add(
+                    new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
                 // Create the request content
                 StringContent content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
@@ -1048,18 +983,16 @@ public class DHMessager : MonoBehaviour
                     Console.WriteLine(responseBody);
                     popupWindow.SetActive(true);
                     windowMessage.text = "Posted DH parameters to ledger!";
-
-
                 }
                 else
                 {
                     Console.WriteLine($"Request failed with status code: {response.StatusCode}");
                 }
             }
-        }catch (Exception ex) { }
-        
-
-
+        }
+        catch (Exception ex)
+        {
+        }
     }
 
     public void OpenMessagePanel()
@@ -1067,6 +1000,7 @@ public class DHMessager : MonoBehaviour
         ConnectionsPanel.SetActive(false);
         MessagesPanel.SetActive(true);
     }
+
     public void OpenAdminScene()
     {
         SceneManager.LoadSceneAsync("Admin Panel");
@@ -1085,9 +1019,6 @@ public class DHMessager : MonoBehaviour
         values[4] = Q.Substring(0, QhalfLength);
         values[5] = Q.Substring(QhalfLength);
 
-        return values; 
+        return values;
     }
-
-
-
 }

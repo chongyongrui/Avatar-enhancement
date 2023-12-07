@@ -20,6 +20,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.IO;
 using UnityEngine.SceneManagement;
+using Org.BouncyCastle.Asn1.Crmf;
 
 public class CredentialIssuer : MonoBehaviour
 {
@@ -49,7 +50,10 @@ public class CredentialIssuer : MonoBehaviour
         if (userdatapersist.Instance.verifiedUser != "admin")
         {
             keyPanel.SetActive(true);
+            
         }
+        string myKeys = GetSQLKeys();
+        keyText.text = myKeys;
     }
 
 
@@ -60,55 +64,106 @@ public class CredentialIssuer : MonoBehaviour
     /// <param name="type">the code of the type of crednetial to check for</param>
     public async void GetCredDef(string receiverID, string type)
     {
-        //Get ledger params
-        //string attributes = GetAttributes(tranactionID);
-        string attributes = (receiverID + type).GetHashCode().ToString();
-        Debug.Log("receiverID is " + receiverID);
-        Debug.Log("attributes is " + attributes);
-
-        string value = null;
-
-        string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=102"; // Specify the transaction type as "102" for cred def
-        HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
 
 
+        //check if the receiverID matches the system logs
 
-        if (response.IsSuccessStatusCode)
+        if (VerifyID(receiverID))
         {
-            string responseBody = response.Content.ReadAsStringAsync().Result;
-            var transactions = JToken.Parse(responseBody)["results"];
-            bool found = false;
-            foreach (var transaction in transactions)
+
+            //Get ledger params
+            //string attributes = GetAttributes(tranactionID);
+            string attributes = (receiverID + type).GetHashCode().ToString();
+            Debug.Log("receiverID is " + receiverID);
+            Debug.Log("attributes is " + attributes);
+
+            string value = null;
+
+            string transactionsUrl = $"{ledgerUrl}/ledger/domain?query=&type=102"; // Specify the transaction type as "102" for cred def
+            HttpResponseMessage response = client.GetAsync(transactionsUrl).Result;
+
+
+
+            if (response.IsSuccessStatusCode)
             {
-                //Debug.Log(transaction.ToString());
-                if (transaction["txn"]["data"]["data"]["primary"]["r"] != null)
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var transactions = JToken.Parse(responseBody)["results"];
+                bool found = false;
+                foreach (var transaction in transactions)
                 {
-                    var responseData = transaction["txn"]["data"]["data"]["primary"]["r"];
-
-
-                    if (responseData[attributes] != null)
+                    //Debug.Log(transaction.ToString());
+                    if (transaction["txn"]["data"]["data"]["primary"]["r"] != null)
                     {
-                        found = true;
-                        string val = responseData[attributes].ToString();
-                        Debug.Log("Generating Key");
-                        GenerateKey(val, type);
+                        var responseData = transaction["txn"]["data"]["data"]["primary"]["r"];
+
+
+                        if (responseData[attributes] != null)
+                        {
+                            found = true;
+                            string val = responseData[attributes].ToString();
+                            Debug.Log("Generating Key");
+                            GenerateKey(val, type);
+                        }
                     }
+
+                }
+
+                if (found == true)
+                {
+                    popupWindow.SetActive(true);
+                    windowMessage.text = "Received a credential \n";
                 }
 
             }
 
-            if (found == true)
+            else
             {
-                popupWindow.SetActive(true);
-                windowMessage.text = "Received a credential \n";
+                Debug.Log("Error retrieving transactions!");
             }
-
         }
 
-        else
+
+
+
+    }
+
+
+    public bool VerifyID(string receiverID)
+    {
+        string adminConString = "Server=" + IPAddress + ";Port=5433;User Id=sysadmin;Password=D5taCard;Database=postgres;";
+        NpgsqlConnection con = new NpgsqlConnection(adminConString);
+        LoginController.instance.CreateTables();
+        bool isMatch = false;
+        try
         {
-            Debug.Log("Error retrieving transactions!");
+            using (NpgsqlConnection connection = new NpgsqlConnection(adminConString))
+            {
+
+                connection.Open();
+
+                using (var command = connection.CreateCommand())
+                {
+
+                    command.CommandText = "select * from userdata WHERE username_hash = '"+ userdatapersist.Instance.verifiedUser.GetHashCode()+"' and userid_hash = '"+receiverID.GetHashCode()+ "';";
+                    
+
+                    using (System.Data.IDataReader reader = command.ExecuteReader())
+                    {
+                        isMatch = reader.Read();
+                        reader.Close();
+                    }
+                }
+                connection.Close();
+                
+
+            }
         }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.Log("(SQL Server) Error inserting key!  " + e);
+
+        }
+        return isMatch;
     }
 
     /// <summary>
