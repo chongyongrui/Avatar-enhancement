@@ -72,7 +72,7 @@ public class PickableItemScript : MonoBehaviour
         {
             isPlayingAnimation = false;
         }
-
+        
         ActivatePlayerAction();
         UpdatePlayerHeldItem();
 
@@ -91,18 +91,18 @@ public class PickableItemScript : MonoBehaviour
         //Debug.Log("object to pick = " + objectToPickUp + " and the object held = " + currentHeldObject);
         bool isUnlocked = false;
         RestrictedItem restrictedItem = null;
-        try {  restrictedItem = objectToPickUp.GetComponent<RestrictedItem>(); }catch(System.Exception e) { }
-        
+        try { restrictedItem = objectToPickUp.GetComponent<RestrictedItem>(); } catch (System.Exception e) { }
+
         if (restrictedItem != null && inCollision)
         {
             bool isChecked = false;
             if (restrictedItem.isRestricted && isChecked == false)
             {
-                
+
                 //do a cross check of keys
                 string itemKey = restrictedItem.GetItemKey(userdatapersist.Instance.verifiedUser);
                 string userKey = GetMyItemKey(restrictedItem.itemCode);
-                if (itemKey == userKey && itemKey!=null)
+                if (itemKey == userKey && itemKey != null)
                 {
                     isUnlocked = true;
                     Debug.Log("Credential passed");
@@ -111,18 +111,35 @@ public class PickableItemScript : MonoBehaviour
                 {
                     Debug.Log("Invalid Key");
                 }
-                isChecked= true;
+                isChecked = true;
             }
         }
         else //not a restricted item
         {
-            isUnlocked = true;
+            NFTItem nftItem = null;
+            try { nftItem = objectToPickUp.GetComponent<NFTItem>(); } catch (System.Exception e) { }
+            if (nftItem != null && inCollision)
+            {
+                
+                var itemID = nftItem.NFTID;
+                //Do comparison
+                isUnlocked = NFTCheck.instance.myTokenList.Contains(itemID.ToString());
+                Debug.Log("Item is nft item, access is " + isUnlocked);
+            }
+
+
+            else
+            {
+                isUnlocked = true;
+            }
+
+
         }
 
         if (!isPlayingAnimation && canpickup == true
         && Input.GetKeyDown(KeyCode.F)
         && currentHeldObject != objectToPickUp
-        && !isHoldingInteractableObject() 
+        && !isHoldingInteractableObject()
         && isUnlocked) // if you enter thecollider of the object and press F
 
         {
@@ -168,10 +185,10 @@ public class PickableItemScript : MonoBehaviour
 
 
         }
-        
-    
+
+
         //pick the object
-        
+
     }
 
     public string GetMyItemKey(string itemCode)
@@ -215,7 +232,7 @@ public class PickableItemScript : MonoBehaviour
             Debug.Log("(SQL Server) Error getting private key " + e);
         }
 
-        return null; 
+        return null;
 
     }
 
@@ -225,7 +242,7 @@ public class PickableItemScript : MonoBehaviour
 
 
 
-private void UpdatePlayerHeldItem()
+    private void UpdatePlayerHeldItem()
     {
 
         if (InventoryManager.instance.GetSelectedItem(false) == null) // character has not selected anything

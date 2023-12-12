@@ -1,6 +1,7 @@
 # Avatar Project Developer Guide
 
-last updated 28/11/2023
+last update: 11/12/2023
+you may refer to the web version for the latest version here: [https://quill-carriage-fc8.notion.site/Avatar-Project-User-Guide-e447ae230f014a388db5f3e380e92dc8?pvs=4](https://www.notion.so/Avatar-Project-Documentation-Landing-Page-a874edfbfab340b4a88817786147023a?pvs=21)
 
 # Introduction
 
@@ -49,6 +50,12 @@ To read the ledger, click on “Domain” under Ledger state, as shown below.
 1. **Aca-py** uses **port 11001**. It has a built in Swagger Ui that shows all the possible functions used in the Verifiable Credentials framework. **Most functions/features built make HTML requests to this swagger interface to write schemas to the ledger**. This is done so that the Aries source code does not need to be edited and makes installation easier. You can refer to their repository readme to learn more. It can only be accessed with a valid login:
     
     ![Untitled](developerguide/Untitled%204.png)
+    
+    It is important to note that schemas cannot have duplicate names. There can have multiple schema versions, the table below shows what each version is used currently and what group of features it corresponds to:
+    
+    note that currently the usernames are not hashed for demo purposes
+    
+    ![Untitled](developerguide/Untitled%205.png)
     
 2. PostgreSQL uses **port 5433 for the host database server**. Also, port 5432 is used for the Aca-py wallet. You can access the server and make queries through an app such as ****PGAdmin 4.****
 
@@ -99,7 +106,7 @@ If there is a match, the next step of authentication is done by making a SQL Ser
 
 If the password matches, the `StartAcaPyInstance` function is called. This function will start the Aca-py instance that is a Docker Container on the host computer and log the user into their Aca-Py instance. The scene will also switch to the main scene. 
 
-![Untitled](developerguide/Untitled%205.png)
+![Untitled](developerguide/Untitled%206.png)
 
 ### 3. Inventory feature persistence with SQL server and SQLite
 
@@ -121,7 +128,7 @@ The `InventoryManager` will then spawn the icon of the newly picked item into an
 
 Diffie Hellman (DH) is used to do a key exchange between two users. The result of this is both users will be able to generate a secret symmetric key and add it to their local PostgreSQL wallets. This key is used as the key for AES encryption for subsequent features.  
 
-![Untitled](developerguide/Untitled%206.png)
+![Untitled](developerguide/Untitled%207.png)
 
 This connection establishment process between user A (inviter) and user B (invitee) can be broken down into the following three states:
 
@@ -166,7 +173,7 @@ The credential system is based on the Verifiable credentials model.. The data mo
 
 This system is based off the triangle of trust as shown below. 
 
-![Untitled](developerguide/Untitled%207.png)
+![Untitled](developerguide/Untitled%208.png)
 
 In the current implementation, the admin is able to generate access tokens to invite new players. The admin is also the one who verifies and issues credentials to access the dynamite and car features. The admin is trusted by the server. 
 
@@ -178,7 +185,7 @@ For credentials used to access digital features like driving the jeep and dynami
 
 **Credential request by User**
 
-The `RequestCredential` method is called when the user wants to request for a credential for certain limited digital features or assets as earlier explained. The method first checks if an admin connection is already established with the `CheckAdminConenction` method, and verifies that the user’s Identiy number keyed in matches that of what is stored in the database during sign up with the `MatchUserID` method. If both methods return true, and if the other inputs are valid, the request is posted to the ledger as a request with the `sendReq` method.
+The `RequestCredential` method is called when the user wants to request for a credential for certain limited digital features or assets as earlier explained. The method first checks if an admin connection is already established with the `CheckAdminConenction` method, and verifies that the user’s Identity number keyed in matches that of what is stored in the database during sign up with the `MatchUserID` method. If both methods return true, and if the other inputs are valid, the request is posted to the ledger as a request with the `sendReq` method.
 
 ![RequestCredentialSequenceDiagram.png](developerguide/RequestCredentialSequenceDiagram.png)
 
@@ -193,3 +200,11 @@ On the admin’s UI on the credential screen, credential requests by different u
 In order for the user to generate this encrypted key to be stored in the users local wallet, the user must first check if the credential request has been approved. This is done using the `GetKeys` method in the `CredentialIssuer` class. The method calls the `GetCredDef` method that will read the ledger to linearly search for any credential definitions posted by the admin. During this search, the userID is used to validate if the credential belongs to the user. If there is a match, the `GenerateKey` method is called which will calculate the secret credential key using AES. The calculated credential key is then saved to the user’s local wallet with the `SQLAddKey` method. 
 
 ![GetCredentialSequenceDiagram.png](developerguide/GetCredentialSequenceDiagram%201.png)
+
+### Note on NFT feature
+
+NFT feature ideally relies on using the unique Network ID of each game object. The current project uses netcode which is outdated. Further development of this feature can be implementing the updated networking technology and connecting the network ID to the NFT feature.
+
+The current implementation does not save any keys to the owner’s wallet. Instead, NFTs are minted by the admin, and transferred by the admin to other users. Other users who receive this NFT from the admin are able to transfer it to other users as well. There can currently be only one token for each unique Network ID for the game object. This makes the token and the tokenID (network ID) unique and singular.
+
+The current implementation relies on matching the hashed username of the user as a means of checking if the token belongs to him/her. When objects (colored grenades) which require token access are collided with and are tried to pick up, a comparison is made between the username hash and the ledger transactions to see if the user owns that token and whether he/her can pick it up and use it in the game.
