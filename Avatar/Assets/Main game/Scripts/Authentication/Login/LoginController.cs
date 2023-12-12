@@ -35,10 +35,6 @@ public class LoginController : MonoBehaviour
     [SerializeField] GameObject popupWindow;
     [SerializeField] TMP_Text windowMessage;
     public bool isHost;
-    public GameObject parentPopupWindow;
-    public GameObject registrationStatus;
-    private GameObject errorWindow;
-    private GameObject successfulLoginWindow;
     private string ledgerUrl;
     private string registrationEndpoint = "/register";
     private static readonly HttpClient client = new HttpClient();
@@ -93,8 +89,8 @@ public class LoginController : MonoBehaviour
             StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 0));
         }catch (Exception e)
         {
+            
             popupWindow.SetActive(true);
-            registrationStatus.SetActive(true);
             windowMessage.text = "Connection failed: " + e;
         }
 
@@ -372,6 +368,10 @@ public class LoginController : MonoBehaviour
                 {
                     SceneManager.LoadSceneAsync("Messaging");
                 }
+                else if (sceneNumber == 3)
+                {
+                    SceneManager.LoadSceneAsync("NFTpanel");
+                }
              
 
                
@@ -606,11 +606,8 @@ public class LoginController : MonoBehaviour
     /// <param name="error"></param>
     private void displayErrorText(string error)
     {
-        errorWindow = parentPopupWindow.transform.GetChild(0).gameObject;
-        TMP_Text errorText = errorWindow.transform.GetChild(1).GetComponent<TMP_Text>();
-        errorText.text = error;
-        errorWindow.SetActive(true);
-        registrationStatus.SetActive(true);
+        popupWindow.SetActive(true);
+        windowMessage.text = error;
     }
 
     /// <summary>
@@ -621,5 +618,17 @@ public class LoginController : MonoBehaviour
         Loader.Load(Loader.Scene.Registration);
     }
 
-   
+    public async void AccessNFTPanel()
+    {
+
+        //Get name and password from input fields
+        string nameInput = nameInputField.text;
+        string passwordInput = passwordInputField.text;
+        IPAddress = IPAddressInputField.text;
+        ledgerUrl = "http://" + IPAddress + ":9000";
+        //Add check that name is not already on the blockchain
+        StartCoroutine(HandleLoginQueryResult(nameInput, passwordInput, ledgerUrl, 3));
+    }
+
+
 }

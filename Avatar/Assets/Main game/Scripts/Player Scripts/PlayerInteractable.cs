@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using Unity.Netcode;
 using System;
+using UnityEditor;
 
 public class PlayerInteractable : NetworkBehaviour
 {
@@ -86,8 +87,22 @@ public class PlayerInteractable : NetworkBehaviour
             {
                 if (collider.CompareTag("Interactable"))
                 {
+                    bool hasAccess = false;
+                    GameObject parent = collider.gameObject;
+                    NFTItem item = parent.GetComponent<NFTItem>();
+                    if (item != null)
+                    {
+                        var itemID = item.NFTID;
+                        //Do comparison
+                        hasAccess = NFTCheck.instance.myTokenList.Contains(itemID.ToString()); 
+                    }
+                    else
+                    {
+                        hasAccess = true;
+                    }
+                    
                     InteractableObject objectInteraction = collider.GetComponent<InteractableObject>();
-                    if (objectInteraction != null && InventoryManager.instance.FindItemInSlot(objectInteraction.GetWeaponIdentifier()) == false) //add condition to check if weapon does not already exist in inventory
+                    if (objectInteraction != null && InventoryManager.instance.FindItemInSlot(objectInteraction.GetWeaponIdentifier()) == false && hasAccess) //add condition to check if weapon does not already exist in inventory
                     {
                         // Face the object
                         Vector3 lookDirection = collider.transform.position - transform.position;

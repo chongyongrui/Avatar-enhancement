@@ -1,6 +1,7 @@
 # Avatar Project User Guide
 
-last update: 30/10/2023
+last update: 11/12/2023
+you may refer to the web version for the latest version here: [https://quill-carriage-fc8.notion.site/Avatar-Project-User-Guide-e447ae230f014a388db5f3e380e92dc8?pvs=4](https://www.notion.so/Avatar-Project-Documentation-Landing-Page-a874edfbfab340b4a88817786147023a?pvs=21)
 
 ### Introduction to Avatar Project
 
@@ -40,17 +41,17 @@ Note: As a user, PGadmin4 is used to access the local Aca-py wallet. As a host, 
 ![Untitled](userguide/Untitled.png)
 
 It is **recommended to have PostgreSQL uninstalled** if it is installed on your current machine. This prevents potential port conflicts. The PostgreSQL instance runs on a Docker container. The local Aca-py wallet is hosted on port **5432**, while if you are the host, the server PostgreSQL database is hosted on port **5433**. 
-    
-## Developer guide
-
-If you are interested to see how the code funcitons and want to learn more, you can refer to the Developer Guide [here](developerguide.md).
-
 
 ## Step-by-step Instructions
 
 ### Part 1: Installing General Framework:
 
 1. Install Unity Hub and Unity 2022.1.20f1
+    1. The Unity Player configuration is as follows:
+    
+    ![Untitled](userguide/Untitled%201.png)
+    
+2. Install .NET framework and C# 
 3. Clone the project from this repository into your local folder
 4. Install Git
 
@@ -81,9 +82,9 @@ If you are interested to see how the code funcitons and want to learn more, you 
         ./manage start --logs
         ```
         
-        ![Untitled](userguide/Untitled%201.png)
-        
         ![Untitled](userguide/Untitled%202.png)
+        
+        ![Untitled](userguide/Untitled%203.png)
         
 3. Install Aries cloud agent
     
@@ -104,7 +105,7 @@ If you are interested to see how the code funcitons and want to learn more, you 
     $ sudo apt-get update
     $ sudo apt-get install -y libindy
     ```
-
+    
 
 ## Start-up guide
 
@@ -114,7 +115,7 @@ Before starting, you can view the video demos to see how it should be run. You c
 
 After cloning and building Von-network and Aca-py, this is what the Docker should look like:
 
-![Untitled](userguide/Untitled%203.png)
+![Untitled](userguide/Untitled%204.png)
 
 **If you are the host**, run Von-network. This can be done by clicking the play button in the von container in docker desktop, or use the command in git bash.
 
@@ -124,15 +125,15 @@ After cloning and building Von-network and Aca-py, this is what the Docker shoul
 
  in Git Bash in the root folder of von-network repository. This is what you should see after starting the Von-network successfully.
 
-![Untitled](userguide/Untitled%204.png)
-
 ![Untitled](userguide/Untitled%205.png)
+
+![Untitled](userguide/Untitled%206.png)
 
 Now you can start the Unity project! Run from the splash screen or login screen if you are not using the executable 
 
 ### 2. Setting up PostgreSQL host server
 
-![Untitled](userguide/Untitled%206.png)
+![Untitled](userguide/Untitled%207.png)
 
 From the login screen, the refresh button on the top left is red. This means that is not connected to the PostgreSQL Server. This could mean either one of two things:
 1.  The host server IP address is wrong
@@ -141,49 +142,49 @@ From the login screen, the refresh button on the top left is red. This means tha
 If case 1: change the “Host Server IP Address” and press the red refresh button
 If case 2: press the Database button to initialize the PostgreSQL server (this means you are the host)
 
-![Untitled](userguide/Untitled%207.png)
+![Untitled](userguide/Untitled%208.png)
 
 **On the first run, it will take a while as Docker will download all the necessary containers.** 
 
-![Untitled](userguide/Untitled%208.png)
-
 ![Untitled](userguide/Untitled%209.png)
-
-Now, PostgreSQL server container should have been started, and you can verify it by looking at the Docker Desktop. This is also signified by the power button being green. 
 
 ![Untitled](userguide/Untitled%2010.png)
 
+Now, PostgreSQL server container should have been started, and you can verify it by looking at the Docker Desktop. This is also signified by the power button being green. 
+
 ![Untitled](userguide/Untitled%2011.png)
+
+![Untitled](userguide/Untitled%2012.png)
 
 Green means that the PostgreSQL server is now connected 
 
 ### 3. Creating a credential for a new user (should only be done by admin or existing user)
 
-![Untitled](userguide/Untitled%2012.png)
+![Untitled](userguide/Untitled%2013.png)
 
 As an admin, key in your host IP address (the ip address that is hosting the sql server), username and password. 
 
 **Do not press login, instead press the key button below the green power button.**
 
-![Untitled](userguide/Untitled%2013.png)
+![Untitled](userguide/Untitled%2014.png)
 
 If Successful, your user name will appear in the top left corner of the Issue Credentials screen:
 
-![Untitled](userguide/Untitled%2014.png)
+![Untitled](userguide/Untitled%2015.png)
 
 To issue the credential, fill in the identity number (maybe IC number of the user) and the expiry date of the credential in the DDMMYYYY format (no spaces/dash/etc). You can leave the receiver name empty. Ensure type is set to “account”. 
 
 Click **generate** and take note of the credential ID that has been created:
 
-![Untitled](userguide/Untitled%2015.png)
+![Untitled](userguide/Untitled%2016.png)
 
 **Von-network: Credential will be written to the blockchain ledger** 
 
-![Untitled](userguide/Untitled%2016.png)
+![Untitled](userguide/Untitled%2017.png)
 
 **PostgreSQL Server: Issued credentials are also saved onto a table in the “AvatarProject” database:**
 
-![Untitled](userguide/Untitled%2017.png)
+![Untitled](userguide/Untitled%2018.png)
 
 ### 4. Creating a new account using a credential (done by user)
 
@@ -198,31 +199,31 @@ Fill in the correct IP host address, credential code that was generated above by
 
 Otherwise: the credential verification will fail:
 
-![Untitled](userguide/Untitled%2018.png)
+![Untitled](userguide/Untitled%2019.png)
 
 Once pressing register, there will be a success pop up message.
 
 **Von-network: new username will be written to the blockchain ledger:**
 
-![Untitled](userguide/Untitled%2019.png)
+![Untitled](userguide/Untitled%2020.png)
 
 **SQL Server: user details (hashed) are also saved onto a table in the “AvatarProject” database:**
 
-![Untitled](userguide/Untitled%2020.png)
+![Untitled](userguide/Untitled%2021.png)
 
 New users can now then log into the game with their newly created accounts
 
-![Untitled](userguide/Untitled%2021.png)
+![Untitled](userguide/Untitled%2022.png)
 
 **Note:** The login first checks if the username is valid by checking with the blockchain ledger if such a username exists. If it is, a query is made to the SQL Server to see if the password matches the username. 
 
 ### 5. In-game SQL Server features
 
-![Untitled](userguide/Untitled%2022.png)
-
 ![Untitled](userguide/Untitled%2023.png)
 
 ![Untitled](userguide/Untitled%2024.png)
+
+![Untitled](userguide/Untitled%2025.png)
 
 PostgreSQL Server is currently used to save the players inventory items and player location.
 
@@ -232,25 +233,25 @@ Note: SQLite is also used currently as a form of local database/ back-up of the 
 
 Secure connections can be made between different users. Establishing a connection is important as it serves as a secure means for communicating securely with user others for subsequent features. This is done through doing a Diffie Hellman Key exchange between users, this creates a symmetric private key that the 2 users will have. This key will be used for encrypting data that will be communicated over the blockchain ledger. 
 
-![Untitled](userguide/Untitled%2025.png)
+![Untitled](userguide/Untitled%2026.png)
 
 Click the “Messaging button” which will redirect you to the Messaging page. From there, click the “connections” button
 
-![Untitled](userguide/Untitled%2026.png)
+![Untitled](userguide/Untitled%2027.png)
 
 Key in the username of the user you want to establish a connection with and click “invite”. A successful invitation will create a pop-up message as follows:
 
-![Untitled](userguide/Untitled%2027.png)
+![Untitled](userguide/Untitled%2028.png)
 
 The receiver user will see that they have a new request. If they want to accept the invitation, they will key in the username of the inviter and press accept. There will also be a successful pop-up window. 
 
-![Untitled](userguide/Untitled%2028.png)
-
 ![Untitled](userguide/Untitled%2029.png)
+
+![Untitled](userguide/Untitled%2030.png)
 
 Lastly, the inviter will see that the invitee has accepted the invitation. 
 
-![Untitled](userguide/Untitled%2030.png)
+![Untitled](userguide/Untitled%2031.png)
 
 The inviter will now complete the process by establishing the connection with the establish button. 
 
@@ -260,35 +261,53 @@ After doing so, both inviter and invitee will have a symmetric key stored on the
 
 Credentials can be requested to the admin and then generated by admin to give users the credentials to access certain items and features in the virtual world. Currently, the two features that require credentials are driving the car and getting/throwing dynamite. If a user does not have the credentials, they are unable to pick the dynamite or drive the car. 
 
-![Untitled](userguide/Untitled%2031.png)
-
 ![Untitled](userguide/Untitled%2032.png)
-
-To get a credential, it has to be requested from the admin. This request can be made on the admin panel. The requester will have to input their identity number and expiry date (does not impact credentials as of now) Ensure that the type is set to the digital asset the requester wants access to. Click the request button. 
 
 ![Untitled](userguide/Untitled%2033.png)
 
-The admin will receive this request on the same panel of his account. To meet the request and generate the credential, the admin will have to input the requesters name, ID and expiry date (not used in current implementation) Ensure the type is set to the type requested for and press generate. It will take about 5 seconds to generate the credential. 
+To get a credential, it has to be requested from the admin. This request can be made on the admin panel. The requester will have to input their identity number and expiry date (does not impact credentials as of now) Ensure that the type is set to the digital asset the requester wants access to. Click the request button. 
 
 ![Untitled](userguide/Untitled%2034.png)
 
-Next, the requester can refresh the credentials they received by inputting their userID and pressing the refresh button on the page. 
+The admin will receive this request on the same panel of his account. To meet the request and generate the credential, the admin will have to input the requesters name, ID and expiry date (not used in current implementation) Ensure the type is set to the type requested for and press generate. It will take about 5 seconds to generate the credential. 
 
 ![Untitled](userguide/Untitled%2035.png)
 
-Now in the virtual world, they will be able to access the digital asset (car in this example). 
+Next, the requester can refresh the credentials they received by inputting their userID and pressing the refresh button on the page. 
 
 ![Untitled](userguide/Untitled%2036.png)
+
+Now in the virtual world, they will be able to access the digital asset (car in this example). 
+
+![Untitled](userguide/Untitled%2037.png)
 
 ### 8. Encrypted Messaging feature
 
 This messaging feature makes use of AES to encrypt messages between users with already established connections using the symmetric key. The UI shows how messages are automatically decrypted and shown on the UI. 
 
-![Untitled](userguide/Untitled%2037.png)
-
 ![Untitled](userguide/Untitled%2038.png)
 
 ![Untitled](userguide/Untitled%2039.png)
+
+![Untitled](userguide/Untitled%2040.png)
+
+### 9. NFT token feature (prototype)
+
+The goal of this feature is to explore an alternative method of credentials and tokens. This features follows how a NFT works (Non-Fungible Token). Each token is unique and there can only be one token per game object network ID. The token can be transferred from player to player. The token can only be minted by the admin. In the current implementation, the token ID is the network ID of the game object. Since the project currently uses Netcode which is outdated, an in place ID is used. This ID is manually assigned for now, and in the future, the network ID of the game object can be used instead. 
+
+![Untitled](userguide/Untitled%2041.png)
+
+The NFT UI can be accessed from the main login page with the NFT button on the left. 
+
+The “All Tokens” column shows all tokens that have been minted by the admin. Token data include the toeknID, a description of the token, and the username hash of the existing owner of the token. The “My Tokens” column shows the tokens that are currently owned. These tokens are NOT stored in the user’s wallet for now. 
+
+Currently, users are only able to transfer tokens to other users, this is done by inputting the TokenID under NetworkID and the receiver name, then clicking “Transfer”.
+
+![Untitled](userguide/Untitled%2042.png)
+
+For the Admin, an additional mint function is available. This function creates tokens using the networkID and the description. 
+
+Minting and transferring transactions are all written to the ledger as schemas. 
 
 ## Host-Client set up
 
@@ -323,9 +342,12 @@ On the Host:
 ./manage run <yourIPv4Address> WEB_SERVER_HOST_PORT=9000
 ```
 
-A demo is available here: (recommended to watch at 1.25x speed)
+1. Modify the docker-compose.yaml file in Avatar\Assets\Main Scene Folder\Scripts\Wallet 
+    
+    `GENESIS_URL: "[http://host.docker.internal:9000/genesis](http://host.docker.internal:9000/genesis)"` should be changed to `“http://<yourHostIPv4Address>:9000/genesis”` for lines 24, 44 and 94
+    
 
-[https://www.youtube.com/watch?v=GqjeWSF4j84](https://www.youtube.com/watch?v=GqjeWSF4j84)
+A demo is available on the shared video folder in Google Drive
 
 ## Video demonstration of individual features
 
@@ -419,3 +441,5 @@ The process takes 3 steps:
 This last step completes the credential issuance process. User will receive the offer and accept the offer by clicking the refresh number along with his identity number. This will get the credential definition from the ledger and generate the access credential token with the use of the symmetric AES key.
 
 ### Videos 7,8,9: Example videos showing the credential feature on digital assets
+
+![Untitled](userguide/Untitled%2043.png)

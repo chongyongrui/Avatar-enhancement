@@ -1990,6 +1990,7 @@ GameObject:
   - component: {fileID: 8793682441582430714}
   - component: {fileID: 5985359373204563230}
   - component: {fileID: 7625162992114533138}
+  - component: {fileID: 8137469612217280975}
   m_Layer: 6
   m_Name: Soldier
   m_TagString: Player
@@ -2258,7 +2259,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4900686166078442603}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
@@ -2431,6 +2432,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   myHands: {fileID: 2279986776476003392}
   hasItem: 0
+  inCollision: 0
   dynamiteItem: {fileID: 11400000, guid: dd122243760acaf448c1b9ee525f0733, type: 2}
   smokeGrenadeItem: {fileID: 11400000, guid: dd9259f9f5f327249985d6a49e884866, type: 2}
   grenadeItem: {fileID: 11400000, guid: df70229a2535fd149a3b26f3fae9c138, type: 2}
@@ -2538,6 +2540,21 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &8137469612217280975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4900686166078442603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6d86ddbc680d1546b62133a135599e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IPAddress: 
+  ledgerUrl: 
+  myTokenList: []
 --- !u!1 &4900686166078442702
 GameObject:
   m_ObjectHideFlags: 0

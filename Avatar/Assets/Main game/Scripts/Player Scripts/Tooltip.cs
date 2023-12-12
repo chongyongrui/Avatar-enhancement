@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,9 +7,26 @@ public class Tooltip : MonoBehaviour
 {
     public string message;
     private void OnMouseEnter(){
-        TooltipManager.instance.SetToolTip(message);
+        try
+        {
+            TooltipManager.instance.SetToolTip(message);
+        }
+        catch (Exception e)
+        {
+
+        }
+        
     }
     private void OnMouseExit(){
-         TooltipManager.instance.HideToolTip();
+        try
+        {
+            TooltipManager.instance.HideToolTip();
+        }
+        catch (Exception e)
+        {
+
+        }
+        
+
     }
 }
